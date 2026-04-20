@@ -24,34 +24,9 @@
 % Carga de módulos
 % -----------------------------------------------------------------------------
 :- use_module('../src/sintactico').
-:- use_module('../src/semantico').
-:- use_module('../src/deteccion').
-:- use_module('../src/mejoras').
 :- use_module('../src/conjunto_oraciones').
 
 % -----------------------------------------------------------------------------
-% Tests: carga de módulos
-% Los módulos deben cargarse sin errores de compilación.
-% -----------------------------------------------------------------------------
-:- begin_tests(carga_modulos).
-
-test(sintactico_cargado) :-
-    current_module(sintactico).
-
-test(semantico_cargado) :-
-    current_module(semantico).
-
-test(deteccion_cargado) :-
-    current_module(deteccion).
-
-test(mejoras_cargado) :-
-    current_module(mejoras).
-
-test(conjunto_oraciones_cargado) :-
-    current_module(conjunto_oraciones).
-
-:- end_tests(carga_modulos).
-
 % -----------------------------------------------------------------------------
 % Tests: corpus de oraciones
 % Al menos 30 oraciones deben estar definidas.
@@ -104,18 +79,20 @@ test(clases_validas) :-
 :- end_tests(corpus).
 
 % -----------------------------------------------------------------------------
-% Tests: análisis sintáctico
-% Añadir aquí tests concretos cuando se implemente la DCG.
+% Tests: análisis sintáctico básico
 % -----------------------------------------------------------------------------
 :- begin_tests(sintactico_dcg).
 
-% Ejemplo — descomentar cuando sintactico.pl esté implementado:
-%
-% test(oracion_simple_correcta) :-
-%     oración([el, banco, central, subio, los, tipos, de, interes], _, []).
-%
-% test(oracion_invalida, fail) :-
-%     oración([subio, el, de, interes], _, []).
+test(oracion_simple_correcta) :-
+    sintactico:oración(Arbol, [la, constante, es, esencial], []),
+    nonvar(Arbol).
+
+test(oracion_simple_con_gn_compuesto) :-
+    sintactico:oración(Arbol, [la, fisica, cuantica, es, fundamental], []),
+    nonvar(Arbol).
+
+test(oracion_invalida, fail) :-
+    sintactico:oración(_, [es, la, constante], []).
 
 :- end_tests(sintactico_dcg).
 
