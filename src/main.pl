@@ -4,7 +4,7 @@
  * Conocimiento y Razonamiento Automatizado · UAH · Curso 2025-26
  *=============================================================================*/
 
-:- module(main, [analizar/1, analizar_arbol/2, simplificar/2, detectar/1]).
+:- module(main, [analizar/1, analizar_arbol/2, detectar/1]).
 
 :- use_module(sintactico).
 :- use_module(semantico).
