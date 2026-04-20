@@ -1,0 +1,23 @@
+# ── Binary and compiled files ─────────────────────────────────────────────────
+*.pdf
+*.zip
+*.tar.gz
+*.qlf
+*.wam
+*.pdb
+*.sav
+
+# ── Images ────────────────────────────────────────────────────────────────────
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+
+# ── Generated / delivery artifacts ────────────────────────────────────────────
+dist/
+
+# ── Prolog trace / log output ─────────────────────────────────────────────────
+*.log
+*.tmp
