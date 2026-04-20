@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Prolog Tests (SWI-Prolog)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install SWI-Prolog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y swi-prolog
+
+      - name: Check SWI-Prolog version
+        run: swipl --version
+
+      - name: Verify module syntax
+        run: |
+          for f in src/*.pl; do
+            echo "Checking syntax: $f"
+            swipl --quiet -g "load_files('$f', [silent(true)]), halt" -t "halt(1)" 2>&1
+          done
+
+      - name: Run PLUnit tests
+        working-directory: ${{ github.workspace }}
+        run: |
+          swipl -g "run_tests, halt" -t "halt(1)" tests/tests.pl
