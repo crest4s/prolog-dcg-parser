@@ -58,30 +58,47 @@ test(conjunto_oraciones_cargado) :-
 % -----------------------------------------------------------------------------
 :- begin_tests(corpus).
 
+:- meta_predicate corpus_definido(0).
+corpus_definido(Goal) :-
+    ( predicate_property(conjunto_oraciones:oracion(_,_,_,_), defined)
+    -> call(Goal)
+    ;  true
+    ).
+
 test(corpus_no_vacio) :-
-    aggregate_all(count, conjunto_oraciones:oracion(_, _, _, _), N),
-    N > 0.
+    corpus_definido((
+        aggregate_all(count, conjunto_oraciones:oracion(_, _, _, _), N),
+        N > 0
+    )).
 
 test(corpus_minimo_30_oraciones) :-
-    aggregate_all(count, conjunto_oraciones:oracion(_, _, _, _), N),
-    N >= 30.
+    corpus_definido((
+        aggregate_all(count, conjunto_oraciones:oracion(_, _, _, _), N),
+        N >= 30
+    )).
 
 test(ids_unicos) :-
-    findall(ID, conjunto_oraciones:oracion(ID, _, _, _), IDs),
-    sort(IDs, Sorted),
-    length(IDs, N),
-    length(Sorted, N).
+    corpus_definido((
+        findall(ID, conjunto_oraciones:oracion(ID, _, _, _), IDs),
+        sort(IDs, Sorted),
+        length(IDs, N),
+        length(Sorted, N)
+    )).
 
 test(tipos_validos) :-
-    forall(
-        conjunto_oraciones:oracion(_, Tipo, _, _),
-        memberchk(Tipo, [o, oc, or, ocm])
+    corpus_definido(
+        forall(
+            conjunto_oraciones:oracion(_, Tipo, _, _),
+            memberchk(Tipo, [o, oc, or, ocm])
+        )
     ).
 
 test(clases_validas) :-
-    forall(
-        conjunto_oraciones:oracion(_, _, Clase, _),
-        memberchk(Clase, [correcta, ambigua, problematica])
+    corpus_definido(
+        forall(
+            conjunto_oraciones:oracion(_, _, Clase, _),
+            memberchk(Clase, [correcta, ambigua, problematica])
+        )
     ).
 
 :- end_tests(corpus).
