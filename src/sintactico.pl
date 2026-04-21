@@ -21,7 +21,9 @@
  *   det, n, v, adj, adv, conj, prep
  *=============================================================================*/
 
-:- module(sintactico, [oración/3]).
+:- module(sintactico, [oración/3, simplificar/2, simplificar_y_dibujar/1]).
+
+:- use_module(draw).
 
 % Reglas de oraciones
 
@@ -29,6 +31,8 @@
 oracion(ListaArboles) --> ocm(ListaArboles).
 oracion(ListaArboles) --> or(ListaArboles).
 oracion(ListaArboles) --> oc(ListaArboles).
+oracion(ListaArboles) --> oc_sujeto_comun(ListaArboles).
+oracion(ListaArboles) --> oc_verbo_comun(ListaArboles).
 oracion([ArbolSimple]) --> o(ArbolSimple).
 
 % Oración simple
@@ -36,7 +40,7 @@ o(o(GN, GV)) -->
     grupo_nominal(GN),
     grupo_verbal(GV).
 
-% Oraciones coordinadas
+% Oraciones coordinadas (dos oraciones completas con sujetos distintos)
 oc([Arbol1, Arbol2]) -->
     o(Arbol1), [','],
     conj(_),
@@ -46,6 +50,39 @@ oc([Arbol1, Arbol2]) -->
     o(Arbol1),
     conj(_),
     o(Arbol2).
+
+% Oraciones coordinadas con sujeto compartido: GN V1 [,] conj V2
+% Ej. hipotético: "el fotón absorbe y actúa" → "el fotón absorbe", "el fotón actúa"
+oc_sujeto_comun([o(GN, GV1), o(GN, GV2)]) -->
+    grupo_nominal(GN),
+    grupo_verbal(GV1),
+    [','],
+    conj(_),
+    grupo_verbal(GV2).
+
+oc_sujeto_comun([o(GN, GV1), o(GN, GV2)]) -->
+    grupo_nominal(GN),
+    grupo_verbal(GV1),
+    conj(_),
+    grupo_verbal(GV2).
+
+% Oraciones coordinadas con verbo transitivo compartido: GN V GN1 [,] conj GN2
+% Ej. hipotético: "einstein propuso la teoría y el modelo"
+%                 → "einstein propuso la teoría", "einstein propuso el modelo"
+oc_verbo_comun([o(GN, gv(V, GN1)), o(GN, gv(V, GN2))]) -->
+    grupo_nominal(GN),
+    verbo_transitivo(V),
+    grupo_nominal(GN1),
+    [','],
+    conj(_),
+    grupo_nominal(GN2).
+
+oc_verbo_comun([o(GN, gv(V, GN1)), o(GN, gv(V, GN2))]) -->
+    grupo_nominal(GN),
+    verbo_transitivo(V),
+    grupo_nominal(GN1),
+    conj(_),
+    grupo_nominal(GN2).
 
 % Oraciones subordinadas de relativo
 or([o(GN, GV_Sub), o(GN, GV_Princ)]) --> 
@@ -109,6 +146,45 @@ ocm([Arbol1, Arbol2]) -->
 
 oración(Arbol, Tokens, Resto) :-
     phrase(oracion(Arbol), Tokens, Resto).
+
+% =============================================================================
+% Simplificación: convierte cualquier árbol o lista a [o(GN,GV), ...]
+% =============================================================================
+
+% Caso base: lista vacía
+simplificar([], []) :- !.
+
+% Oración simple: ya es atómica, devolver en lista unitaria
+simplificar(o(GN, GV), [o(GN, GV)]) :- !.
+
+% Lista de árboles: simplificar cada elemento y concatenar
+simplificar([H | T], Simples) :-
+    simplificar(H, HS),
+    simplificar(T, TS),
+    append(HS, TS, Simples).
+
+% =============================================================================
+% Simplificación + dibujo con draw.pl
+% =============================================================================
+
+% simplificar_y_dibujar(+Tokens)
+% Parsea Tokens, simplifica el resultado y dibuja cada oración simple.
+simplificar_y_dibujar(Tokens) :-
+    oración(Arboles, Tokens, []),
+    simplificar(Arboles, Simples),
+    length(Simples, N),
+    format("~`=t~50|~n"),
+    format("~w oración(es) simple(s) obtenida(s):~n", [N]),
+    format("~`=t~50|~n"),
+    dibujar_simples(Simples, 1).
+
+% dibujar_simples(+Lista, +NumInicial)
+dibujar_simples([], _).
+dibujar_simples([O | Resto], Num) :-
+    format("~n[~w] ~w~n", [Num, O]),
+    draw(O),
+    Siguiente is Num + 1,
+    dibujar_simples(Resto, Siguiente).
 
 % Reglas de grupos sintácticos
 grupo_nominal(gn(N)) -->

@@ -172,6 +172,80 @@ test(diccionario_cubre_todos_los_tokens_del_corpus) :-
 :- end_tests(diccionario).
 
 % -----------------------------------------------------------------------------
+% Tests: simplificación de oraciones complejas
+% -----------------------------------------------------------------------------
+:- begin_tests(simplificacion).
+
+% simplificar/2 sobre lista vacía
+test(simplificar_lista_vacia) :-
+    sintactico:simplificar([], []).
+
+% simplificar/2 sobre una oración simple suelta
+test(simplificar_oracion_simple_suelta) :-
+    O = o(gn(det(la), n(constante)), gv(v(existe))),
+    sintactico:simplificar(O, [O]).
+
+% simplificar/2 sobre lista de oraciones simples: identidad
+test(simplificar_lista_simples) :-
+    O1 = o(gn(det(la), n(constante)), gv(v(existe))),
+    O2 = o(gn(det(la), n(fisica)), gv(v(aparece))),
+    sintactico:simplificar([O1, O2], [O1, O2]).
+
+% Coordinada con sujeto compartido: GN V1 conj V2 (sin coma)
+% "la constante existe y aparece"
+test(oc_sujeto_comun_sin_coma) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, existe, y, aparece],
+        [])),
+    Arboles = [o(GN, _), o(GN, _)],
+    GN = gn(det(la), n(constante)).
+
+% Coordinada con sujeto compartido: GN V1 , conj V2 (con coma)
+% "la constante existe , y aparece"
+test(oc_sujeto_comun_con_coma) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, existe, ',', y, aparece],
+        [])),
+    Arboles = [o(GN, _), o(GN, _)],
+    GN = gn(det(la), n(constante)).
+
+% Coordinada con sujeto compartido produce exactamente 2 oraciones simples
+test(oc_sujeto_comun_longitud) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, existe, y, aparece],
+        [])),
+    length(Arboles, 2).
+
+% Coordinada con verbo compartido: GN V GN1 conj GN2 (sin coma)
+% "la fisica posee la constante y la teoria"
+test(oc_verbo_comun_sin_coma) :-
+    once(sintactico:oración(Arboles,
+        [la, fisica, posee, la, constante, y, la, teoria],
+        [])),
+    Arboles = [o(GN, gv(V, _)), o(GN, gv(V, _))],
+    GN = gn(det(la), n(fisica)),
+    V = v(posee).
+
+% Coordinada con verbo compartido: GN V GN1 , conj GN2 (con coma)
+test(oc_verbo_comun_con_coma) :-
+    once(sintactico:oración(Arboles,
+        [la, fisica, posee, la, constante, ',', y, la, teoria],
+        [])),
+    Arboles = [o(GN, gv(V, _)), o(GN, gv(V, _))],
+    GN = gn(det(la), n(fisica)),
+    V = v(posee).
+
+% simplificar sobre resultado de oc_sujeto_comun es la misma lista
+test(simplificar_sobre_oc_sujeto_comun) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, existe, y, aparece],
+        [])),
+    sintactico:simplificar(Arboles, Simples),
+    Simples = [o(_, _), o(_, _)].
+
+:- end_tests(simplificacion).
+
+% -----------------------------------------------------------------------------
 % Tests: detección de problemas
 % Añadir aquí tests concretos cuando se implemente deteccion.pl.
 % -----------------------------------------------------------------------------
