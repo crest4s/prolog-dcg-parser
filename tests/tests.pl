@@ -26,6 +26,20 @@
 :- use_module('../src/sintactico').
 :- use_module('../src/conjunto_oraciones').
 
+token_clasificable(Token) :-
+    once((
+        phrase(sintactico:determinante(_), [Token], [])
+    ;   phrase(sintactico:nombre(_), [Token], [])
+    ;   phrase(sintactico:adjetivo(_), [Token], [])
+    ;   phrase(sintactico:adverbio(_), [Token], [])
+    ;   phrase(sintactico:conj(_), [Token], [])
+    ;   phrase(sintactico:rel(_), [Token], [])
+    ;   phrase(sintactico:preposicion(_), [Token], [])
+    ;   phrase(sintactico:verbo_transitivo(_), [Token], [])
+    ;   phrase(sintactico:verbo_intransitivo(_), [Token], [])
+    ;   phrase(sintactico:verbo_copulativo(_), [Token], [])
+    )).
+
 % -----------------------------------------------------------------------------
 % -----------------------------------------------------------------------------
 % Tests: corpus de oraciones
@@ -84,17 +98,78 @@ test(clases_validas) :-
 :- begin_tests(sintactico_dcg).
 
 test(oracion_simple_correcta) :-
-    sintactico:oración(Arbol, [la, constante, es, esencial], []),
+    once(sintactico:oración(Arbol, [la, constante, es, esencial], [])),
     nonvar(Arbol).
 
 test(oracion_simple_con_gn_compuesto) :-
-    sintactico:oración(Arbol, [la, fisica, cuantica, es, fundamental], []),
+    once(sintactico:oración(Arbol, [la, fisica, cuantica, es, fundamental], [])),
     nonvar(Arbol).
 
 test(oracion_invalida, fail) :-
     sintactico:oración(_, [es, la, constante], []).
 
 :- end_tests(sintactico_dcg).
+
+% -----------------------------------------------------------------------------
+% Tests: persona B (oc, or, ocm)
+% -----------------------------------------------------------------------------
+:- begin_tests(sintactico_complejas).
+
+test(oracion_coordinada_sin_coma) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, es, esencial, y, la, fisica, es, fundamental],
+        [])),
+    Arboles = [_, _].
+
+test(oracion_coordinada_con_coma) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, es, esencial, ',', y, la, fisica, es, fundamental],
+        [])),
+    Arboles = [_, _].
+
+test(oracion_relativo_sin_comas) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, que, es, esencial, es, fundamental],
+        [])),
+    Arboles = [_, _].
+
+test(oracion_relativo_con_comas) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, ',', que, es, esencial, ',', es, fundamental],
+        [])),
+    Arboles = [_, _].
+
+test(oracion_compuesta_relativo_y_simple) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, ',', que, es, esencial, ',', es, fundamental, ',', y,
+         la, fisica, es, fundamental],
+        [])),
+    Arboles = [_, _, _].
+
+:- end_tests(sintactico_complejas).
+
+% -----------------------------------------------------------------------------
+% Tests: diccionario persona B
+% -----------------------------------------------------------------------------
+:- begin_tests(diccionario).
+
+test(diccionario_determinante) :- phrase(sintactico:determinante(_), [la], []).
+test(diccionario_nombre) :- phrase(sintactico:nombre(_), [planck], []).
+test(diccionario_adjetivo) :- phrase(sintactico:adjetivo(_), [fundamental], []).
+test(diccionario_adverbio) :- phrase(sintactico:adverbio(_), [muy], []).
+test(diccionario_conjuncion) :- phrase(sintactico:conj(_), [y], []).
+test(diccionario_relativo) :- phrase(sintactico:rel(_), [que], []).
+test(diccionario_preposicion) :- phrase(sintactico:preposicion(_), [de], []).
+test(diccionario_verbo_copulativo) :- phrase(sintactico:verbo_copulativo(_), [es], []).
+test(diccionario_verbo_transitivo) :- phrase(sintactico:verbo_transitivo(_), [explicar], []).
+test(diccionario_verbo_intransitivo) :- phrase(sintactico:verbo_intransitivo(_), [existe], []).
+
+test(diccionario_cubre_todos_los_tokens_del_corpus) :-
+    findall(T, (conjunto_oraciones:oracion(_, _, _, Ts), member(T, Ts)), Todos),
+    sort(Todos, Unicos),
+    forall(member(Token, Unicos), token_clasificable(Token)).
+
+:- end_tests(diccionario).
 
 % -----------------------------------------------------------------------------
 % Tests: detección de problemas
