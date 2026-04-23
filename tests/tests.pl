@@ -146,6 +146,64 @@ test(oracion_compuesta_relativo_y_simple) :-
         [])),
     Arboles = [_, _, _].
 
+% oc con sujeto compartido — el mismo GN aparece en ambos árboles
+test(oc_sujeto_comun_estructura) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, existe, y, aparece],
+        [])),
+    Arboles = [o(GN, _), o(GN, _)].
+
+test(oc_sujeto_comun_con_coma_estructura) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, existe, ',', y, aparece],
+        [])),
+    Arboles = [o(GN, _), o(GN, _)],
+    GN = gn(det(la), n(constante)).
+
+% oc con verbo compartido — el mismo GN sujeto y el mismo V aparecen en ambos árboles
+test(oc_verbo_comun_estructura) :-
+    once(sintactico:oración(Arboles,
+        [la, fisica, posee, la, constante, y, la, teoria],
+        [])),
+    Arboles = [o(GN, gv(V, _)), o(GN, gv(V, _))].
+
+test(oc_verbo_comun_con_coma_estructura) :-
+    once(sintactico:oración(Arboles,
+        [la, fisica, posee, la, constante, ',', y, la, teoria],
+        [])),
+    Arboles = [o(GN, gv(V, _)), o(GN, gv(V, _))],
+    GN = gn(det(la), n(fisica)),
+    V = v(posee).
+
+% or — el mismo GN sujeto aparece en la subordinada y en la principal
+test(or_sujeto_compartido_estructura) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, ',', que, es, esencial, ',', es, fundamental],
+        [])),
+    Arboles = [o(GN, _), o(GN, _)].
+
+% ocm — cuatro oraciones simples: (or + conj + o + conj + o)
+% "la constante , que es esencial , es fundamental , y
+%  la fisica es fundamental , y la teoria es fundamental"
+test(ocm_cuatro_simples) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, ',', que, es, esencial, ',', es, fundamental,
+         ',', y, la, fisica, es, fundamental,
+         ',', y, la, teoria, es, fundamental],
+        [])),
+    length(Arboles, 4).
+
+% Todos los árboles resultantes de una coordinada deben ser o/2
+test(oc_todos_arboles_son_o) :-
+    once(sintactico:oración(Arboles,
+        [la, constante, es, esencial, y, la, fisica, es, fundamental],
+        [])),
+    forall(member(A, Arboles), A = o(_, _)).
+
+% Oración compleja inválida (empieza con conjunción): debe fallar
+test(oracion_compleja_invalida, fail) :-
+    sintactico:oración(_, [y, la, constante, es, esencial], []).
+
 :- end_tests(sintactico_complejas).
 
 % -----------------------------------------------------------------------------
