@@ -24,6 +24,7 @@
 % Carga de módulos
 % -----------------------------------------------------------------------------
 :- use_module('../src/sintactico').
+:- use_module('../src/semantico').
 :- use_module('../src/conjunto_oraciones').
 
 token_clasificable(Token) :-
@@ -228,6 +229,25 @@ test(diccionario_cubre_todos_los_tokens_del_corpus) :-
     forall(member(Token, Unicos), token_clasificable(Token)).
 
 :- end_tests(diccionario).
+
+% -----------------------------------------------------------------------------
+% Tests: enriquecimiento semántico
+% -----------------------------------------------------------------------------
+:- begin_tests(semantico).
+
+test(tipo_de_persona_cientifica) :-
+    once(semantico:tipo(planck, persona_cientifica)).
+
+test(tipo_de_disciplina) :-
+    once(semantico:tipo(cuantica, disciplina_cientifica)).
+
+test(categoria_semantica_alias) :-
+    once(semantico:categoria_semantica(fotones, particula_fisica)).
+
+test(tipo_de_alteridad) :-
+    once(semantico:tipo(otros, alteridad)).
+
+:- end_tests(semantico).
 
 % -----------------------------------------------------------------------------
 % Tests: simplificación de oraciones complejas
