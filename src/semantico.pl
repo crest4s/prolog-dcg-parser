@@ -6,177 +6,215 @@
  *
  * Categorías semánticas del dominio de la física cuántica:
  *
- *   constante_fisica   — valores numéricos con rol fundamental en la física
- *   fenomeno_fisico    — fenómenos observables en la naturaleza
- *   entidad_fisica     — partículas, objetos físicos
- *   persona            — científicos e investigadores
- *   propiedad          — atributos o características de entidades
- *   proceso            — acciones o transformaciones
- *   cantidad           — magnitudes y medidas
- *   concepto_teorico   — principios, teorías, leyes
+ *   physical_constant   — valores numéricos con rol fundamental en la física
+ *   physical_phenomenon — fenómenos observables en la naturaleza
+ *   physical_entity     — partículas, objetos físicos
+ *   person              — científicos e investigadores
+ *   property            — atributos o características de entidades
+ *   process             — acciones o transformaciones
+ *   quantity            — magnitudes y medidas
+ *   theoretical_concept — principios, teorías, leyes
  *
  * Predicados exportados:
- *   tipo/2             — tipo(+Palabra, -Categoria)
- *   categoria_semantica/2 — categoria_semantica(+ListaTokens, -Analisis)
- *   rol_semantico/3    — rol_semantico(+Arbol, +Rol, -Palabra)
+ *   type/2              — type(+Word, -Category)
+ *   semantic_category/2 — semantic_category(+Tokens, -Analysis)
+ *   semantic_role/3     — semantic_role(+Tree, +Role, -Words)
  *=============================================================================*/
 
-:- module(semantico, [tipo/2, categoria_semantica/2, rol_semantico/3]).
+:- module(semantico, [type/2, semantic_category/2, semantic_role/3]).
 
 % =============================================================================
-% tipo/2 — asigna categoría semántica a palabras del dominio
+% type/2 — asigna categoría semántica a palabras del dominio
 % =============================================================================
 
 % Constantes físicas
-tipo(constant,         constante_fisica).
-tipo(planck,           constante_fisica).
-tipo('6.626x10-34',    constante_fisica).
-tipo(h,                constante_fisica).
+type(constant,         physical_constant).
+type(planck,           physical_constant).
+type('6.626x10-34',    physical_constant).
+type(h,                physical_constant).
 
 % Fenómenos físicos
-tipo(uncertainty,      fenomeno_fisico).
-tipo(duality,          fenomeno_fisico).
-tipo(diffraction,      fenomeno_fisico).
-tipo(radiation,        fenomeno_fisico).
-tipo(effect,           fenomeno_fisico).
-tipo(phenomenon,       fenomeno_fisico).
-tipo(quantization,     fenomeno_fisico).
-tipo(emission,         fenomeno_fisico).
-tipo(wave,             fenomeno_fisico).
+type(uncertainty,      physical_phenomenon).
+type(duality,          physical_phenomenon).
+type(diffraction,      physical_phenomenon).
+type(radiation,        physical_phenomenon).
+type(effect,           physical_phenomenon).
+type(phenomenon,       physical_phenomenon).
+type(quantization,     physical_phenomenon).
+type(emission,         physical_phenomenon).
+type(wave,             physical_phenomenon).
 
 % Entidades físicas (partículas, objetos)
-tipo(particle,         entidad_fisica).
-tipo(particles,        entidad_fisica).
-tipo(photon,           entidad_fisica).
-tipo(photons,          entidad_fisica).
-tipo(electron,         entidad_fisica).
-tipo(electrons,        entidad_fisica).
-tipo(body,             entidad_fisica).
-tipo(metal,            entidad_fisica).
-tipo(light,            entidad_fisica).
-tipo(barriers,         entidad_fisica).
+type(particle,         physical_entity).
+type(particles,        physical_entity).
+type(photon,           physical_entity).
+type(photons,          physical_entity).
+type(electron,         physical_entity).
+type(electrons,        physical_entity).
+type(body,             physical_entity).
+type(metal,            physical_entity).
+type(light,            physical_entity).
+type(barriers,         physical_entity).
 
 % Personas
-tipo(planck,           persona).  % también constante_fisica — ambigüedad léxica
-tipo(einstein,         persona).
-tipo(heisenberg,       persona).
-tipo(bohr,             persona).
-tipo(davisson,         persona).
-tipo(germer,           persona).
-tipo(max,              persona).
-tipo(niels,            persona).
-tipo(albert,           persona).
-tipo(werner,           persona).
-tipo(clinton,          persona).
-tipo(lester,           persona).
-tipo(physicist,        persona).
-tipo(physicists,       persona).
-tipo(scientists,       persona).
+type(planck,           person).  % también physical_constant — ambigüedad léxica deliberada
+type(einstein,         person).
+type(heisenberg,       person).
+type(bohr,             person).
+type(davisson,         person).
+type(germer,           person).
+type(max,              person).
+type(niels,            person).
+type(albert,           person).
+type(werner,           person).
+type(clinton,          person).
+type(lester,           person).
+type(physicist,        person).
+type(physicists,       person).
+type(scientists,       person).
 
 % Propiedades
-tipo(essential,        propiedad).
-tipo(fundamental,      propiedad).
-tipo(innovative,       propiedad).
-tipo(coherent,         propiedad).
-tipo(efficient,        propiedad).
-tipo(proportional,     propiedad).
-tipo(indispensable,    propiedad).
-tipo(characteristic,   propiedad).
-tipo(forbidden,        propiedad).
-tipo(wavelike,         propiedad).
-tipo(subatomic,        propiedad).
-tipo(microscopic,      propiedad).
-tipo(theoretical,      propiedad).
-tipo(quantized,        propiedad).
-tipo(discretized,      propiedad).
+type(essential,        property).
+type(fundamental,      property).
+type(innovative,       property).
+type(coherent,         property).
+type(efficient,        property).
+type(proportional,     property).
+type(indispensable,    property).
+type(characteristic,   property).
+type(forbidden,        property).
+type(wavelike,         property).
+type(subatomic,        property).
+type(microscopic,      property).
+type(theoretical,      property).
+type(quantized,        property).
+type(discretized,      property).
 
 % Procesos / acciones
-tipo(formulation,      proceso).
-tipo(formulating,      proceso).
-tipo(quantization,     proceso).
-tipo(consolidation,    proceso).
-tipo(diffraction,      proceso).
+type(formulation,      process).
+type(formulating,      process).
+type(quantization,     process).
+type(consolidation,    process).
+type(diffraction,      process).
 
 % Cantidades y medidas
-tipo(value,            cantidad).
-tipo(quantity,         cantidad).
-tipo(quantities,       cantidad).
-tipo(energy,           cantidad).
-tipo(momentum,         cantidad).
-tipo(precision,        cantidad).
-tipo(multiples,        cantidad).
-tipo(integers,         cantidad).
-tipo(joules,           cantidad).
+type(value,            quantity).
+type(quantity,         quantity).
+type(quantities,       quantity).
+type(energy,           quantity).
+type(momentum,         quantity).
+type(precision,        quantity).
+type(multiples,        quantity).
+type(integers,         quantity).
+type(joules,           quantity).
 
 % Conceptos teóricos
-tipo(principle,        concepto_teorico).
-tipo(theory,           concepto_teorico).
-tipo(mechanics,        concepto_teorico).
-tipo(physics,          concepto_teorico).
-tipo(hypothesis,       concepto_teorico).
-tipo(law,              concepto_teorico).
-tipo(laws,             concepto_teorico).
-tipo(postulate,        concepto_teorico).
-tipo(approach,         concepto_teorico).
-tipo(approaches,       concepto_teorico).
+type(principle,        theoretical_concept).
+type(theory,           theoretical_concept).
+type(mechanics,        theoretical_concept).
+type(physics,          theoretical_concept).
+type(hypothesis,       theoretical_concept).
+type(law,              theoretical_concept).
+type(laws,             theoretical_concept).
+type(postulate,        theoretical_concept).
+type(approach,         theoretical_concept).
+type(approaches,       theoretical_concept).
 
 % =============================================================================
-% categoria_semantica/2
-% Analiza los tokens de una oración e identifica qué categorías aparecen
-% categoria_semantica(+Tokens, -ListaCategorias)
+% semantic_category/2
+% Analiza los tokens de una oración e identifica qué categorías semánticas aparecen.
+% semantic_category(+Tokens, -Categories)
 % =============================================================================
 
-categoria_semantica(Tokens, Categorias) :-
-    findall(Cat-Palabra,
-        (member(Palabra, Tokens), tipo(Palabra, Cat)),
-        Pares),
-    sort(Pares, Categorias).
+semantic_category(Tokens, Categories) :-
+    findall(Cat-Word,
+        (member(Word, Tokens), type(Word, Cat)),
+        Pairs),
+    sort(Pairs, Categories).
 
 % =============================================================================
-% rol_semantico/3
-% Extrae el rol semántico de un nodo del árbol sintáctico
-% rol_semantico(+Arbol, +Rol, -Palabras)
+% semantic_role/3
+% Extrae el rol semántico de un nodo del árbol sintáctico.
+% semantic_role(+Tree, +Role, -Words)
 %
-%   Roles:  sujeto | predicado | objeto | complemento
+%   Roles:  subject | predicate | object | complement
 % =============================================================================
 
-rol_semantico(o(GN, _), sujeto, Palabras) :-
-    palabras_gn(GN, Palabras).
+semantic_role(s(NP, _), subject, Words) :-
+    words_np(NP, Words).
 
-rol_semantico(o(_, GV), predicado, Palabras) :-
-    palabras_gv(GV, Palabras).
+semantic_role(s(_, VP), predicate, Words) :-
+    words_vp(VP, Words).
 
-rol_semantico(o(_, gv(_, GN)), objeto, Palabras) :-
-    palabras_gn(GN, Palabras).
+semantic_role(s(_, vp(_, NP)), object, Words) :-
+    words_np(NP, Words).
 
-rol_semantico(o(_, gv(_, _, GP)), complemento, Palabras) :-
-    palabras_gp(GP, Palabras).
-
-% Auxiliares para extraer palabras de los grupos
-palabras_gn(gn(n(N)), [N]).
-palabras_gn(gn(det(D), n(N)), [D, N]).
-palabras_gn(gn(det(D), n(N), adj(A)), [D, N, A]).
-palabras_gn(gn(det(D), n(N), gp(prep(P), GN2)), [D, N, P | Resto]) :-
-    palabras_gn(GN2, Resto).
-palabras_gn(gn(det(D), n(N), adj(A), gp(prep(P), GN2)), [D, N, A, P | Resto]) :-
-    palabras_gn(GN2, Resto).
-
-palabras_gv(gv(v(V)), [V]).
-palabras_gv(gv(v(V), GN), [V | Resto]) :- palabras_gn(GN, Resto).
-palabras_gv(gv(v(V), gadj(adj(A))), [V, A]).
-palabras_gv(gv(aux(A), v(V)), [A, V]).
-palabras_gv(gv(aux(A), v(V), GN), [A, V | Resto]) :- palabras_gn(GN, Resto).
-
-palabras_gp(gp(prep(P), GN), [P | Resto]) :- palabras_gn(GN, Resto).
+semantic_role(s(_, vp(_, _, PP)), complement, Words) :-
+    words_pp(PP, Words).
 
 % =============================================================================
-% analisis_semantico/2
-% Genera un análisis completo de la oración a partir de su árbol
-% analisis_semantico(+Arbol, -Informe)
+% Auxiliares para extraer palabras de los grupos sintácticos
 % =============================================================================
 
-analisis_semantico(o(GN, GV), informe(Sujeto, TiposSujeto, Predicado)) :-
-    palabras_gn(GN, Sujeto),
-    palabras_gv(GV, Predicado),
-    findall(Cat, (member(P, Sujeto), tipo(P, Cat)), TiposSujeto0),
-    sort(TiposSujeto0, TiposSujeto).
+% --- np (grupo nominal) ---
+
+words_np(np(n(N)), [N]).
+words_np(np(det(D), n(N)), [D, N]).
+words_np(np(det(D), adj(A), n(N)), [D, A, N]).
+words_np(np(det(D), AP, n(N)), [D | Rest]) :-
+    words_ap(AP, AR),
+    append(AR, [N], Rest).
+words_np(np(det(D), n(N), adj(A)), [D, N, A]).
+words_np(np(det(D), n(N), pp(prep(P), NP2)), [D, N, P | Rest]) :-
+    words_np(NP2, Rest).
+words_np(np(det(D), adj(A), n(N), pp(prep(P), NP2)), [D, A, N, P | Rest]) :-
+    words_np(NP2, Rest).
+words_np(np(det(D), AP, n(N), pp(prep(P), NP2)), [D | R]) :-
+    words_ap(AP, AR),
+    words_np(NP2, PR),
+    append(AR, [N, P | PR], R).
+words_np(np(n(N), pp(prep(P), NP2)), [N, P | Rest]) :-
+    words_np(NP2, Rest).
+words_np(np(det(D), n(N1), n(N2)), [D, N1, N2]).
+words_np(np(det(D), n(N1), n(N2), pp(prep(P), NP2)), [D, N1, N2, P | Rest]) :-
+    words_np(NP2, Rest).
+
+% --- ap (grupo adjetival) ---
+
+words_ap(ap(adj(A)), [A]).
+words_ap(ap(adv(D), adj(A)), [D, A]).
+
+% --- vp (grupo verbal) ---
+
+words_vp(vp(v(V)), [V]).
+words_vp(vp(v(V), NP), [V | Rest])      :- words_np(NP, Rest).
+words_vp(vp(v(V), AP), [V | Rest])      :- words_ap(AP, Rest).
+words_vp(vp(v(V), AdvP, PP), [V | Rest]) :-
+    words_advp(AdvP, AR),
+    words_pp(PP, PR),
+    append(AR, PR, Rest).
+words_vp(vp(aux(A), v(V)), [A, V]).
+words_vp(vp(aux(A), v(V), NP), [A, V | Rest]) :- words_np(NP, Rest).
+words_vp(vp(aux(A), v(V), AP), [A, V | Rest]) :- words_ap(AP, Rest).
+words_vp(vp(v(V), infp(aux(A), v(V2))), [V, A, V2]).
+
+% --- advp (grupo adverbial) ---
+
+words_advp(advp(adv(D)), [D]).
+
+% --- pp (grupo preposicional) ---
+
+words_pp(pp(prep(P), NP), [P | Rest]) :- words_np(NP, Rest).
+words_pp(pp(prep(P), AP), [P | Rest]) :- words_ap(AP, Rest).
+
+% =============================================================================
+% semantic_analysis/2
+% Genera un análisis completo de la oración a partir de su árbol.
+% semantic_analysis(+Tree, -Report)
+% =============================================================================
+
+semantic_analysis(s(NP, VP), report(Subject, SubjectTypes, Predicate)) :-
+    words_np(NP, Subject),
+    words_vp(VP, Predicate),
+    findall(Cat, (member(P, Subject), type(P, Cat)), Types0),
+    sort(Types0, SubjectTypes).

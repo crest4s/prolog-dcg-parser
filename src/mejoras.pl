@@ -13,7 +13,7 @@
  *              Manejo de plurales, género y tiempos verbales.
  *
  *   Mejora 3 — Asignación de funciones sintácticas
- *              Identificación de roles: CD, CI, CC, Atributo, etc.
+ *              Identificación de roles: sujeto, predicado, objeto, complemento.
  *
  * Mejoras opcionales adicionales:
  *   - Optimización del análisis sintáctico
@@ -23,19 +23,21 @@
  *   - Generación de explicaciones automáticas
  *=============================================================================*/
 
-:- module(mejoras, [tokenizar/2, normalizar/2, flexion/3, funcion_sintactica/3]).
+:- module(mejoras, [tokenize/2, normalize/2, inflect/3, syntactic_function/3]).
 
-% Stub implementations — to be developed in future iterations
-
-tokenizar(Text, Tokens) :-
+% tokenize/2 — divide un átomo de texto en una lista de tokens
+tokenize(Text, Tokens) :-
     atomic_list_concat(Tokens, ' ', Text).
 
-normalizar(Tokens, Norm) :-
+% normalize/2 — convierte todos los tokens a minúsculas
+normalize(Tokens, Norm) :-
     maplist([T, N]>>(downcase_atom(T, N)), Tokens, Norm).
 
-flexion(Palabra, _Categoria, Raiz) :-
-    atom(Palabra),
-    Raiz = Palabra.
+% inflect/3 — stub: devuelve la raíz como la propia palabra (sin flexión)
+inflect(Word, _Category, Root) :-
+    atom(Word),
+    Root = Word.
 
-funcion_sintactica(o(GN, _), sujeto, GN).
-funcion_sintactica(o(_, GV), predicado, GV).
+% syntactic_function/3 — extrae sujeto o predicado de un árbol s(NP, VP)
+syntactic_function(s(NP, _), subject,   NP).
+syntactic_function(s(_, VP), predicate, VP).
