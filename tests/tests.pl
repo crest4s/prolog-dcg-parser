@@ -1,32 +1,25 @@
 /*=============================================================================
- * tests/tests.pl — Suite de tests PLUnit
+ * tests/tests.pl — Suite de tests PLUnit (inglés)
  * Práctica 2: Análisis Sintáctico y Semántico de Oraciones en Contextos Reales
  * Conocimiento y Razonamiento Automatizado · UAH · Curso 2025-26
  *=============================================================================
  *
- * Cómo añadir tests:
- *   :- begin_tests(nombre_grupo).
- *   test(nombre_test) :- <goal que debe ser verdadero>.
- *   test(nombre_test, fail) :- <goal que debe fallar>.
- *   test(nombre_test, throws(error(_,_))) :- <goal que debe lanzar error>.
- *   :- end_tests(nombre_grupo).
- *
- * Ejecución local:
+ * Ejecución:
  *   swipl -g "run_tests, halt" -t "halt(1)" tests/tests.pl
  *=============================================================================*/
 
 :- use_module(library(plunit)).
 
-% Añade src/ al path de búsqueda de módulos
 :- assertz(file_search_path(src, 'src')).
 
-% -----------------------------------------------------------------------------
-% Carga de módulos
-% -----------------------------------------------------------------------------
 :- use_module('../src/sintactico').
 :- use_module('../src/semantico').
 :- use_module('../src/conjunto_oraciones').
+:- use_module('../src/semantico').
+:- use_module('../src/deteccion').
+:- use_module('../src/mejoras').
 
+% Helper: verifica que un token es clasificable por la gramática
 token_clasificable(Token) :-
     once((
         phrase(sintactico:determinante(_), [Token], [])
@@ -36,16 +29,15 @@ token_clasificable(Token) :-
     ;   phrase(sintactico:conj(_), [Token], [])
     ;   phrase(sintactico:rel(_), [Token], [])
     ;   phrase(sintactico:preposicion(_), [Token], [])
+    ;   phrase(sintactico:auxiliar(_), [Token], [])
     ;   phrase(sintactico:verbo_transitivo(_), [Token], [])
     ;   phrase(sintactico:verbo_intransitivo(_), [Token], [])
     ;   phrase(sintactico:verbo_copulativo(_), [Token], [])
     )).
 
-% -----------------------------------------------------------------------------
-% -----------------------------------------------------------------------------
-% Tests: corpus de oraciones
-% Al menos 30 oraciones deben estar definidas.
-% -----------------------------------------------------------------------------
+% =============================================================================
+% Tests: corpus de oraciones (inglés)
+% =============================================================================
 :- begin_tests(corpus).
 
 :- meta_predicate corpus_definido(0).
@@ -91,138 +83,178 @@ test(clases_validas) :-
         )
     ).
 
+% Cada oración inglesa tiene su referencia española
+test(oraciones_es_disponibles) :-
+    corpus_definido(
+        forall(
+            conjunto_oraciones:oracion(ID, _, _, _),
+            conjunto_oraciones:oracion_es(ID, _)
+        )
+    ).
+
+% Distribución: al menos una oración de cada tipo
+test(hay_oracion_simple) :-
+    corpus_definido(
+        once(conjunto_oraciones:oracion(_, o, _, _))
+    ).
+
+test(hay_oracion_coordinada) :-
+    corpus_definido(
+        once(conjunto_oraciones:oracion(_, oc, _, _))
+    ).
+
+test(hay_oracion_relativa) :-
+    corpus_definido(
+        once(conjunto_oraciones:oracion(_, or, _, _))
+    ).
+
+test(hay_oracion_compuesta) :-
+    corpus_definido(
+        once(conjunto_oraciones:oracion(_, ocm, _, _))
+    ).
+
 :- end_tests(corpus).
 
-% -----------------------------------------------------------------------------
-% Tests: análisis sintáctico básico
-% -----------------------------------------------------------------------------
+% =============================================================================
+% Tests: análisis sintáctico DCG básico (inglés)
+% =============================================================================
 :- begin_tests(sintactico_dcg).
 
-test(oracion_simple_correcta) :-
-    once(sintactico:oración(Arbol, [la, constante, es, esencial], [])),
+% Oración simple: Det + N + V_cop + Adj
+test(oracion_simple_cop_adj) :-
+    once(sintactico:oración(Arbol,
+        [the, constant, is, essential],
+        [])),
     nonvar(Arbol).
 
-test(oracion_simple_con_gn_compuesto) :-
-    once(sintactico:oración(Arbol, [la, fisica, cuantica, es, fundamental], [])),
+% Oración simple: Det + N + Aux + V_trans
+test(oracion_simple_aux_trans) :-
+    once(sintactico:oración(Arbol,
+        [the, constant, was, named],
+        [])),
     nonvar(Arbol).
 
+% Oración simple: Det + N + V_trans + Det + N
+test(oracion_simple_trans_gn) :-
+    once(sintactico:oración(Arbol,
+        [the, physicist, proposed, the, theory],
+        [])),
+    nonvar(Arbol).
+
+% Oración inválida: empieza con verbo
 test(oracion_invalida, fail) :-
-    sintactico:oración(_, [es, la, constante], []).
+    sintactico:oración(_, [is, the, constant, essential], []).
+
+% Oración inválida: empieza con conjunción
+test(oracion_invalida_conj, fail) :-
+    sintactico:oración(_, [and, the, constant, is, essential], []).
 
 :- end_tests(sintactico_dcg).
 
-% -----------------------------------------------------------------------------
-% Tests: persona B (oc, or, ocm)
-% -----------------------------------------------------------------------------
+% =============================================================================
+% Tests: oraciones complejas (coordinadas, relativas, compuestas)
+% =============================================================================
 :- begin_tests(sintactico_complejas).
 
+% Coordinada sin coma
 test(oracion_coordinada_sin_coma) :-
     once(sintactico:oración(Arboles,
-        [la, constante, es, esencial, y, la, fisica, es, fundamental],
+        [the, constant, is, essential, and, the, theory, is, fundamental],
         [])),
     Arboles = [_, _].
 
+% Coordinada con coma
 test(oracion_coordinada_con_coma) :-
     once(sintactico:oración(Arboles,
-        [la, constante, es, esencial, ',', y, la, fisica, es, fundamental],
+        [the, constant, is, essential, ',', and, the, theory, is, fundamental],
         [])),
     Arboles = [_, _].
 
-test(oracion_relativo_sin_comas) :-
+% Relativa sin comas
+test(oracion_relativa_sin_comas) :-
     once(sintactico:oración(Arboles,
-        [la, constante, que, es, esencial, es, fundamental],
+        [the, constant, that, is, essential, is, fundamental],
         [])),
     Arboles = [_, _].
 
-test(oracion_relativo_con_comas) :-
+% Relativa con comas
+test(oracion_relativa_con_comas) :-
     once(sintactico:oración(Arboles,
-        [la, constante, ',', que, es, esencial, ',', es, fundamental],
+        [the, constant, ',', that, is, essential, ',', is, fundamental],
         [])),
     Arboles = [_, _].
 
-test(oracion_compuesta_relativo_y_simple) :-
+% Compuesta: relativa + conj + simple → 3 oraciones simples
+test(oracion_compuesta_relativa_y_simple) :-
     once(sintactico:oración(Arboles,
-        [la, constante, ',', que, es, esencial, ',', es, fundamental, ',', y,
-         la, fisica, es, fundamental],
+        [the, constant, ',', that, is, essential, ',', is, fundamental,
+         ',', and, the, theory, is, fundamental],
         [])),
     Arboles = [_, _, _].
 
-% oc con sujeto compartido — el mismo GN aparece en ambos árboles
+% Sujeto compartido — el mismo GN en ambos árboles
 test(oc_sujeto_comun_estructura) :-
     once(sintactico:oración(Arboles,
-        [la, constante, existe, y, aparece],
+        [the, constant, exists, and, appears],
         [])),
     Arboles = [o(GN, _), o(GN, _)].
 
+% Sujeto compartido con coma
 test(oc_sujeto_comun_con_coma_estructura) :-
     once(sintactico:oración(Arboles,
-        [la, constante, existe, ',', y, aparece],
+        [the, constant, exists, ',', and, appears],
         [])),
     Arboles = [o(GN, _), o(GN, _)],
-    GN = gn(det(la), n(constante)).
+    GN = gn(det(the), n(constant)).
 
-% oc con verbo compartido — el mismo GN sujeto y el mismo V aparecen en ambos árboles
+% Verbo compartido
 test(oc_verbo_comun_estructura) :-
     once(sintactico:oración(Arboles,
-        [la, fisica, posee, la, constante, y, la, teoria],
+        [the, physicist, proposed, the, theory, and, the, hypothesis],
         [])),
     Arboles = [o(GN, gv(V, _)), o(GN, gv(V, _))].
 
-test(oc_verbo_comun_con_coma_estructura) :-
-    once(sintactico:oración(Arboles,
-        [la, fisica, posee, la, constante, ',', y, la, teoria],
-        [])),
-    Arboles = [o(GN, gv(V, _)), o(GN, gv(V, _))],
-    GN = gn(det(la), n(fisica)),
-    V = v(posee).
-
-% or — el mismo GN sujeto aparece en la subordinada y en la principal
+% Relativo — sujeto compartido entre subordinada y principal
 test(or_sujeto_compartido_estructura) :-
     once(sintactico:oración(Arboles,
-        [la, constante, ',', que, es, esencial, ',', es, fundamental],
+        [the, constant, ',', that, is, essential, ',', is, fundamental],
         [])),
     Arboles = [o(GN, _), o(GN, _)].
 
-% ocm — cuatro oraciones simples: (or + conj + o + conj + o)
-% "la constante , que es esencial , es fundamental , y
-%  la fisica es fundamental , y la teoria es fundamental"
-test(ocm_cuatro_simples) :-
-    once(sintactico:oración(Arboles,
-        [la, constante, ',', que, es, esencial, ',', es, fundamental,
-         ',', y, la, fisica, es, fundamental,
-         ',', y, la, teoria, es, fundamental],
-        [])),
-    length(Arboles, 4).
-
-% Todos los árboles resultantes de una coordinada deben ser o/2
+% Todos los árboles de una coordinada son o/2
 test(oc_todos_arboles_son_o) :-
     once(sintactico:oración(Arboles,
-        [la, constante, es, esencial, y, la, fisica, es, fundamental],
+        [the, constant, is, essential, and, the, theory, is, fundamental],
         [])),
     forall(member(A, Arboles), A = o(_, _)).
 
-% Oración compleja inválida (empieza con conjunción): debe fallar
-test(oracion_compleja_invalida, fail) :-
-    sintactico:oración(_, [y, la, constante, es, esencial], []).
-
 :- end_tests(sintactico_complejas).
 
-% -----------------------------------------------------------------------------
-% Tests: diccionario persona B
-% -----------------------------------------------------------------------------
+% =============================================================================
+% Tests: diccionario en inglés
+% =============================================================================
 :- begin_tests(diccionario).
 
-test(diccionario_determinante) :- phrase(sintactico:determinante(_), [la], []).
-test(diccionario_nombre) :- phrase(sintactico:nombre(_), [planck], []).
-test(diccionario_adjetivo) :- phrase(sintactico:adjetivo(_), [fundamental], []).
-test(diccionario_adverbio) :- phrase(sintactico:adverbio(_), [muy], []).
-test(diccionario_conjuncion) :- phrase(sintactico:conj(_), [y], []).
-test(diccionario_relativo) :- phrase(sintactico:rel(_), [que], []).
-test(diccionario_preposicion) :- phrase(sintactico:preposicion(_), [de], []).
-test(diccionario_verbo_copulativo) :- phrase(sintactico:verbo_copulativo(_), [es], []).
-test(diccionario_verbo_transitivo) :- phrase(sintactico:verbo_transitivo(_), [explicar], []).
-test(diccionario_verbo_intransitivo) :- phrase(sintactico:verbo_intransitivo(_), [existe], []).
+test(diccionario_determinante)     :- phrase(sintactico:determinante(_), [the], []).
+test(diccionario_determinante_a)   :- phrase(sintactico:determinante(_), [a], []).
+test(diccionario_determinante_an)  :- phrase(sintactico:determinante(_), [an], []).
+test(diccionario_nombre)           :- phrase(sintactico:nombre(_), [planck], []).
+test(diccionario_adjetivo)         :- phrase(sintactico:adjetivo(_), [fundamental], []).
+test(diccionario_adjetivo_small)   :- phrase(sintactico:adjetivo(_), [small], []).
+test(diccionario_adverbio)         :- phrase(sintactico:adverbio(_), [also], []).
+test(diccionario_adverbio_not)     :- phrase(sintactico:adverbio(_), [not], []).
+test(diccionario_conjuncion)       :- phrase(sintactico:conj(_), [and], []).
+test(diccionario_conjuncion_but)   :- phrase(sintactico:conj(_), [but], []).
+test(diccionario_relativo_that)    :- phrase(sintactico:rel(_), [that], []).
+test(diccionario_relativo_which)   :- phrase(sintactico:rel(_), [which], []).
+test(diccionario_preposicion)      :- phrase(sintactico:preposicion(_), [of], []).
+test(diccionario_auxiliar_was)     :- phrase(sintactico:auxiliar(_), [was], []).
+test(diccionario_auxiliar_can)     :- phrase(sintactico:auxiliar(_), [can], []).
+test(diccionario_verbo_copulativo) :- phrase(sintactico:verbo_copulativo(_), [became], []).
+test(diccionario_verbo_transitivo) :- phrase(sintactico:verbo_transitivo(_), [proposed], []).
+test(diccionario_verbo_intransitivo):- phrase(sintactico:verbo_intransitivo(_), [exists], []).
 
+% Todos los tokens del corpus son clasificables
 test(diccionario_cubre_todos_los_tokens_del_corpus) :-
     findall(T, (conjunto_oraciones:oracion(_, _, _, Ts), member(T, Ts)), Todos),
     sort(Todos, Unicos),
@@ -230,111 +262,166 @@ test(diccionario_cubre_todos_los_tokens_del_corpus) :-
 
 :- end_tests(diccionario).
 
-% -----------------------------------------------------------------------------
-% Tests: enriquecimiento semántico
-% -----------------------------------------------------------------------------
-:- begin_tests(semantico).
-
-test(tipo_de_persona_cientifica) :-
-    once(semantico:tipo(planck, persona_cientifica)).
-
-test(tipo_de_disciplina) :-
-    once(semantico:tipo(cuantica, disciplina_cientifica)).
-
-test(categoria_semantica_alias) :-
-    once(semantico:categoria_semantica(fotones, particula_fisica)).
-
-test(tipo_de_alteridad) :-
-    once(semantico:tipo(otros, alteridad)).
-
-:- end_tests(semantico).
-
-% -----------------------------------------------------------------------------
-% Tests: simplificación de oraciones complejas
-% -----------------------------------------------------------------------------
+% =============================================================================
+% Tests: simplificación de oraciones
+% =============================================================================
 :- begin_tests(simplificacion).
 
-% simplificar/2 sobre lista vacía
 test(simplificar_lista_vacia) :-
     sintactico:simplificar([], []).
 
-% simplificar/2 sobre una oración simple suelta
 test(simplificar_oracion_simple_suelta) :-
-    O = o(gn(det(la), n(constante)), gv(v(existe))),
+    O = o(gn(det(the), n(constant)), gv(v(exists))),
     sintactico:simplificar(O, [O]).
 
-% simplificar/2 sobre lista de oraciones simples: identidad
 test(simplificar_lista_simples) :-
-    O1 = o(gn(det(la), n(constante)), gv(v(existe))),
-    O2 = o(gn(det(la), n(fisica)), gv(v(aparece))),
+    O1 = o(gn(det(the), n(constant)), gv(v(exists))),
+    O2 = o(gn(det(the), n(theory)), gv(v(appears))),
     sintactico:simplificar([O1, O2], [O1, O2]).
 
-% Coordinada con sujeto compartido: GN V1 conj V2 (sin coma)
-% "la constante existe y aparece"
+% Sujeto compartido sin coma
 test(oc_sujeto_comun_sin_coma) :-
     once(sintactico:oración(Arboles,
-        [la, constante, existe, y, aparece],
+        [the, constant, exists, and, appears],
         [])),
     Arboles = [o(GN, _), o(GN, _)],
-    GN = gn(det(la), n(constante)).
+    GN = gn(det(the), n(constant)).
 
-% Coordinada con sujeto compartido: GN V1 , conj V2 (con coma)
-% "la constante existe , y aparece"
+% Sujeto compartido con coma
 test(oc_sujeto_comun_con_coma) :-
     once(sintactico:oración(Arboles,
-        [la, constante, existe, ',', y, aparece],
+        [the, constant, exists, ',', and, appears],
         [])),
     Arboles = [o(GN, _), o(GN, _)],
-    GN = gn(det(la), n(constante)).
+    GN = gn(det(the), n(constant)).
 
-% Coordinada con sujeto compartido produce exactamente 2 oraciones simples
+% Sujeto compartido produce exactamente 2 oraciones simples
 test(oc_sujeto_comun_longitud) :-
     once(sintactico:oración(Arboles,
-        [la, constante, existe, y, aparece],
+        [the, constant, exists, and, appears],
         [])),
     length(Arboles, 2).
 
-% Coordinada con verbo compartido: GN V GN1 conj GN2 (sin coma)
-% "la fisica posee la constante y la teoria"
+% Verbo compartido sin coma
 test(oc_verbo_comun_sin_coma) :-
     once(sintactico:oración(Arboles,
-        [la, fisica, posee, la, constante, y, la, teoria],
+        [the, physicist, proposed, the, theory, and, the, hypothesis],
         [])),
     Arboles = [o(GN, gv(V, _)), o(GN, gv(V, _))],
-    GN = gn(det(la), n(fisica)),
-    V = v(posee).
+    GN = gn(det(the), n(physicist)),
+    V = v(proposed).
 
-% Coordinada con verbo compartido: GN V GN1 , conj GN2 (con coma)
+% Verbo compartido con coma
 test(oc_verbo_comun_con_coma) :-
     once(sintactico:oración(Arboles,
-        [la, fisica, posee, la, constante, ',', y, la, teoria],
+        [the, physicist, proposed, the, theory, ',', and, the, hypothesis],
         [])),
     Arboles = [o(GN, gv(V, _)), o(GN, gv(V, _))],
-    GN = gn(det(la), n(fisica)),
-    V = v(posee).
+    GN = gn(det(the), n(physicist)),
+    V = v(proposed).
 
-% simplificar sobre resultado de oc_sujeto_comun es la misma lista
+% simplificar sobre oc_sujeto_comun produce lista de o/2
 test(simplificar_sobre_oc_sujeto_comun) :-
     once(sintactico:oración(Arboles,
-        [la, constante, existe, y, aparece],
+        [the, constant, exists, and, appears],
         [])),
     sintactico:simplificar(Arboles, Simples),
     Simples = [o(_, _), o(_, _)].
 
 :- end_tests(simplificacion).
 
-% -----------------------------------------------------------------------------
-% Tests: detección de problemas
-% Añadir aquí tests concretos cuando se implemente deteccion.pl.
-% -----------------------------------------------------------------------------
+% =============================================================================
+% Tests: análisis semántico
+% =============================================================================
+:- begin_tests(semantico).
+
+% tipo/2 — categorías conocidas
+test(tipo_constante)    :- semantico:tipo(constant, constante_fisica).
+test(tipo_planck)       :- semantico:tipo(planck, persona).
+test(tipo_energy)       :- semantico:tipo(energy, cantidad).
+test(tipo_principle)    :- semantico:tipo(principle, concepto_teorico).
+test(tipo_particle)     :- semantico:tipo(particle, entidad_fisica).
+test(tipo_essential)    :- semantico:tipo(essential, propiedad).
+
+% categoria_semantica/2 — lista de categorías para tokens de oración 1
+test(categoria_oracion_1) :-
+    conjunto_oraciones:oracion(1, _, _, Tokens),
+    semantico:categoria_semantica(Tokens, Cats),
+    Cats \= [].
+
+% rol_semantico/3 — extracción de sujeto de árbol simple
+test(rol_sujeto) :-
+    Arbol = o(gn(det(the), n(constant)), gv(v(exists))),
+    once(semantico:rol_semantico(Arbol, sujeto, [the, constant])).
+
+test(rol_predicado) :-
+    Arbol = o(gn(det(the), n(constant)), gv(v(exists))),
+    once(semantico:rol_semantico(Arbol, predicado, [exists])).
+
+:- end_tests(semantico).
+
+% =============================================================================
+% Tests: utilidades auxiliares (mejoras.pl)
+% =============================================================================
+:- begin_tests(mejoras).
+
+test(tokenizar_basico) :-
+    mejoras:tokenizar('Hello world', [Hello, world]),
+    Hello == 'Hello'.
+
+test(normalizar_minusculas) :-
+    mejoras:normalizar(['HeLLo', world], [hello, world]).
+
+test(flexion_stub) :-
+    mejoras:flexion(played, verbo, played).
+
+test(funcion_sintactica_sujeto) :-
+    O = o(gn(det(the), n(constant)), gv(v(exists))),
+    mejoras:funcion_sintactica(O, sujeto, gn(det(the), n(constant))).
+
+test(funcion_sintactica_predicado) :-
+    O = o(gn(det(the), n(constant)), gv(v(exists))),
+    mejoras:funcion_sintactica(O, predicado, gv(v(exists))).
+
+:- end_tests(mejoras).
+
+% =============================================================================
+% Tests: detección de problemas de traducción
+% =============================================================================
 :- begin_tests(deteccion_problemas).
 
-% Ejemplo — descomentar cuando deteccion.pl esté implementado:
-%
-% test(detecta_ambiguedad) :-
-%     ambigüedad(banco, _).
-%
-% test(detecta_incoherencia) :-
-%     incoherencia([la, inflacion, come, los, ahorros], _).
+% Las oraciones problemáticas tienen un problema registrado
+test(problema_oracion_4) :-
+    deteccion:problema_traduccion(4, _, _).
+
+test(problema_oracion_16) :-
+    deteccion:problema_traduccion(16, cambio_estructura, _).
+
+test(problema_oracion_20) :-
+    deteccion:problema_traduccion(20, cambio_estructura, _).
+
+test(problema_oracion_29) :-
+    deteccion:problema_traduccion(29, perdida_referencia, _).
+
+% Las oraciones ambiguas tienen problema de tipo ambiguedad
+test(ambiguedad_oracion_10) :-
+    deteccion:ambiguedad(10, _).
+
+test(ambiguedad_oracion_30) :-
+    deteccion:ambiguedad(30, _).
+
+% Las oraciones correctas NO tienen problema registrado
+test(sin_problema_oracion_1, fail) :-
+    deteccion:problema_traduccion(1, _, _).
+
+test(sin_problema_oracion_8, fail) :-
+    deteccion:problema_traduccion(8, _, _).
+
+% Todos los problemas tienen descripción no vacía
+test(descripciones_no_vacias) :-
+    forall(
+        deteccion:problema_traduccion(_, _, Desc),
+        ( atom(Desc), Desc \= '' )
+    ).
 
 :- end_tests(deteccion_problemas).

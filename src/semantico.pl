@@ -1,224 +1,182 @@
 /*=============================================================================
- * semantico.pl — Enriquecimiento semántico
+ * semantico.pl — Enriquecimiento semántico (inglés)
  * Práctica 2: Análisis Sintáctico y Semántico de Oraciones en Contextos Reales
  * Conocimiento y Razonamiento Automatizado · UAH · Curso 2025-26
  *=============================================================================
  *
- * Hechos de la forma:  tipo(+Palabra, +Categoría)
+ * Categorías semánticas del dominio de la física cuántica:
  *
- * Ejemplos:
- *   tipo(inflacion, fenomeno_economico).
- *   tipo(banco, institucion_financiera).
- *   tipo(banco, objeto_fisico).
- *   tipo(crecer, proceso).
- *   tipo(comer, accion_fisica).
+ *   constante_fisica   — valores numéricos con rol fundamental en la física
+ *   fenomeno_fisico    — fenómenos observables en la naturaleza
+ *   entidad_fisica     — partículas, objetos físicos
+ *   persona            — científicos e investigadores
+ *   propiedad          — atributos o características de entidades
+ *   proceso            — acciones o transformaciones
+ *   cantidad           — magnitudes y medidas
+ *   concepto_teorico   — principios, teorías, leyes
+ *
+ * Predicados exportados:
+ *   tipo/2             — tipo(+Palabra, -Categoria)
+ *   categoria_semantica/2 — categoria_semantica(+ListaTokens, -Analisis)
+ *   rol_semantico/3    — rol_semantico(+Arbol, +Rol, -Palabra)
  *=============================================================================*/
 
-:- module(semantico, [tipo/2, categoria_semantica/2]).
+:- module(semantico, [tipo/2, categoria_semantica/2, rol_semantico/3]).
 
-categoria_semantica(Palabra, Categoria) :-
-	tipo(Palabra, Categoria).
+% =============================================================================
+% tipo/2 — asigna categoría semántica a palabras del dominio
+% =============================================================================
 
-% -----------------------------------------------------------------------------
-% Personas y grupos científicos
-% -----------------------------------------------------------------------------
+% Constantes físicas
+tipo(constant,         constante_fisica).
+tipo(planck,           constante_fisica).
+tipo('6.626x10-34',    constante_fisica).
+tipo(h,                constante_fisica).
 
-tipo(albert, persona_cientifica).
-tipo(einstein, persona_cientifica).
-tipo(niels, persona_cientifica).
-tipo(bohr, persona_cientifica).
-tipo(werner, persona_cientifica).
-tipo(heisenberg, persona_cientifica).
-tipo(max, persona_cientifica).
-tipo(planck, persona_cientifica).
-tipo(clinton, persona_cientifica).
-tipo(davisson, persona_cientifica).
-tipo(lester, persona_cientifica).
-tipo(germer, persona_cientifica).
-tipo(fisico, profesional_cientifico).
-tipo(fisicos, grupo_cientifico).
-tipo(cientificos, grupo_cientifico).
+% Fenómenos físicos
+tipo(uncertainty,      fenomeno_fisico).
+tipo(duality,          fenomeno_fisico).
+tipo(diffraction,      fenomeno_fisico).
+tipo(radiation,        fenomeno_fisico).
+tipo(effect,           fenomeno_fisico).
+tipo(phenomenon,       fenomeno_fisico).
+tipo(quantization,     fenomeno_fisico).
+tipo(emission,         fenomeno_fisico).
+tipo(wave,             fenomeno_fisico).
 
-% -----------------------------------------------------------------------------
-% Disciplinas, teorías y conceptos científicos
-% -----------------------------------------------------------------------------
+% Entidades físicas (partículas, objetos)
+tipo(particle,         entidad_fisica).
+tipo(particles,        entidad_fisica).
+tipo(photon,           entidad_fisica).
+tipo(photons,          entidad_fisica).
+tipo(electron,         entidad_fisica).
+tipo(electrons,        entidad_fisica).
+tipo(body,             entidad_fisica).
+tipo(metal,            entidad_fisica).
+tipo(light,            entidad_fisica).
+tipo(barriers,         entidad_fisica).
 
-tipo(fisica, disciplina_cientifica).
-tipo(cuantica, disciplina_cientifica).
-tipo(mecanica, disciplina_cientifica).
-tipo(teoria, teoria_cientifica).
-tipo(principio, principio_fisico).
-tipo(incertidumbre, principio_fisico).
-tipo(cuantizacion, proceso_cientifico).
-tipo(formulacion, proceso_cientifico).
-tipo(postulacion, proceso_cientifico).
-tipo(concepcion, marco_conceptual).
-tipo(propuesta, propuesta_cientifica).
-tipo(hipotesis, hipotesis_cientifica).
-tipo(idea, idea_cientifica).
-tipo(planteamiento, propuesta_cientifica).
-tipo(planteamientos, propuesta_cientifica).
-tipo(explicacion, explicacion_cientifica).
-tipo(solucion, solucion_cientifica).
-tipo(contexto, marco_referencia).
-tipo(realidad, concepto_abstracto).
-tipo(presencia, existencia).
-tipo(importancia, relevancia).
-tipo(necesidad, requisito).
-tipo(contradiccion, incoherencia_logica).
-tipo(papel, rol_funcional).
-tipo(protagonista, entidad_relevante).
-tipo(honor, reconocimiento_social).
-tipo(parte, fraccion).
-tipo(forma, modo_o_configuracion).
-tipo(letra, simbolo_linguistico).
-tipo(elemento, componente).
-tipo(principios, principio_fisico).
-tipo(problemas, dificultad_analitica).
-tipo(dilemas, dificultad_analitica).
-tipo(inquietudes, preocupacion_cientifica).
-tipo(objetivo, meta_cientifica).
-tipo(caso, situacion).
-tipo(fenomeno, fenomeno_general).
-tipo(fenomenos, fenomeno_general).
-tipo(dualidad, concepto_fisico).
-tipo(emision, fenomeno_fisico).
-tipo(radiacion, fenomeno_fisico).
-tipo(difraccion, fenomeno_fisico).
-tipo(efecto, fenomeno_fisico).
-tipo(comportamiento, comportamiento_fisico).
-tipo(comportamientos, comportamiento_fisico).
-tipo(estudio, actividad_cientifica).
-tipo(investigaciones, actividad_cientifica).
-tipo(experimentos, actividad_cientifica).
-tipo(invencion, desarrollo_tecnologico).
-tipo(trabajo, actividad_cientifica).
-tipo(avance, progreso_cientifico).
-tipo(avances, progreso_cientifico).
-tipo(base, fundamento_cientifico).
-tipo(bases, fundamento_cientifico).
-tipo(leyes, ley_fisica).
-tipo(frase, expresion_linguistica).
-tipo(palabras, expresion_linguistica).
-tipo(testimonio, fuente_documental).
+% Personas
+tipo(planck,           persona).  % también constante_fisica — ambigüedad léxica
+tipo(einstein,         persona).
+tipo(heisenberg,       persona).
+tipo(bohr,             persona).
+tipo(davisson,         persona).
+tipo(germer,           persona).
+tipo(max,              persona).
+tipo(niels,            persona).
+tipo(albert,           persona).
+tipo(werner,           persona).
+tipo(clinton,          persona).
+tipo(lester,           persona).
+tipo(physicist,        persona).
+tipo(physicists,       persona).
+tipo(scientists,       persona).
 
-% -----------------------------------------------------------------------------
-% Magnitudes, medidas, tiempo y espacio
-% -----------------------------------------------------------------------------
+% Propiedades
+tipo(essential,        propiedad).
+tipo(fundamental,      propiedad).
+tipo(innovative,       propiedad).
+tipo(coherent,         propiedad).
+tipo(efficient,        propiedad).
+tipo(proportional,     propiedad).
+tipo(indispensable,    propiedad).
+tipo(characteristic,   propiedad).
+tipo(forbidden,        propiedad).
+tipo(wavelike,         propiedad).
+tipo(subatomic,        propiedad).
+tipo(microscopic,      propiedad).
+tipo(theoretical,      propiedad).
+tipo(quantized,        propiedad).
+tipo(discretized,      propiedad).
 
-tipo(constante, magnitud_fisica).
-tipo(energia, magnitud_fisica).
-tipo(cantidad, magnitud_mensurable).
-tipo(cantidades, magnitud_mensurable).
-tipo(valor, magnitud_mensurable).
-tipo(posicion, magnitud_fisica).
-tipo(momento, magnitud_fisica).
-tipo(precision, precision_medicion).
-tipo(capacidad, capacidad_medicion).
-tipo(limitacion, restriccion).
-tipo(impedimento, obstaculo).
-tipo(ano, tiempo_historico).
-tipo(siglo, tiempo_historico).
-tipo(epoca, tiempo_historico).
-tipo(vez, instante_temporal).
-tipo(miniatura, escala_reducida).
-tipo(mundo, entorno_fisico).
-tipo(naturaleza, entorno_fisico).
-tipo(lugar, ubicacion).
-tipo(cuerpo, objeto_fisico).
-tipo(objeto, objeto_fisico).
-tipo(metal, material).
-tipo(llave, objeto_fisico).
-tipo(microscopio, instrumento_cientifico).
-tipo(barreras, obstaculo_fisico).
-tipo(bolsas, contenedor).
-tipo(intervalos, intervalo).
-tipo(sistema, sistema_medicion).
-tipo(unidades, unidad_medida).
-tipo(julios, unidad_medida).
-tipo(segundo, unidad_medida).
-tipo(h, simbolo_fisico).
+% Procesos / acciones
+tipo(formulation,      proceso).
+tipo(formulating,      proceso).
+tipo(quantization,     proceso).
+tipo(consolidation,    proceso).
+tipo(diffraction,      proceso).
 
-% -----------------------------------------------------------------------------
-% Partículas, ondas y otros objetos físicos
-% -----------------------------------------------------------------------------
+% Cantidades y medidas
+tipo(value,            cantidad).
+tipo(quantity,         cantidad).
+tipo(quantities,       cantidad).
+tipo(energy,           cantidad).
+tipo(momentum,         cantidad).
+tipo(precision,        cantidad).
+tipo(multiples,        cantidad).
+tipo(integers,         cantidad).
+tipo(joules,           cantidad).
 
-tipo(luz, entidad_energetica).
-tipo(onda, onda_fisica).
-tipo(ondas, onda_fisica).
-tipo(particula, particula_fisica).
-tipo(particulas, particula_fisica).
-tipo(electrones, particula_fisica).
-tipo(fotones, particula_fisica).
+% Conceptos teóricos
+tipo(principle,        concepto_teorico).
+tipo(theory,           concepto_teorico).
+tipo(mechanics,        concepto_teorico).
+tipo(physics,          concepto_teorico).
+tipo(hypothesis,       concepto_teorico).
+tipo(law,              concepto_teorico).
+tipo(laws,             concepto_teorico).
+tipo(postulate,        concepto_teorico).
+tipo(approach,         concepto_teorico).
+tipo(approaches,       concepto_teorico).
 
-% -----------------------------------------------------------------------------
-% Atributos y adjetivos del corpus
-% -----------------------------------------------------------------------------
+% =============================================================================
+% categoria_semantica/2
+% Analiza los tokens de una oración e identifica qué categorías aparecen
+% categoria_semantica(+Tokens, -ListaCategorias)
+% =============================================================================
 
-tipo(esencial, cualidad_relevante).
-tipo(fundamental, cualidad_relevante).
-tipo(fundamentales, cualidad_relevante).
-tipo(importante, cualidad_relevante).
-tipo(indispensable, cualidad_relevante).
-tipo(innovadora, cualidad_innovadora).
-tipo(revolucionario, cualidad_innovadora).
-tipo(atrevida, cualidad_innovadora).
-tipo(poetica, cualidad_estetica).
-tipo(romantica, cualidad_estetica).
-tipo(cierta, indeterminacion).
-tipo(ciertos, indeterminacion).
-tipo(ciertas, indeterminacion).
-tipo(cualquier, indeterminacion).
-tipo(otro, alteridad).
-tipo(otros, alteridad).
-tipo(otras, alteridad).
-tipo(general, alcance_general).
-tipo(subatomicas, escala_microscopica).
-tipo(pequenas, escala_reducida).
-tipo(pequenos, escala_reducida).
-tipo(microscopico, escala_microscopica).
-tipo(gran, intensidad).
-tipo(grandes, intensidad).
-tipo(nueva, novedad).
-tipo(primera, orden_temporal).
-tipo(inmediata, inmediatez).
-tipo(desconcertantes, dificultad_interpretativa).
-tipo(coherentes, coherencia).
-tipo(eficientes, eficiencia).
-tipo(habituales, frecuencia).
-tipo(vigentes, vigencia).
-tipo(perceptibles, perceptibilidad).
-tipo(estancado, estado_procesual).
-tipo(negro, color).
-tipo(caracteristica, caracteristica).
-tipo(discretizada, estado_discreto).
-tipo(emitida, emision).
-tipo(proporcional, proporcionalidad).
-tipo(proporcionales, proporcionalidad).
-tipo(enteros, integridad_numerica).
-tipo(exactos, exactitud).
-tipo(internacional, ambito_global).
-tipo(imposible, imposibilidad).
-tipo(absoluta, absolutidad).
-tipo(tal, analogia).
-tipo(deducida, inferencia).
-tipo(teorica, teoricidad).
-tipo(cuanticos, caracter_cuantico).
-tipo(cuantica, caracter_cuantico).
-tipo(observados, observacion).
-tipo(diferentes, diversidad).
-tipo(fotoelectrico, efecto_fotoelectrico).
-tipo(compuesta, composicion).
-tipo(llamada, denominacion).
-tipo(llamadas, denominacion).
-tipo(maestra, funcion_estrategica).
-tipo(ondulatorios, caracter_ondulatorio).
-tipo(similares, similitud).
-tipo(capaces, capacidad).
-tipo(energeticas, energia).
-tipo(prohibidas, prohibicion).
-tipo(cuantizada, cuantificacion).
-tipo(cuantificada, cuantificacion).
-tipo(representada, representacion).
-tipo(determinante, relevancia).
+categoria_semantica(Tokens, Categorias) :-
+    findall(Cat-Palabra,
+        (member(Palabra, Tokens), tipo(Palabra, Cat)),
+        Pares),
+    sort(Pares, Categorias).
 
+% =============================================================================
+% rol_semantico/3
+% Extrae el rol semántico de un nodo del árbol sintáctico
+% rol_semantico(+Arbol, +Rol, -Palabras)
+%
+%   Roles:  sujeto | predicado | objeto | complemento
+% =============================================================================
+
+rol_semantico(o(GN, _), sujeto, Palabras) :-
+    palabras_gn(GN, Palabras).
+
+rol_semantico(o(_, GV), predicado, Palabras) :-
+    palabras_gv(GV, Palabras).
+
+rol_semantico(o(_, gv(_, GN)), objeto, Palabras) :-
+    palabras_gn(GN, Palabras).
+
+rol_semantico(o(_, gv(_, _, GP)), complemento, Palabras) :-
+    palabras_gp(GP, Palabras).
+
+% Auxiliares para extraer palabras de los grupos
+palabras_gn(gn(n(N)), [N]).
+palabras_gn(gn(det(D), n(N)), [D, N]).
+palabras_gn(gn(det(D), n(N), adj(A)), [D, N, A]).
+palabras_gn(gn(det(D), n(N), gp(prep(P), GN2)), [D, N, P | Resto]) :-
+    palabras_gn(GN2, Resto).
+palabras_gn(gn(det(D), n(N), adj(A), gp(prep(P), GN2)), [D, N, A, P | Resto]) :-
+    palabras_gn(GN2, Resto).
+
+palabras_gv(gv(v(V)), [V]).
+palabras_gv(gv(v(V), GN), [V | Resto]) :- palabras_gn(GN, Resto).
+palabras_gv(gv(v(V), gadj(adj(A))), [V, A]).
+palabras_gv(gv(aux(A), v(V)), [A, V]).
+palabras_gv(gv(aux(A), v(V), GN), [A, V | Resto]) :- palabras_gn(GN, Resto).
+
+palabras_gp(gp(prep(P), GN), [P | Resto]) :- palabras_gn(GN, Resto).
+
+% =============================================================================
+% analisis_semantico/2
+% Genera un análisis completo de la oración a partir de su árbol
+% analisis_semantico(+Arbol, -Informe)
+% =============================================================================
+
+analisis_semantico(o(GN, GV), informe(Sujeto, TiposSujeto, Predicado)) :-
+    palabras_gn(GN, Sujeto),
+    palabras_gv(GV, Predicado),
+    findall(Cat, (member(P, Sujeto), tipo(P, Cat)), TiposSujeto0),
+    sort(TiposSujeto0, TiposSujeto).

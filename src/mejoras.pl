@@ -24,3 +24,18 @@
  *=============================================================================*/
 
 :- module(mejoras, [tokenizar/2, normalizar/2, flexion/3, funcion_sintactica/3]).
+
+% Stub implementations — to be developed in future iterations
+
+tokenizar(Text, Tokens) :-
+    atomic_list_concat(Tokens, ' ', Text).
+
+normalizar(Tokens, Norm) :-
+    maplist([T, N]>>(downcase_atom(T, N)), Tokens, Norm).
+
+flexion(Palabra, _Categoria, Raiz) :-
+    atom(Palabra),
+    Raiz = Palabra.
+
+funcion_sintactica(o(GN, _), sujeto, GN).
+funcion_sintactica(o(_, GV), predicado, GV).

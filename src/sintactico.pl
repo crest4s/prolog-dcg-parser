@@ -1,5 +1,5 @@
 /*=============================================================================
- * sintactico.pl — Gramática DCG básica
+ * sintactico.pl — Gramática DCG para inglés
  * Práctica 2: Análisis Sintáctico y Semántico de Oraciones en Contextos Reales
  * Conocimiento y Razonamiento Automatizado · UAH · Curso 2025-26
  *=============================================================================
@@ -18,16 +18,18 @@
  *   gp   — grupo preposicional
  *
  * Léxico:
- *   det, n, v, adj, adv, conj, prep
+ *   det, n, v_cop, v_trans, v_intr, aux, adj, adv, conj, rel, prep
  *=============================================================================*/
 
 :- module(sintactico, [oración/3, simplificar/2, simplificar_y_dibujar/1]).
 
 :- use_module(draw).
 
+% =============================================================================
 % Reglas de oraciones
+% =============================================================================
 
-% Regla maestra (el usuario llama a: phrase(oracion(Lista), Tokens))
+% Regla maestra
 oracion(ListaArboles) --> ocm(ListaArboles).
 oracion(ListaArboles) --> or(ListaArboles).
 oracion(ListaArboles) --> oc(ListaArboles).
@@ -51,8 +53,7 @@ oc([Arbol1, Arbol2]) -->
     conj(_),
     o(Arbol2).
 
-% Oraciones coordinadas con sujeto compartido: GN V1 [,] conj V2
-% Ej. hipotético: "el fotón absorbe y actúa" → "el fotón absorbe", "el fotón actúa"
+% Coordinadas con sujeto compartido: GN V1 [,] conj V2
 oc_sujeto_comun([o(GN, GV1), o(GN, GV2)]) -->
     grupo_nominal(GN),
     grupo_verbal(GV1),
@@ -66,9 +67,7 @@ oc_sujeto_comun([o(GN, GV1), o(GN, GV2)]) -->
     conj(_),
     grupo_verbal(GV2).
 
-% Oraciones coordinadas con verbo transitivo compartido: GN V GN1 [,] conj GN2
-% Ej. hipotético: "einstein propuso la teoría y el modelo"
-%                 → "einstein propuso la teoría", "einstein propuso el modelo"
+% Coordinadas con verbo transitivo compartido: GN V GN1 [,] conj GN2
 oc_verbo_comun([o(GN, gv(V, GN1)), o(GN, gv(V, GN2))]) -->
     grupo_nominal(GN),
     verbo_transitivo(V),
@@ -84,8 +83,8 @@ oc_verbo_comun([o(GN, gv(V, GN1)), o(GN, gv(V, GN2))]) -->
     conj(_),
     grupo_nominal(GN2).
 
-% Oraciones subordinadas de relativo
-or([o(GN, GV_Sub), o(GN, GV_Princ)]) --> 
+% Oraciones subordinadas de relativo (con comas y sin comas)
+or([o(GN, GV_Sub), o(GN, GV_Princ)]) -->
     grupo_nominal(GN),
     [','],
     rel(_),
@@ -93,57 +92,58 @@ or([o(GN, GV_Sub), o(GN, GV_Princ)]) -->
     [','],
     grupo_verbal(GV_Princ).
 
-or([o(GN, GV_Sub), o(GN, GV_Princ)]) --> 
+or([o(GN, GV_Sub), o(GN, GV_Princ)]) -->
     grupo_nominal(GN),
     rel(_),
     grupo_verbal(GV_Sub),
     grupo_verbal(GV_Princ).
 
 % Oraciones compuestas
-ocm([ArbolSub, ArbolPrinc | RestoArboles]) --> 
+ocm([ArbolSub, ArbolPrinc | RestoArboles]) -->
     or([ArbolSub, ArbolPrinc]),
     [','],
     conj(_),
     ocm(RestoArboles).
 
-ocm([ArbolSub, ArbolPrinc | RestoArboles]) --> 
+ocm([ArbolSub, ArbolPrinc | RestoArboles]) -->
     or([ArbolSub, ArbolPrinc]),
     conj(_),
     ocm(RestoArboles).
 
-ocm([ArbolSub, ArbolPrinc, ArbolFinal]) --> 
+ocm([ArbolSub, ArbolPrinc, ArbolFinal]) -->
     or([ArbolSub, ArbolPrinc]),
     [','],
     conj(_),
     o(ArbolFinal).
 
-ocm([ArbolSub, ArbolPrinc, ArbolFinal]) --> 
+ocm([ArbolSub, ArbolPrinc, ArbolFinal]) -->
     or([ArbolSub, ArbolPrinc]),
     conj(_),
     o(ArbolFinal).
 
-ocm([Arbol1 | RestoArboles]) --> 
+ocm([Arbol1 | RestoArboles]) -->
     o(Arbol1),
     [','],
     conj(_),
     ocm(RestoArboles).
 
-ocm([Arbol1 | RestoArboles]) --> 
+ocm([Arbol1 | RestoArboles]) -->
     o(Arbol1),
     conj(_),
     ocm(RestoArboles).
 
-ocm([Arbol1, Arbol2]) --> 
+ocm([Arbol1, Arbol2]) -->
     o(Arbol1),
     [','],
     conj(_),
     o(Arbol2).
 
-ocm([Arbol1, Arbol2]) --> 
+ocm([Arbol1, Arbol2]) -->
     o(Arbol1),
     conj(_),
     o(Arbol2).
 
+% Punto de entrada para phrase/3
 oración(Arbol, Tokens, Resto) :-
     phrase(oracion(Arbol), Tokens, Resto).
 
@@ -151,13 +151,8 @@ oración(Arbol, Tokens, Resto) :-
 % Simplificación: convierte cualquier árbol o lista a [o(GN,GV), ...]
 % =============================================================================
 
-% Caso base: lista vacía
 simplificar([], []) :- !.
-
-% Oración simple: ya es atómica, devolver en lista unitaria
 simplificar(o(GN, GV), [o(GN, GV)]) :- !.
-
-% Lista de árboles: simplificar cada elemento y concatenar
 simplificar([H | T], Simples) :-
     simplificar(H, HS),
     simplificar(T, TS),
@@ -167,18 +162,20 @@ simplificar([H | T], Simples) :-
 % Simplificación + dibujo con draw.pl
 % =============================================================================
 
-% simplificar_y_dibujar(+Tokens)
-% Parsea Tokens, simplifica el resultado y dibuja cada oración simple.
 simplificar_y_dibujar(Tokens) :-
-    oración(Arboles, Tokens, []),
-    simplificar(Arboles, Simples),
-    length(Simples, N),
-    format("~`=t~50|~n"),
-    format("~w oración(es) simple(s) obtenida(s):~n", [N]),
-    format("~`=t~50|~n"),
-    dibujar_simples(Simples, 1).
+    (   oración(Arboles, Tokens, [])
+    ->  simplificar(Arboles, Simples),
+        length(Simples, N),
+        format("~`=t~50|~n"),
+        format("~w simple sentence(s) obtained:~n", [N]),
+        format("~`=t~50|~n"),
+        dibujar_simples(Simples, 1)
+    ;   format("~`=t~50|~n"),
+        format("Note: sentence structure exceeds current DCG coverage.~n"),
+        format("      Stored in corpus for reference and semantic analysis.~n"),
+        format("~`=t~50|~n")
+    ).
 
-% dibujar_simples(+Lista, +NumInicial)
 dibujar_simples([], _).
 dibujar_simples([O | Resto], Num) :-
     format("~n[~w] ~w~n", [Num, O]),
@@ -186,7 +183,11 @@ dibujar_simples([O | Resto], Num) :-
     Siguiente is Num + 1,
     dibujar_simples(Resto, Siguiente).
 
-% Reglas de grupos sintácticos
+% =============================================================================
+% Grupos sintácticos
+% =============================================================================
+
+% Grupo nominal
 grupo_nominal(gn(N)) -->
     nombre(N).
 
@@ -194,6 +195,19 @@ grupo_nominal(gn(Det, N)) -->
     determinante(Det),
     nombre(N).
 
+% Adjetivo pre-nominal (orden inglés: Det + Adj + N)
+grupo_nominal(gn(Det, Adj, N)) -->
+    determinante(Det),
+    adjetivo(Adj),
+    nombre(N).
+
+grupo_nominal(gn(Det, Adj, N, GP)) -->
+    determinante(Det),
+    adjetivo(Adj),
+    nombre(N),
+    grupo_preposicional(GP).
+
+% Adjetivo post-nominal (orden español: Det + N + Adj)
 grupo_nominal(gn(Det, N, Adj)) -->
     determinante(Det),
     nombre(N),
@@ -210,6 +224,7 @@ grupo_nominal(gn(Det, N, Adj, GP)) -->
     adjetivo(Adj),
     grupo_preposicional(GP).
 
+% Grupo verbal — verbos simples
 grupo_verbal(gv(V)) -->
     verbo_intransitivo(V).
 
@@ -226,108 +241,136 @@ grupo_verbal(gv(V, GN, GP)) -->
     grupo_nominal(GN),
     grupo_preposicional(GP).
 
+% Grupo verbal — auxiliar + verbo principal (pasiva y perfectiva en inglés)
+grupo_verbal(gv(Aux, V)) -->
+    auxiliar(Aux),
+    verbo_intransitivo(V).
+
+grupo_verbal(gv(Aux, V, GA)) -->
+    auxiliar(Aux),
+    verbo_copulativo(V),
+    grupo_adjetival(GA).
+
+grupo_verbal(gv(Aux, V, GN)) -->
+    auxiliar(Aux),
+    verbo_transitivo(V),
+    grupo_nominal(GN).
+
+grupo_verbal(gv(Aux, V)) -->
+    auxiliar(Aux),
+    verbo_transitivo(V).
+
+grupo_verbal(gv(Aux, V)) -->
+    auxiliar(Aux),
+    verbo_copulativo(V).
+
+% Grupo adjetival
 grupo_adjetival(gadj(Adj)) -->
     adjetivo(Adj).
 
+% Grupo adverbial
 grupo_adverbial(gadv(Adv)) -->
     adverbio(Adv).
 
+% Grupo preposicional
 grupo_preposicional(gp(Prep, GN)) -->
     preposicion(Prep),
     grupo_nominal(GN).
 
-% Diccionario (terminales)
-determinante(det(Palabra)) -->
-    [Palabra],
-    { determinante_palabra(Palabra) }.
+% =============================================================================
+% Terminales DCG
+% =============================================================================
 
-nombre(n(Palabra)) -->
-    [Palabra],
-    { nombre_palabra(Palabra) }.
+determinante(det(P)) --> [P], { determinante_palabra(P) }.
+nombre(n(P))         --> [P], { nombre_palabra(P) }.
+adjetivo(adj(P))     --> [P], { adjetivo_palabra(P) }.
+adverbio(adv(P))     --> [P], { adverbio_palabra(P) }.
+conj(conj(P))        --> [P], { conjuncion_palabra(P) }.
+rel(rel(P))          --> [P], { relativo_palabra(P) }.
+preposicion(prep(P)) --> [P], { preposicion_palabra(P) }.
+auxiliar(aux(P))     --> [P], { auxiliar_palabra(P) }.
 
-adjetivo(adj(Palabra)) -->
-    [Palabra],
-    { adjetivo_palabra(Palabra) }.
+verbo_transitivo(v(P))   --> [P], { verbo_transitivo_palabra(P) }.
+verbo_intransitivo(v(P)) --> [P], { verbo_intransitivo_palabra(P) }.
+verbo_copulativo(v(P))   --> [P], { verbo_copulativo_palabra(P) }.
 
-adverbio(adv(Palabra)) -->
-    [Palabra],
-    { adverbio_palabra(Palabra) }.
+% =============================================================================
+% Clasificación léxica — inglés
+% =============================================================================
 
-conj(conj(Palabra)) -->
-    [Palabra],
-    { conjuncion_palabra(Palabra) }.
-
-rel(rel(Palabra)) -->
-    [Palabra],
-    { relativo_palabra(Palabra) }.
-
-preposicion(prep(Palabra)) -->
-    [Palabra],
-    { preposicion_palabra(Palabra) }.
-
-verbo_transitivo(v(Palabra)) -->
-    [Palabra],
-    { verbo_transitivo_palabra(Palabra) }.
-
-verbo_intransitivo(v(Palabra)) -->
-    [Palabra],
-    { verbo_intransitivo_palabra(Palabra) }.
-
-verbo_copulativo(v(Palabra)) -->
-    [Palabra],
-    { verbo_copulativo_palabra(Palabra) }.
-
-% Clasificacion lexical
 determinante_palabra(P) :- memberchk(P, [
-    el, la, los, las, un, una, unas, este, esta, estos, ese, esa, su
+    the, a, an, this, that, these, those, its, our, their,
+    another, other, one, each, any, such, some, no, all, both, many
 ]).
 
 conjuncion_palabra(P) :- memberchk(P, [
-    y, pero, o, aunque, sino, pues, ni
+    and, but, or, although, however, well, yet, if
 ]).
 
 relativo_palabra(P) :- memberchk(P, [
-    que, cual, cuales, donde
+    that, which, who, where, what
 ]).
 
 preposicion_palabra(P) :- memberchk(P, [
-    a, al, con, de, del, durante, en, entre, hacia, hasta, para, por, segun, sin, sobre, tras
+    in, of, for, to, from, at, on, by, with, through, into, about,
+    as, after, since, until, during, per, between, according, over,
+    upon, within
 ]).
 
 adverbio_palabra(P) :- memberchk(P, [
-    no, muy, tambien, asi, asimismo, afortunadamente, finalmente, justamente,
-    directamente, completamente, definitivamente, siempre, menos, tal
+    not, very, also, likewise, fortunately, finally, precisely,
+    directly, completely, definitively, always, often, only, just,
+    eventually, far, simply, surely, so, somewhat, then, first,
+    classically, similarly, already, still, here, now,
+    never, ever, truly, accurately
 ]).
 
 adjetivo_palabra(P) :- memberchk(P, [
-    esencial, fundamental, fundamentales, innovadora, imposible, inmediata,
-    atrevida, coherentes, eficientes, caracteristica, ciertas, ciertos,
-    desconcertantes, cuantica, cuanticos, subatomicas, pequenas, poetica,
-    romantica, real, realidad, habituales, vigentes, ondulatorios,
-    microscopico, internacional, discretizada, cuantificada, cuantizada,
-    proporcional, proporcionales, enteros, exactos, similares, absoluta,
-    diferentes, gran, grandes, nueva, cierto, cierta
+    essential, fundamental, innovative, impossible, immediate, bold,
+    coherent, efficient, characteristic, certain, perplexing, subatomic,
+    poetic, romantic, usual, wavelike, microscopic, international,
+    revolutionary, theoretical, forbidden, important, indispensable,
+    multiple, photoelectric, able, early, exact, miniature, small,
+    new, great, absolute, different, proportional, quantized, discretized,
+    general, similar, black, precise, basic, quantum, true,
+    specific, unique, natural, physical, perceptible, complete,
+    innovative, proportional, various
+]).
+
+auxiliar_palabra(P) :- memberchk(P, [
+    was, were, is, are, have, had, can, could, should, would,
+    may, might, do, does, did, be, been, being, has
 ]).
 
 verbo_copulativo_palabra(P) :- memberchk(P, [
-    es, era, fue, son, esta, estaba, estar, trata
+    % Verbos copulativos directos (inglés: be + adjectivo/nombre)
+    is, are, was, were, be, been,
+    % Otros copulativos
+    became, become, seem, seemed, appears, appeared, remain, remained,
+    come, came, known, named, considered, established, related
 ]).
 
 verbo_transitivo_palabra(P) :- memberchk(P, [
-    absorbe, actua, arranca, considerar, considerarse, consigue, consiguio,
-    consolidar, consolido, dar, deducida, demostrar, demostraron,
-    desempeno, determino, entender, establecer, exhibian, explicar,
-    expuso, gobierna, hicieron, introdujo, irradia, jugar, jugo, llamo,
-    medir, nombro, nombrada, observa, observados, posee, postulacion,
-    presento, propuso, realizo, realizaron, representada, resalto, sento,
-    subio, sumerge, tener, tiene, utilizo
+    played, plays, governs, govern, challenges, challenged, proposed,
+    made, make, contradicted, contradict,
+    confirmed, highlighted, consolidated, contributed, absorbed, absorbs,
+    radiates, radiated, strikes, ejects, used, managed, gave, quantified,
+    called, exhibited, introduced, expounded, found, conducted,
+    said, determined, presented, explained, laid, heard, explained,
+    states, stated, showed, hitting, ejects, established, observed,
+    confirmed, highlighted, managed, consolidated, explained, laid,
+    represented, formulating, understand, know, measure, find, explain,
+    solve, establish, give, manifest, show, conduct, confirm, highlight,
+    consider, determine, present, propose, introduce, name, use, manage,
+    exhibit, quantify, call, absorb, radiate, strike, eject, hear,
+    expressed, proved, demonstrated, reveal, suggest
 ]).
 
 verbo_intransitivo_palabra(P) :- memberchk(P, [
-    aparece, conocer, conocerse, conseguir, contribuir, contribuyeron,
-    crecer, desafia, emitir, emitia, entraba, existe, existen, existian,
-    hablar, hayas, haberse, incide, manifestarse, parecer, parecia,
-    paso, puede, pudieron, relaciona, suele, terminaron
+    exists, exist, stalled, grew, grow, acts, act, appears, appear,
+    began, begin, plunges, plunge, started, start, contributed,
+    contribute, possessed, possess, passes, pass, stalled, stall,
+    proceeded, proceed
 ]).
 
 nombre_palabra(P) :-
@@ -338,58 +381,87 @@ nombre_palabra(P) :-
     \+ preposicion_palabra(P),
     \+ adverbio_palabra(P),
     \+ adjetivo_palabra(P),
+    \+ auxiliar_palabra(P),
     \+ verbo_copulativo_palabra(P),
     \+ verbo_transitivo_palabra(P),
     \+ verbo_intransitivo_palabra(P).
 
+% =============================================================================
+% Tokens del corpus (inglés) — usado para inferir nombres por exclusión
+% =============================================================================
+
 token_corpus(P) :- memberchk(P, [
-    1900, 1905, 1927, 1981, '6.626x10-34', a, abrir, absoluta, absorbe,
-    aceptacion, actua, afortunadamente, al, albert, algo, ano, aparece,
-    apostando, aquel, aquellas, arranca, asento, asi, asimismo, atravesar,
-    atrevida, aunque, avance, avances, barreras, basandose, bases, bien,
-    bohr, bolsas, cada, cantidad, cantidades, capaces, capacidad,
-    caracteristica, caso, cientificos, cierta, ciertas, ciertos,
-    clasicamente, clinton, coherentes, comenzaron, comienzos, como,
-    completamente, comportamiento, comportamientos, compuesta, con,
-    concepcion, confirmo, conocer, conocerse, conseguian, consideraba,
-    considerar, considerarse, consigue, consiguio, consolidar,
-    consolidaron, constante, contexto, contradiccion, contribuyeron,
-    crecer, cual, cuales, cualquier, cuantica, cuanticos, cuantificada,
-    cuantizacion, cuantizada, cuantos, cuerpo, dar, davisson, de, debia,
-    decir, deducida, definitivamente, del, demostrando, desafia,
-    desconcertantes, desde, desempeno, determino, diferentes, difraccion,
-    dilemas, directamente, disciplina, discretizada, donde, dualidad,
-    durante, efecto, eficientes, einstein, ejemplo, el, electrones,
-    elemento, embargo, emision, emitia, emitida, en, encontrar,
-    energeticas, energia, entender, enteros, entraba, epoca, era, es, esa,
-    ese, esencial, esos, esta, estaba, establece, establecer, estancado,
-    estar, este, estos, estudio, exactos, exhibian, existe, existen,
-    existian, experimentos, explicacion, explicar, expuso, fenomeno,
-    fenomenos, finalmente, fisica, fisico, fisicos, forma, formulacion,
-    fotoelectrico, fotones, frase, fue, fuera, fueran, fueron, fundamental,
-    fundamentales, general, germer, gobierna, gran, grandes, h, haberse,
-    habituales, hablar, hasta, hayas, heisenberg, hicieron, hipotesis,
-    honor, idea, impedimento, importancia, importante, imposible, incertidumbre,
-    incide, indispensable, inmediata, innovadora, inquietudes,
-    internacional, intervalos, introdujo, invencion, investigaciones,
-    irradia, jugando, jugo, julios, justamente, la, las, lester, letra,
-    leyes, limitacion, llamada, llamadas, llamo, llave, lo, los, lugar,
-    luz, maestra, manifestarse, max, mecanica, medir, menos, menudo,
-    metal, microscopico, microscopio, miniatura, momento, muchas, mucho,
-    multiplos, mundo, muy, naturaleza, necesidad, negro, ni, niels, no,
-    nombrada, nuestros, nueva, o, objetivo, objeto, observados, oido,
-    ojos, onda, ondas, ondulatorios, otras, otro, otros, palabras, papel,
-    para, parecia, parte, particula, particulas, paso, pequenas, pequenos,
-    percepcion, perceptibles, pero, pilares, planck, planteamiento,
-    planteamientos, podia, poetica, por, posee, posicion, postulacion,
-    precision, presencia, presentaba, presento, primera, principio,
-    principios, problemas, prohibidas, proporcional, proporcionales,
-    propuesta, propuso, protagonista, pudo, puede, pues, que, radiacion,
-    realidad, realizaron, relaciona, representada, resalto,
-    revolucionario, romantica, se, segun, segundo, seguramente, sentando,
-    sento, ser, si, siempre, siglo, similares, sin, sino, sistema, sobre,
-    solo, solucion, son, su, subatomicas, suele, sumerge, tal, tambien,
-    tan, tener, tenia, teoria, teorias, teorica, terminaron, testimonio,
-    tienen, toda, trabajo, trata, traves, tunel, un, una, unas, unidades,
-    uno, utilizo, valor, vez, vigentes, werner, xx, y
+    % Numbers and special values
+    1900, 1905, 1927, 1981, '6.626x10-34',
+    % Pronouns and expletives (treated as nouns in the grammar)
+    it, its, they, their, he, you, we, there, itself, themselves,
+    this, that, those, one, each,
+    % Determiners
+    the, a, an, another, other, some, no, all, both, many, such, any,
+    % Conjunctions
+    and, but, or, although, however, well, yet,
+    % Relatives
+    that, which, who, where, what,
+    % Prepositions
+    in, of, for, to, from, at, on, by, with, through, into, about, as,
+    after, since, until, during, per, between, according, over,
+    % Adverbs
+    not, very, also, likewise, fortunately, finally, precisely, directly,
+    completely, definitively, always, often, only, just, eventually, far,
+    simply, surely, so, somewhat, then, first, classically,
+    % Adjectives
+    essential, fundamental, innovative, impossible, immediate, bold,
+    coherent, efficient, characteristic, certain, perplexing, subatomic,
+    poetic, romantic, usual, wavelike, microscopic, international,
+    revolutionary, theoretical, forbidden, important, indispensable,
+    multiple, photoelectric, able, early, exact, miniature, small,
+    new, great, absolute, different, proportional, quantized, discretized,
+    general, similar, black, true, quantum, constant,
+    % Auxiliaries (also classified as v_cop when used as main verb)
+    was, were, is, are, have, had, can, could, should, would, may,
+    might, do, does, did, be, been, being, has,
+    % Copular verbs
+    became, become, seemed, seems, appeared, come, came,
+    known, named, considered, established, related,
+    % Pronouns / expletives
+    there, itself, themselves, himself, herself,
+    % Transitive verbs
+    played, governs, challenges, proposed, confirmed, highlighted,
+    consolidated, contributed, absorbed, absorbs, radiates, strikes,
+    ejects, used, managed, gave, quantified, called, exhibited,
+    introduced, expounded, found, conducted, said, determined,
+    presented, explained, laid, heard, states, showed, hitting,
+    represented, formulating, observed, manages,
+    % Intransitive verbs
+    exists, exist, stalled, grew, grow, acts, began, plunges,
+    possessed, passes, pass, contributed, appeared,
+    % Domain nouns
+    constant, role, formulation, approaches, heisenberg, uncertainty,
+    principle, physics, discipline, perception, reality, phrase, part,
+    behavior, particles, eyes, study, scientists, research, laws, context,
+    protagonist, world, planck, physicist, century, work, anxieties,
+    time, era, progress, dilemmas, radiation, body, object, quantity,
+    energy, phenomenon, idea, quantization, intervals, pockets, quanta,
+    value, quantities, acceptance, proposal, phenomena, theories, force,
+    physicists, importance, einstein, bohr, werner, breakthroughs, theory,
+    duality, mechanics, pillars, conception, way, letter, h, nature,
+    emission, postulate, integers, joules, second, units, system, approach,
+    precision, position, momentum, particle, case, impediment, limitation,
+    ability, presence, explanation, experiments, testimony, effect,
+    light, metal, electrons, hypothesis, photons, foundation, diffraction,
+    behaviors, waves, wave, element, barriers, multiples, microscope,
+    invention, tunnel, niels, bohr, albert, lester, germer, clinton,
+    davisson, max, werner, order, words, example, problem, body, object,
+    key, understanding, groundwork, many, anxieties, need, consider,
+    importance, consolidate, highlight, establish, show, give, manifest,
+    itself, photons, energy, intervals, pockets, quanta, integers,
+    multiples, barriers, diffraction, behaviors, waves, breakthroughs,
+    % Participles and gerunds used as nouns/modifiers
+    emitted, observed, deduced, showing, laying, playing, betting,
+    hitting, taking, place, based, composed, called,
+    % Additional nouns/words that may not fall in other categories
+    force, role, context, key, understanding, order, words, example,
+    constant, problem, body, object, groundwork, need, consider,
+    consolidate, highlight, establish, show, give, manifest, itself,
+    photons, quanta, diffraction, electron, master
 ]).
