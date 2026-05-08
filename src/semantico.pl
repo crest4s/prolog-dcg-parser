@@ -141,28 +141,50 @@ semantic_category(Tokens, Categories) :-
 % =============================================================================
 
 semantic_role(s(NP, _), subject, Words) :-
-    words_np(NP, Words).
+    tree_words(NP, Words).
 
 semantic_role(s(_, NP, _), subject, Words) :-
-    words_np(NP, Words).
+    tree_words(NP, Words).
 
 semantic_role(s(_, VP), predicate, Words) :-
-    words_vp(VP, Words).
+    tree_words(VP, Words).
 
 semantic_role(s(_, _, VP), predicate, Words) :-
-    words_vp(VP, Words).
+    tree_words(VP, Words).
 
 semantic_role(s(_, vp(_, NP)), object, Words) :-
-    words_np(NP, Words).
+    nonvar(NP), tree_words(NP, Words).
 
 semantic_role(s(_, _, vp(_, NP)), object, Words) :-
-    words_np(NP, Words).
+    nonvar(NP), tree_words(NP, Words).
 
 semantic_role(s(_, vp(_, _, PP)), complement, Words) :-
-    words_pp(PP, Words).
+    nonvar(PP), tree_words(PP, Words).
 
 semantic_role(s(_, _, vp(_, _, PP)), complement, Words) :-
-    words_pp(PP, Words).
+    nonvar(PP), tree_words(PP, Words).
+
+% Extractor genérico: recorre cualquier árbol y devuelve la lista de hojas
+% (átomos terminales) en orden de aparición. Funciona con cualquier
+% estructura producida por la gramática.
+tree_words(Tree, Words) :-
+    tree_words_acc(Tree, [], RevWords),
+    reverse(RevWords, Words).
+
+tree_words_acc(Var, Acc, Acc) :- var(Var), !.
+tree_words_acc([], Acc, Acc) :- !.
+tree_words_acc([H | T], A0, A) :- !,
+    tree_words_acc(H, A0, A1),
+    tree_words_acc(T, A1, A).
+tree_words_acc(Atom, Acc, [Atom | Acc]) :-
+    atom(Atom), !.
+tree_words_acc(Num, Acc, [Num | Acc]) :-
+    number(Num), !.
+tree_words_acc(Term, A0, A) :-
+    compound(Term), !,
+    Term =.. [_ | Args],
+    tree_words_acc(Args, A0, A).
+tree_words_acc(_, Acc, Acc).
 
 % =============================================================================
 % Auxiliares para extraer palabras de los grupos sintácticos
