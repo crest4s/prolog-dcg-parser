@@ -413,8 +413,17 @@ test(tokenize_basico) :-
 test(normalize_minusculas) :-
     mejoras:normalize(['HeLLo', world], [hello, world]).
 
-test(inflect_stub) :-
-    mejoras:inflect(played, verb, played).
+test(inflect_verb_past) :-
+    mejoras:inflect(played, verb, play).
+
+test(inflect_verb_irregular) :-
+    mejoras:inflect(was, verb, be).
+
+test(inflect_noun_plural) :-
+    mejoras:inflect(theories, noun, theory).
+
+test(inflect_fallback) :-
+    mejoras:inflect(constant, adjective, constant).
 
 test(syntactic_function_subject) :-
     S = s(np(det(the), n(constant)), vp(v(exists))),
