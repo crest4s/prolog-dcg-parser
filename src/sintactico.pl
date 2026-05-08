@@ -75,14 +75,16 @@ subordinate_adv_s([s(NP1, vp(Conj1, vp(Conj2, VP1))), s(NP2, VP2)]) -->
 coord_s([S1, S2]) --> simple_s(S1), opt_comma, conjunction(_), simple_s(S2).
 
 % --- Coordinadas con sujeto compartido ---
+% vp_base (sin coord_tail) para que la conjunción quede disponible
 coord_shared_subj([s(NP, VP1), s(NP, VP2)]) -->
-    noun_phrase(NP), verb_phrase(VP1), opt_comma, conjunction(_), verb_phrase(VP2).
+    noun_phrase(NP), vp_base(VP1), opt_comma, conjunction(_), verb_phrase(VP2).
 coord_shared_subj([s(NP, VP1), s(NP, VP2)]) -->
-    noun_phrase(NP), auxiliary(_Aux), [not, only], verb_phrase(VP1), opt_comma, [but, also], verb_phrase(VP2).
+    noun_phrase(NP), auxiliary(_Aux), [not, only], vp_base(VP1), opt_comma, [but, also], verb_phrase(VP2).
 
 % --- Coordinadas con verbo transitivo compartido ---
+% noun_phrase_simple (sin coord_tail) para que la conjunción quede disponible
 coord_shared_verb([s(NP, vp(V, NP1)), s(NP, vp(V, NP2))]) -->
-    noun_phrase(NP), transitive_verb(V), noun_phrase(NP1), opt_comma, conjunction(_), noun_phrase(NP2).
+    noun_phrase(NP), transitive_verb(V), noun_phrase_simple(NP1), opt_comma, conjunction(_), noun_phrase(NP2).
 
 % --- Subordinadas de relativo ---
 relative_s([s(NP, VP_sub), s(NP, VP_main)]) --> noun_phrase(NP), opt_comma, relative(_), verb_phrase(VP_sub), opt_comma, verb_phrase(VP_main).
@@ -90,6 +92,8 @@ relative_s_single(s(NP, vp(Rel, VP_sub, VP_main))) --> noun_phrase(NP), opt_comm
 relative_s_single(s(NP, VP_sub)) --> noun_phrase(NP), relative(_), verb_phrase(VP_sub).
 
 % --- Oraciones compuestas (ocm) ---
+% Relativa (2 árboles) + conj + simple → 3 árboles
+compound_s([S1, S2, S3]) --> relative_s([S1, S2]), opt_comma, conjunction(_), simple_s(S3).
 compound_s([S1 | Resto]) --> unit_s(S1), opt_comma, conjunction(_), (compound_s(Resto) ; unit_s_list(Resto)).
 compound_s([S1, s(np(n(he)), VP)]) --> simple_s(S1), opt_comma, [he], verb_phrase(VP).
 
@@ -193,8 +197,8 @@ noun_phrase_coord_tail(NP1, np(NP1, Conj, NP2)) --> opt_comma, conjunction(Conj)
 noun_phrase_coord_tail(NP, NP) --> [].
 
 np_base(np(N)) --> noun(N).
-np_base(np(det(D))) --> determiner(det(D)).
 np_base(np(Det, N)) --> determiner(Det), noun(N).
+np_base(np(det(D))) --> determiner(det(D)).   % bare det: only when no noun follows
 np_base(np(Det, N1, N2)) --> determiner(Det), noun(N1), noun(N2).
 np_base(np(Det, N1, N2, N3)) --> determiner(Det), noun(N1), noun(N2), noun(N3).
 np_base(np(N1, N2)) --> noun(N1), noun(N2).
@@ -254,6 +258,8 @@ vp_base(vp(V, Adv, PP)) --> copulative_verb(V), adverb(Adv), prep_phrase(PP).
 
 vp_base(vp(Aux, V)) --> auxiliary(Aux), intransitive_verb(V).
 vp_base(vp(Aux, V, NP)) --> auxiliary(Aux), transitive_verb(V), noun_phrase(NP).
+vp_base(vp(Aux, V))    --> auxiliary(Aux), transitive_verb(V).   % pasiva sin complemento
+vp_base(vp(Aux, V))    --> auxiliary(Aux), copulative_verb(V).   % was named, was called…
 vp_base(vp(Aux, V, AP)) --> auxiliary(Aux), copulative_verb(V), adj_phrase(AP).
 vp_base(vp(Aux, V, PP)) --> auxiliary(Aux), copulative_verb(V), prep_phrase(PP).
 vp_base(vp(Aux, Adv, V)) --> auxiliary(Aux), adverb(Adv), (intransitive_verb(V); transitive_verb(V)).
