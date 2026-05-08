@@ -44,11 +44,11 @@
 %     de los grandes planteamientos de la cuántica: el principio de
 %     incertidumbre de Heisenberg.
 % EN: This constant played an essential role in the formulation of another
-%     of quantum s great approaches: the Heisenberg uncertainty principle.
+%     of the great quantum approaches: the Heisenberg uncertainty principle.
 % ---------------------------------------------------------------------------
 oracion(1, o, correcta,
     [this, constant, played, an, essential, role, in, the, formulation,
-     of, another, of, quantum, great, approaches, the, heisenberg,
+     of, another, of, the, great, quantum, approaches, the, heisenberg,
      uncertainty, principle]).
 
 oracion_es(1,
@@ -415,21 +415,19 @@ oracion_es(19,
      por, segundo, segun, el, sistema, internacional, de, unidades]).
 
 % ---------------------------------------------------------------------------
-% Oración 20 — Simple (o) | Problemática
+% Oración 20 — Simple (o) | Correcta
 % ES: Asimismo, la constante de Planck también desempeñó un papel
 %     esencial en la formulación de otro de los grandes planteamientos
 %     de la cuántica: el principio de incertidumbre de Heisenberg.
 % EN: Likewise, the Planck constant also played an essential role in
-%     formulating another of quantum s great approaches: the Heisenberg
-%     uncertainty principle.
-% PROBLEMA: La frase nominal "en la formulación de" se traduce como
-%           "in formulating", cambiando el registro nominal por un gerundio
-%           que no refleja con precisión la estructura del original.
+%     the formulation of another of the great quantum approaches to the
+%     Heisenberg uncertainty principle.
 % ---------------------------------------------------------------------------
-oracion(20, o, problematica,
+oracion(20, o, correcta,
     [likewise, the, planck, constant, also, played, an, essential,
-     role, in, formulating, another, of, quantum, great, approaches,
-     the, heisenberg, uncertainty, principle]).
+     role, in, the, formulation, of, another, of, the, great,
+     quantum, approaches, to, the, heisenberg, uncertainty,
+     principle]).
 
 oracion_es(20,
     [asimismo, la, constante, de, planck, tambien, desempeno, un,
@@ -621,11 +619,11 @@ oracion_es(28,
 %           introduciendo ambigüedad sobre a qué referente alude.
 % ---------------------------------------------------------------------------
 oracion(29, o, problematica,
-    [also, in, 1981, it, played, a, very, important, role, during,
+    [also, in, '1981', it, played, a, very, important, role, during,
      the, invention, of, the, tunnel, effect, microscope]).
 
 oracion_es(29,
-    [tambien, en, el, ano, 1981, jugo, un, papel, muy, importante,
+    [tambien, en, el, ano, '1981', jugo, un, papel, muy, importante,
      durante, la, invencion, del, microscopio, de, efecto, tunel]).
 
 % ---------------------------------------------------------------------------

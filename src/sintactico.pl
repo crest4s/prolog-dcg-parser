@@ -57,15 +57,28 @@ simple_s(s(NP, VP)) -->
     verb_phrase(VP).
 
 % Con SP inicial (since the early century, in 1981…)
-simple_s(s(NP, VP)) -->
-    prep_phrase(_),
+simple_s(s(PP, NP, VP)) -->
+    prep_phrase(PP),
     noun_phrase(NP),
     verb_phrase(VP).
 
-% Con adverbio + SP iniciales
-simple_s(s(NP, VP)) -->
-    adverb(_),
-    prep_phrase(_),
+% Con adverbio + SP iniciales, conservando ambos modificadores
+simple_s(s(Adv, PP, NP, VP)) -->
+    adverb(Adv),
+    prep_phrase(PP),
+    noun_phrase(NP),
+    verb_phrase(VP).
+
+% Infinitival adverbial: to be exact
+simple_s(s(Inf, NP, VP)) -->
+    fronted_infinitive(Inf),
+    noun_phrase(NP),
+    verb_phrase(VP).
+
+% Verbo copulativo / atributivo al inicio de la oracion
+simple_s(s(Fronted, Apposition, NP, VP)) -->
+    fronted_modifier(Fronted),
+    noun_phrase(Apposition),
     noun_phrase(NP),
     verb_phrase(VP).
 
@@ -181,6 +194,9 @@ parse(Tree, Tokens, Rest) :-
 
 simplify([], []) :- !.
 simplify(s(NP, VP), [s(NP, VP)]) :- !.
+simplify(s(PP, NP, VP), [s(PP, NP, VP)]) :- !.
+simplify(s(Adv, PP, NP, VP), [s(Adv, PP, NP, VP)]) :- !.
+simplify(s(Fronted, Apposition, NP, VP), [s(Fronted, Apposition, NP, VP)]) :- !.
 simplify([H | T], Simples) :-
     simplify(H, HS),
     simplify(T, TS),
@@ -215,6 +231,14 @@ draw_sentences([S | Rest], Num) :-
 % Grupos sintácticos
 % =============================================================================
 
+% --- Modificador frontal reducido ---
+
+fronted_modifier(fronted(V, PP, Rel, VP)) -->
+    copulative_verb(V),
+    prep_phrase(PP),
+    relative(Rel),
+    verb_phrase(VP).
+
 % --- Grupo nominal (np) ---
 
 % Solo nombre
@@ -225,6 +249,33 @@ noun_phrase(np(N)) -->
 noun_phrase(np(N, PP)) -->
     noun(N),
     prep_phrase(PP).
+
+% Nombre + nombre + SP (6.626x10-34 joules per second ...)
+noun_phrase(np(N1, N2, PP)) -->
+    noun(N1),
+    noun(N2),
+    prep_phrase(PP).
+
+% Determinante + SP
+noun_phrase(np(Det, PP)) -->
+    determiner(Det),
+    prep_phrase(PP).
+
+% Grupo adjetival + nombre 
+noun_phrase(np(AP, N)) -->
+    adj_phrase(AP),
+    noun(N).
+
+% Grupo adjetival + nombre + grupo nominal
+noun_phrase(np(AP, N, NP2)) -->
+    adj_phrase(AP),
+    noun(N),
+    noun_phrase(NP2).
+
+% Nombre propio compuesto
+noun_phrase(np(N1, N2)) -->
+    noun(N1),
+    noun(N2).
 
 % Det + N
 noun_phrase(np(Det, N)) -->
@@ -282,6 +333,13 @@ noun_phrase(np(Det, N1, N2)) -->
     noun(N1),
     noun(N2).
 
+% Det + N + N + N  (heisenberg uncertainty principle)
+noun_phrase(np(Det, N1, N2, N3)) -->
+    determiner(Det),
+    noun(N1),
+    noun(N2),
+    noun(N3).
+
 % Det + N + N + SP
 noun_phrase(np(Det, N1, N2, PP)) -->
     determiner(Det),
@@ -316,11 +374,29 @@ verb_phrase(vp(V, AdvP, PP)) -->
     adv_phrase(AdvP),
     prep_phrase(PP).
 
+% Aux + Adv + V + SP  (was first named in the early century)
+verb_phrase(vp(Aux, AdvP, V, PP)) -->
+    auxiliary(Aux),
+    adv_phrase(AdvP),
+    copulative_verb(V),
+    prep_phrase(PP).
+
 % V transitivo + SN + SP
 verb_phrase(vp(V, NP, PP)) -->
     transitive_verb(V),
     noun_phrase(NP),
     prep_phrase(PP).
+
+% Adverbio + grupo verbal
+verb_phrase(vp(Adv, VP)) -->
+    adverb(Adv),
+    verb_phrase(VP).
+
+% V transitivo + SN + SN  (apposition / nominal complement)
+verb_phrase(vp(V, NP1, NP2)) -->
+    transitive_verb(V),
+    noun_phrase(NP1),
+    noun_phrase(NP2).
 
 % Aux + V intransitivo
 verb_phrase(vp(Aux, V)) -->
@@ -368,6 +444,11 @@ verb_phrase(vp(V, infp(aux(A), v(V2)))) -->
 adj_phrase(ap(adj(A))) -->
     adjective(adj(A)).
 
+% Secuencia de adjetivos
+adj_phrase(ap(adj(A), AP)) -->
+    adjective(adj(A)),
+    adj_phrase(AP).
+
 % Adv + Adj  (very important, far from…)
 adj_phrase(ap(adv(D), adj(A))) -->
     adverb(adv(D)),
@@ -385,10 +466,25 @@ prep_phrase(pp(Prep, NP)) -->
     preposition(Prep),
     noun_phrase(NP).
 
+% Prep + grupo verbal  (in formulating..., to understand...)
+prep_phrase(pp(Prep, VP)) -->
+    preposition(Prep),
+    verb_phrase(VP).
+
 % Prep + SA  (from immediate, as essential)
 prep_phrase(pp(Prep, AP)) -->
     preposition(Prep),
     adj_phrase(AP).
+
+% Prep compuesta: according to ...
+prep_phrase(pp(prep(according), PP)) -->
+    [according],
+    prep_phrase(PP).
+
+% Infinitivo adverbial
+fronted_infinitive(fronted(to, VP)) -->
+    [to],
+    verb_phrase(VP).
 
 % =============================================================================
 % Terminales DCG
@@ -486,6 +582,10 @@ is_intransitive_verb(P) :- memberchk(P, [
 ]).
 
 is_noun(P) :-
+    atom(P),
+    atom_number(P, _).
+
+is_noun(P) :-
     corpus_token(P),
     \+ is_determiner(P),
     \+ is_conjunction(P),
@@ -504,7 +604,7 @@ is_noun(P) :-
 
 corpus_token(P) :- memberchk(P, [
     % Números y valores especiales
-    1900, 1905, 1927, 1981, '6.626x10-34',
+    1900, 1905, 1927, '1981', '6.626x10-34',
     % Pronombres y expletivos (tratados como nombres en la gramática)
     it, its, they, their, he, you, we, there, itself, themselves,
     this, that, those, one, each,
