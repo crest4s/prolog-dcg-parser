@@ -143,13 +143,25 @@ semantic_category(Tokens, Categories) :-
 semantic_role(s(NP, _), subject, Words) :-
     words_np(NP, Words).
 
+semantic_role(s(_, NP, _), subject, Words) :-
+    words_np(NP, Words).
+
 semantic_role(s(_, VP), predicate, Words) :-
+    words_vp(VP, Words).
+
+semantic_role(s(_, _, VP), predicate, Words) :-
     words_vp(VP, Words).
 
 semantic_role(s(_, vp(_, NP)), object, Words) :-
     words_np(NP, Words).
 
+semantic_role(s(_, _, vp(_, NP)), object, Words) :-
+    words_np(NP, Words).
+
 semantic_role(s(_, vp(_, _, PP)), complement, Words) :-
+    words_pp(PP, Words).
+
+semantic_role(s(_, _, vp(_, _, PP)), complement, Words) :-
     words_pp(PP, Words).
 
 % =============================================================================
@@ -161,9 +173,19 @@ semantic_role(s(_, vp(_, _, PP)), complement, Words) :-
 words_np(np(n(N)), [N]).
 words_np(np(det(D), n(N)), [D, N]).
 words_np(np(det(D), adj(A), n(N)), [D, A, N]).
+words_np(np(det(D), pp(Prep, NP)), [D, P | Rest]) :-
+    words_pp(pp(Prep, NP), [P | Rest]).
+words_np(np(det(D), N1, N2, N3), [D, N1, N2, N3]).
 words_np(np(det(D), AP, n(N)), [D | Rest]) :-
     words_ap(AP, AR),
     append(AR, [N], Rest).
+words_np(np(AP, n(N)), Words) :-
+    words_ap(AP, AR),
+    append(AR, [N], Words).
+words_np(np(AP, n(N), NP2), Words) :-
+    words_ap(AP, AR),
+    words_np(NP2, PR),
+    append(AR, [N | PR], Words).
 words_np(np(det(D), n(N), adj(A)), [D, N, A]).
 words_np(np(det(D), n(N), pp(prep(P), NP2)), [D, N, P | Rest]) :-
     words_np(NP2, Rest).
@@ -182,6 +204,8 @@ words_np(np(det(D), n(N1), n(N2), pp(prep(P), NP2)), [D, N1, N2, P | Rest]) :-
 % --- ap (grupo adjetival) ---
 
 words_ap(ap(adj(A)), [A]).
+words_ap(ap(adj(A), AP), [A | Rest]) :-
+    words_ap(AP, Rest).
 words_ap(ap(adv(D), adj(A)), [D, A]).
 
 % --- vp (grupo verbal) ---
