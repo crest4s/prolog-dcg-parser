@@ -239,13 +239,13 @@ oracion_es(10,
 % ---------------------------------------------------------------------------
 oracion(11, ocm, correcta,
     [in, order, to, solve, this, phenomenon, max, planck, presented,
-     in, 1900, an, innovative, idea, about, the, quantization, of,
+     in, '1900', an, innovative, idea, about, the, quantization, of,
      energy, he, proposed, that, energy, was, discretized, into,
      small, intervals, or, pockets, which, he, called, quanta]).
 
 oracion_es(11,
     [con, el, objetivo, de, dar, solucion, a, ese, fenomeno, max,
-     planck, presento, en, el, ano, 1900, una, idea, innovadora,
+     planck, presento, en, el, ano, '1900', una, idea, innovadora,
      sobre, la, cuantizacion, de, la, energia, propuso, que, la,
      energia, estaba, discretizada, en, pequenos, intervalos, o,
      bolsas, a, los, que, llamo, cuantos]).
@@ -510,13 +510,13 @@ oracion_es(23,
 % ---------------------------------------------------------------------------
 oracion(24, ocm, problematica,
     [for, example, based, on, the, testimony, of, planck, albert,
-     einstein, proposed, in, 1905, a, quantum, explanation, for,
+     einstein, proposed, in, '1905', a, quantum, explanation, for,
      the, photoelectric, effect, betting, that, light, hitting,
      a, metal, ejects, electrons]).
 
 oracion_es(24,
     [por, ejemplo, basandose, en, el, testimonio, de, planck, albert,
-     einstein, propuso, en, 1905, una, explicacion, cuantica, para,
+     einstein, propuso, en, '1905', una, explicacion, cuantica, para,
      el, efecto, fotoelectrico, apostando, a, que, la, luz, que,
      incide, sobre, un, metal, arranca, electrones]).
 
@@ -571,13 +571,13 @@ oracion_es(26,
 %     exhibited wavelike behaviors very similar to light waves.
 % ---------------------------------------------------------------------------
 oracion(27, ocm, correcta,
-    [likewise, in, 1927, clinton, davisson, and, lester, germer,
+    [likewise, in, '1927', clinton, davisson, and, lester, germer,
      conducted, different, experiments, of, electron, diffraction,
      showing, that, they, exhibited, wavelike, behaviors, very,
      similar, to, light, waves]).
 
 oracion_es(27,
-    [asimismo, en, el, ano, 1927, clinton, davisson, y, lester,
+    [asimismo, en, el, ano, '1927', clinton, davisson, y, lester,
      germer, realizaron, diferentes, experimentos, de, difraccion,
      de, electrones, demostrando, que, estos, exhibian,
      comportamientos, ondulatorios, muy, similares, a, las, ondas,
