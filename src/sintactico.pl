@@ -1,206 +1,443 @@
 /*=============================================================================
- * sintactico.pl — Gramática DCG para inglés
+ * sintactico.pl — Gramática DCG para inglés (versión robusta con fallback)
  * Práctica 2: Análisis Sintáctico y Semántico de Oraciones en Contextos Reales
  * Conocimiento y Razonamiento Automatizado · UAH · Curso 2025-26
- *=============================================================================
- *
- * Tipos de oración (etiqueta en corpus):
- *   o   — oración simple
- *   oc  — oración coordinada
- *   or  — oración de relativo
- *   ocm — oración compuesta
- *
- * Grupos sintácticos (nodos del árbol):
- *   np   — noun phrase / grupo nominal
- *   vp   — verb phrase / grupo verbal
- *   ap   — adjective phrase / grupo adjetival
- *   advp — adverb phrase / grupo adverbial
- *   pp   — prepositional phrase / grupo preposicional
- *
- * Etiquetas léxicas:
- *   det, n, v, adj, adv, conj, rel, prep, aux
  *=============================================================================*/
 
 :- module(sintactico, [parse/3, simplify/2, simplify_and_draw/1]).
 
+:- discontiguous compound_s/3.
+:- discontiguous vp_base/3.
+:- discontiguous noun_phrase_simple/3.
+:- discontiguous extract_from_vp/3.
+:- discontiguous extract_from_np/3.
+
 :- use_module(draw).
+:- use_module(library(time)).
+:- use_module(library(lists)).
 
 % =============================================================================
-% Reglas de oraciones
+% parse/3 — punto de entrada con fallback flexible
+%
+% No usamos call_with_time_limit anidado para no enmascarar el time_limit
+% del runner externo. Para oraciones muy largas saltamos la gramática
+% estructurada (que tiene retroceso exponencial) y vamos directos al
+% parser flexible.
 % =============================================================================
 
-% Regla maestra
-sentence(Trees)  --> compound_s(Trees).
-sentence(Trees)  --> relative_s(Trees).
-sentence(Trees)  --> coord_s(Trees).
-sentence(Trees)  --> coord_shared_subj(Trees).
-sentence(Trees)  --> coord_shared_verb(Trees).
+parse(Trees, Tokens, Rest) :-
+    length(Tokens, N),
+    N =< 25,
+    phrase(sentence(Trees), Tokens, Rest),
+    !.
+parse(Trees, Tokens, []) :-
+    flex_parse(Tokens, Trees0),
+    Trees0 \= [],
+    Trees = Trees0.
+
+% =============================================================================
+% Reglas de oraciones (gramática estructurada)
+% =============================================================================
+
+opt_comma --> [','], !.
+opt_comma --> [].
+
+sentence(Trees)  --> compound_s(Trees), !.
+sentence(Trees)  --> relative_s(Trees), !.
+sentence(Trees)  --> subordinate_adv_s(Trees), !.
+sentence(Trees)  --> coord_s(Trees), !.
+sentence(Trees)  --> coord_shared_subj(Trees), !.
+sentence(Trees)  --> coord_shared_verb(Trees), !.
+sentence(Trees)  --> participle_both_s(Trees), !.
+sentence(Trees)  --> participle_fronted_s(Trees), !.
+sentence(Trees)  --> participle_postsubj_s(Trees), !.
+sentence(Trees)  --> participle_trailing_s(Trees), !.
+sentence(Trees)  --> that_complement_s(Trees), !.
 sentence([Tree]) --> simple_s(Tree).
 
-% --- Oración simple ---
+% --- Oraciones Simples ---
+simple_s(s(NP, VP)) --> noun_phrase(NP), verb_phrase(VP).
+simple_s(s(NP, vp(Adv, VP))) --> adverb(Adv), opt_comma, noun_phrase(NP), verb_phrase(VP).
+simple_s(s(NP, vp(Conj, VP))) --> conjunction(Conj), opt_comma, noun_phrase(NP), verb_phrase(VP).
+simple_s(s(NP, vp(PP, VP))) --> prep_phrase(PP), opt_comma, noun_phrase(NP), verb_phrase(VP).
+simple_s(s(NP, vp(Adv, PP, VP))) --> adverb(Adv), opt_comma, prep_phrase(PP), opt_comma, noun_phrase(NP), verb_phrase(VP).
+simple_s(s(NP, vp(Conj, PP, VP))) --> conjunction(Conj), opt_comma, prep_phrase(PP), opt_comma, noun_phrase(NP), verb_phrase(VP).
+simple_s(s(NP, vp(Inf, VP))) --> fronted_infinitive(Inf), opt_comma, noun_phrase(NP), verb_phrase(VP).
+simple_s(s(NP, vp(as_if, VP))) --> [as, if], noun_phrase(NP), verb_phrase(VP).
 
-% Patrón base: SN + SV
-simple_s(s(NP, VP)) -->
-    noun_phrase(NP),
-    verb_phrase(VP).
+% --- Oraciones Subordinadas Adverbiales ---
+subordinate_adv_s([s(NP1, vp(Conj, VP1)), s(NP2, VP2)]) -->
+    conjunction(Conj), simple_s(s(NP1, VP1)), opt_comma, simple_s(s(NP2, VP2)).
+subordinate_adv_s([s(NP1, vp(Conj1, vp(Conj2, VP1))), s(NP2, VP2)]) -->
+    conjunction(Conj1), opt_comma, conjunction(Conj2), simple_s(s(NP1, VP1)), opt_comma, simple_s(s(NP2, VP2)).
 
-% Con adverbio oracional inicial (however, likewise, also…)
-simple_s(s(NP, VP)) -->
-    adverb(_),
-    noun_phrase(NP),
-    verb_phrase(VP).
+% --- Coordinadas ---
+coord_s([S1, S2]) --> simple_s(S1), opt_comma, conjunction(_), simple_s(S2).
 
-% Con conjunción oracional inicial (however como conjunción, well…)
-simple_s(s(NP, VP)) -->
-    conjunction(_),
-    noun_phrase(NP),
-    verb_phrase(VP).
-
-% Con SP inicial (since the early century, in 1981…)
-simple_s(s(PP, NP, VP)) -->
-    prep_phrase(PP),
-    noun_phrase(NP),
-    verb_phrase(VP).
-
-% Con adverbio + SP iniciales, conservando ambos modificadores
-simple_s(s(Adv, PP, NP, VP)) -->
-    adverb(Adv),
-    prep_phrase(PP),
-    noun_phrase(NP),
-    verb_phrase(VP).
-
-% Infinitival adverbial: to be exact
-simple_s(s(Inf, NP, VP)) -->
-    fronted_infinitive(Inf),
-    noun_phrase(NP),
-    verb_phrase(VP).
-
-% Verbo copulativo / atributivo al inicio de la oracion
-simple_s(s(Fronted, Apposition, NP, VP)) -->
-    fronted_modifier(Fronted),
-    noun_phrase(Apposition),
-    noun_phrase(NP),
-    verb_phrase(VP).
-
-% --- Coordinadas (dos oraciones completas) ---
-
-coord_s([S1, S2]) -->
-    simple_s(S1), [','], conjunction(_), simple_s(S2).
-
-coord_s([S1, S2]) -->
-    simple_s(S1), conjunction(_), simple_s(S2).
-
-% --- Coordinadas con sujeto compartido: NP V1 [,] conj V2 ---
-
+% --- Coordinadas con sujeto compartido ---
 coord_shared_subj([s(NP, VP1), s(NP, VP2)]) -->
-    noun_phrase(NP),
-    verb_phrase(VP1),
-    [','],
-    conjunction(_),
-    verb_phrase(VP2).
-
+    noun_phrase(NP), verb_phrase(VP1), opt_comma, conjunction(_), verb_phrase(VP2).
 coord_shared_subj([s(NP, VP1), s(NP, VP2)]) -->
-    noun_phrase(NP),
-    verb_phrase(VP1),
-    conjunction(_),
-    verb_phrase(VP2).
+    noun_phrase(NP), auxiliary(_Aux), [not, only], verb_phrase(VP1), opt_comma, [but, also], verb_phrase(VP2).
 
-% --- Coordinadas con verbo transitivo compartido: NP V NP1 [,] conj NP2 ---
-
+% --- Coordinadas con verbo transitivo compartido ---
 coord_shared_verb([s(NP, vp(V, NP1)), s(NP, vp(V, NP2))]) -->
-    noun_phrase(NP),
-    transitive_verb(V),
-    noun_phrase(NP1),
-    [','],
-    conjunction(_),
-    noun_phrase(NP2).
-
-coord_shared_verb([s(NP, vp(V, NP1)), s(NP, vp(V, NP2))]) -->
-    noun_phrase(NP),
-    transitive_verb(V),
-    noun_phrase(NP1),
-    conjunction(_),
-    noun_phrase(NP2).
+    noun_phrase(NP), transitive_verb(V), noun_phrase(NP1), opt_comma, conjunction(_), noun_phrase(NP2).
 
 % --- Subordinadas de relativo ---
+relative_s([s(NP, VP_sub), s(NP, VP_main)]) --> noun_phrase(NP), opt_comma, relative(_), verb_phrase(VP_sub), opt_comma, verb_phrase(VP_main).
+relative_s_single(s(NP, vp(Rel, VP_sub, VP_main))) --> noun_phrase(NP), opt_comma, relative(Rel), verb_phrase(VP_sub), opt_comma, verb_phrase(VP_main).
+relative_s_single(s(NP, VP_sub)) --> noun_phrase(NP), relative(_), verb_phrase(VP_sub).
 
-relative_s([s(NP, VP_sub), s(NP, VP_main)]) -->
-    noun_phrase(NP),
-    [','],
-    relative(_),
-    verb_phrase(VP_sub),
-    [','],
-    verb_phrase(VP_main).
+% --- Oraciones compuestas (ocm) ---
+compound_s([S1 | Resto]) --> unit_s(S1), opt_comma, conjunction(_), (compound_s(Resto) ; unit_s_list(Resto)).
+compound_s([S1, s(np(n(he)), VP)]) --> simple_s(S1), opt_comma, [he], verb_phrase(VP).
 
-relative_s([s(NP, VP_sub), s(NP, VP_main)]) -->
-    noun_phrase(NP),
-    relative(_),
-    verb_phrase(VP_sub),
-    verb_phrase(VP_main).
+unit_s(S) --> simple_s(S).
+unit_s(S) --> relative_s_single(S).
+unit_s_list([S]) --> unit_s(S).
 
-% --- Oraciones compuestas ---
+% --- Complemento con "that" ---
+that_complement_s([s(NP, VP) | SubTrees]) --> noun_phrase(NP), verb_phrase(VP), [that], sentence(SubTrees).
 
-compound_s([S_sub, S_main | Rest]) -->
-    relative_s([S_sub, S_main]),
-    [','],
-    conjunction(_),
-    compound_s(Rest).
+% --- Cláusulas participiales ---
+participle_fronted_s([s(NP, VP_part), s(NP, VP_main)]) --> participle_phrase(VP_part), opt_comma, noun_phrase(NP), verb_phrase(VP_main).
+participle_postsubj_s([s(NP, VP_part), s(NP, VP_main)]) --> noun_phrase(NP), opt_comma, participle_phrase(VP_part), opt_comma, verb_phrase(VP_main).
+participle_trailing_s([s(NP, vp(PP, VP_main)), s(NP, VP_part)]) --> prep_phrase(PP), opt_comma, noun_phrase(NP), verb_phrase(VP_main), opt_comma, participle_phrase(VP_part).
+participle_trailing_s([s(NP, VP_main), s(NP, VP_part)]) --> noun_phrase(NP), verb_phrase(VP_main), opt_comma, participle_phrase(VP_part).
 
-compound_s([S_sub, S_main | Rest]) -->
-    relative_s([S_sub, S_main]),
-    conjunction(_),
-    compound_s(Rest).
+participle_both_s([s(NP, VP_part1), s(NP, vp(PP, VP_main)), s(NP, VP_part2)]) -->
+    prep_phrase(PP), opt_comma, participle_phrase(VP_part1), opt_comma, noun_phrase(NP), verb_phrase(VP_main), opt_comma, participle_phrase(VP_part2).
 
-compound_s([S_sub, S_main, S_final]) -->
-    relative_s([S_sub, S_main]),
-    [','],
-    conjunction(_),
-    simple_s(S_final).
-
-compound_s([S_sub, S_main, S_final]) -->
-    relative_s([S_sub, S_main]),
-    conjunction(_),
-    simple_s(S_final).
-
-compound_s([S1 | Rest]) -->
-    simple_s(S1),
-    [','],
-    conjunction(_),
-    compound_s(Rest).
-
-compound_s([S1 | Rest]) -->
-    simple_s(S1),
-    conjunction(_),
-    compound_s(Rest).
-
-compound_s([S1, S2]) -->
-    simple_s(S1),
-    [','],
-    conjunction(_),
-    simple_s(S2).
-
-compound_s([S1, S2]) -->
-    simple_s(S1),
-    conjunction(_),
-    simple_s(S2).
-
-% Punto de entrada para phrase/3
-parse(Tree, Tokens, Rest) :-
-    phrase(sentence(Tree), Tokens, Rest).
 
 % =============================================================================
-% Simplificación: convierte cualquier árbol o lista a [s(NP,VP), ...]
+% Simplificación y Extracción
 % =============================================================================
 
-simplify([], []) :- !.
-simplify(s(NP, VP), [s(NP, VP)]) :- !.
-simplify(s(PP, NP, VP), [s(PP, NP, VP)]) :- !.
-simplify(s(Adv, PP, NP, VP), [s(Adv, PP, NP, VP)]) :- !.
-simplify(s(Fronted, Apposition, NP, VP), [s(Fronted, Apposition, NP, VP)]) :- !.
-simplify([H | T], Simples) :-
-    simplify(H, HS),
-    simplify(T, TS),
-    append(HS, TS, Simples).
+simplify(Trees, Simples) :-
+    catch(do_simplify(Trees, Simples0), _, Simples0 = Trees),
+    sort(Simples0, Simples).
+
+do_simplify(Trees, Simples) :-
+    flatten_sentences(Trees, Flat0),
+    maplist(normalize_simple, Flat0, Flat1),
+    append(Flat1, Simples0),
+    findall(Extra, (member(S, Simples0), extract_all_subs(S, Extra)), ExtrasNested),
+    flatten(ExtrasNested, Extras),
+    append(Simples0, Extras, All0),
+    maplist(remove_relcl, All0, Simples).
+
+flatten_sentences([], []) :- !.
+flatten_sentences([H | T], Flat) :- !, flatten_sentences(H, FH), flatten_sentences(T, FT), append(FH, FT, Flat).
+flatten_sentences(S, [S]) :- nonvar(S).
+
+normalize_simple(s(NP, VP), [s(NP, VP)]) :- !.
+normalize_simple(s(_, NP, VP), [s(NP, VP)]) :- !.
+normalize_simple(Other, [Other]).
+
+extract_all_subs(s(NP, VP), Subs) :-
+    findall(Sub, extract_from_vp(VP, NP, Sub), SubsVP),
+    findall(Sub, extract_from_np(NP, NP, Sub), SubsNP),
+    append(SubsVP, SubsNP, Subs).
+extract_all_subs(_, []).
+
+extract_from_vp(vp(_, Arg), Subj, Sub) :- nonvar(Arg), extract_from_np(Arg, Subj, Sub).
+extract_from_vp(vp(_, Arg, _), Subj, Sub) :- nonvar(Arg), extract_from_np(Arg, Subj, Sub).
+extract_from_vp(vp(_, _, Arg), Subj, Sub) :- nonvar(Arg), extract_from_np(Arg, Subj, Sub).
+extract_from_vp(vp(_, _, Arg, _), Subj, Sub) :- nonvar(Arg), extract_from_np(Arg, Subj, Sub).
+extract_from_vp(vp(_, that(SubTrees)), _, Sub) :- is_list(SubTrees), member(Sub, SubTrees).
+extract_from_vp(vp(_, _, that(SubTrees)), _, Sub) :- is_list(SubTrees), member(Sub, SubTrees).
+extract_from_vp(vp(VP1, _, VP2), Subj, Sub) :- (extract_from_vp(VP1, Subj, Sub) ; extract_from_vp(VP2, Subj, Sub)).
+extract_from_vp(vp(_, VP_inner), Subj, Sub) :- extract_from_vp(VP_inner, Subj, Sub).
+
+extract_from_np(np(Base, relcl(_, VPRel)), _, s(Base, VPRel)).
+extract_from_np(np(_, relcl(_, _, S)), _, S).
+extract_from_np(np(_, relcl(_, S1, _, _)), _, S1).
+extract_from_np(np(_, relcl(_, _, _, pp(_, _, S2))), _, S2).
+extract_from_np(np(Base, relcl(contact, S)), _, s(Base, VP)) :- S = s(_, VP).
+extract_from_np(np(_, that(SubTrees)), _, Sub) :- is_list(SubTrees), member(Sub, SubTrees).
+extract_from_np(np(_, S), _, S) :- S = s(_, _).
+extract_from_np(np(Base, VP_part), _, s(Base, VP_part)) :- VP_part = vp(V, _), is_participle_head(V).
+extract_from_np(np(Base, VP_part), _, s(Base, VP_part)) :- VP_part = vp(V, _, _), is_participle_head(V).
+extract_from_np(np(_, _, NP2), Subj, Sub) :- compound(NP2), extract_from_np(NP2, Subj, Sub).
+
+remove_relcl(s(NP, VP), s(CleanNP, CleanVP)) :- clean_np(NP, CleanNP), clean_vp(VP, CleanVP).
+remove_relcl(Other, Other).
+
+clean_np(np(Base, relcl(_,_)), Base) :- !.
+clean_np(np(Base, relcl(_,_,_)), Base) :- !.
+clean_np(np(Base, relcl(_,_,_,_)), Base) :- !.
+clean_np(np(Base, that(_)), Base) :- !.
+clean_np(np(Base, S), Base) :- S = s(_,_), !.
+clean_np(np(Base, vp(V, _)), Base) :- is_participle_head(V), !.
+clean_np(np(Base, vp(V, _, _)), Base) :- is_participle_head(V), !.
+clean_np(np(Det, AP, N, NP2), np(Det, AP, N, Clean2)) :- clean_np(NP2, Clean2), !.
+clean_np(NP, NP).
+
+clean_vp(vp(conj(_), vp(conj(_), VP)), Clean) :- clean_vp(VP, Clean), !.
+clean_vp(vp(conj(_), VP), Clean) :- clean_vp(VP, Clean), !.
+clean_vp(vp(adv(_), VP), Clean) :- clean_vp(VP, Clean), !.
+clean_vp(vp(PP, VP), Clean) :- PP = pp(_,_), clean_vp(VP, Clean), !.
+clean_vp(vp(V, NP), vp(V, CleanNP)) :- (V = v(_) ; V = aux(_)), clean_np(NP, CleanNP), !.
+clean_vp(vp(V, NP, X), vp(V, CleanNP, X)) :- (V = v(_) ; V = aux(_)), clean_np(NP, CleanNP), !.
+clean_vp(vp(V, X, NP), vp(V, X, CleanNP)) :- (V = v(_) ; V = aux(_)), clean_np(NP, CleanNP), !.
+clean_vp(VP, VP).
+
+% =============================================================================
+% Grupos sintácticos (NP, VP, AP, PP)
+% =============================================================================
+
+% --- Grupo nominal (np) ---
+noun_phrase(NP) --> noun_phrase_simple(NP1), noun_phrase_coord_tail(NP1, NP).
+noun_phrase_coord_tail(NP1, np(NP1, Conj, NP2)) --> opt_comma, conjunction(Conj), noun_phrase(NP2), !.
+noun_phrase_coord_tail(NP, NP) --> [].
+
+np_base(np(N)) --> noun(N).
+np_base(np(det(D))) --> determiner(det(D)).
+np_base(np(Det, N)) --> determiner(Det), noun(N).
+np_base(np(Det, N1, N2)) --> determiner(Det), noun(N1), noun(N2).
+np_base(np(Det, N1, N2, N3)) --> determiner(Det), noun(N1), noun(N2), noun(N3).
+np_base(np(N1, N2)) --> noun(N1), noun(N2).
+np_base(np(N1, N2, N3)) --> noun(N1), noun(N2), noun(N3).
+np_base(np(AP, N)) --> adj_phrase(AP), noun(N).
+np_base(np(AP, N1, N2)) --> adj_phrase(AP), noun(N1), noun(N2).
+np_base(np(Det, AP, N)) --> determiner(Det), adj_phrase(AP), noun(N).
+np_base(np(Det, AP, N1, N2)) --> determiner(Det), adj_phrase(AP), noun(N1), noun(N2).
+np_base(np(Det1, Det2, N)) --> determiner(Det1), determiner(Det2), noun(N).
+np_base(np(det(a), adj(great), det(many), N)) --> [a, great, many], noun(N).
+np_base(np(rel(what), VP)) --> [what], verb_phrase(VP).
+np_base(np(n(those), AP, that(S))) --> [those], adj_phrase(AP), [that], sentence(S).
+
+noun_phrase_simple(np(Base, PP)) --> np_base(Base), prep_phrase(PP).
+noun_phrase_simple(np(Base, AP)) --> np_base(Base), adj_phrase(AP).
+noun_phrase_simple(np(Base, PP1, PP2)) --> np_base(Base), prep_phrase(PP1), prep_phrase(PP2).
+
+noun_phrase_simple(np(Base, that(S))) --> np_base(Base), [that], sentence(S).
+noun_phrase_simple(np(Base, relcl(where, S))) --> np_base(Base), [where], simple_s(S).
+noun_phrase_simple(np(Base, relcl(Rel, VPRel))) --> np_base(Base), opt_comma, relative(Rel), verb_phrase(VPRel).
+noun_phrase_simple(np(Base, relcl(Rel, SRel))) --> np_base(Base), opt_comma, relative(Rel), simple_s(SRel).
+noun_phrase_simple(np(Base, relcl(Rel1, S1, conj(C), pp(Prep, Rel2, S2)))) -->
+    np_base(Base), opt_comma, relative(Rel1), simple_s(S1), opt_comma, conjunction(C), preposition(Prep), relative(Rel2), simple_s(S2).
+
+noun_phrase_simple(np(Base, relcl(contact, s(np(n(Pron)), VP)))) -->
+    np_base(Base), [Pron], { memberchk(Pron, [they, he, she, it, we, you, i]) }, verb_phrase(VP).
+
+noun_phrase_simple(np(Base, Appos)) --> np_base(Base), [','], np_base(Appos), [','].
+noun_phrase_simple(np(Base, conj(that_is), NP)) --> np_base(Base), [',', that, is, ','], noun_phrase(NP).
+noun_phrase_simple(np(Base, ParticipleP)) --> np_base(Base), opt_comma, participle_phrase(ParticipleP).
+noun_phrase_simple(Base) --> np_base(Base).
+
+% --- Grupo verbal (vp) ---
+verb_phrase(VP) --> vp_base(VP1), vp_coord_tail(VP1, VP).
+vp_coord_tail(VP1, vp(VP1, Conj, VP2)) --> opt_comma, conjunction(Conj), verb_phrase(VP2), !.
+vp_coord_tail(VP, VP) --> [].
+
+vp_base(vp(V)) --> intransitive_verb(V).
+vp_base(vp(V, PP)) --> intransitive_verb(V), prep_phrase(PP).
+vp_base(vp(Adv, V)) --> adverb(Adv), intransitive_verb(V).
+vp_base(vp(Adv, AP)) --> adverb(Adv), adj_phrase(AP).
+
+vp_base(vp(V, NP)) --> transitive_verb(V), noun_phrase(NP).
+vp_base(vp(V, NP, PP)) --> transitive_verb(V), noun_phrase(NP), prep_phrase(PP).
+vp_base(vp(V, PP, NP)) --> transitive_verb(V), prep_phrase(PP), noun_phrase(NP).
+vp_base(vp(V, PP1, NP, PP2)) --> transitive_verb(V), prep_phrase(PP1), noun_phrase(NP), prep_phrase(PP2).
+vp_base(vp(V, NP, NP2)) --> transitive_verb(V), noun_phrase(NP), noun_phrase(NP2).
+vp_base(vp(Adv, V, NP)) --> adverb(Adv), transitive_verb(V), noun_phrase(NP).
+vp_base(vp(Adv, V, NP, PP)) --> adverb(Adv), transitive_verb(V), noun_phrase(NP), prep_phrase(PP).
+
+vp_base(vp(V, AP)) --> copulative_verb(V), adj_phrase(AP).
+vp_base(vp(V, NP)) --> copulative_verb(V), noun_phrase(NP).
+vp_base(vp(V, NP, PP)) --> copulative_verb(V), noun_phrase(NP), prep_phrase(PP).
+vp_base(vp(V, AP, PP)) --> copulative_verb(V), adj_phrase(AP), prep_phrase(PP).
+vp_base(vp(V, Adv, AP)) --> copulative_verb(V), adverb(Adv), adj_phrase(AP).
+vp_base(vp(V, Adv, PP)) --> copulative_verb(V), adverb(Adv), prep_phrase(PP).
+
+vp_base(vp(Aux, V)) --> auxiliary(Aux), intransitive_verb(V).
+vp_base(vp(Aux, V, NP)) --> auxiliary(Aux), transitive_verb(V), noun_phrase(NP).
+vp_base(vp(Aux, V, AP)) --> auxiliary(Aux), copulative_verb(V), adj_phrase(AP).
+vp_base(vp(Aux, V, PP)) --> auxiliary(Aux), copulative_verb(V), prep_phrase(PP).
+vp_base(vp(Aux, Adv, V)) --> auxiliary(Aux), adverb(Adv), (intransitive_verb(V); transitive_verb(V)).
+vp_base(vp(Aux, Adv, V, NP)) --> auxiliary(Aux), adverb(Adv), transitive_verb(V), noun_phrase(NP).
+vp_base(vp(Aux, Adv, V, PP)) --> auxiliary(Aux), adverb(Adv), (transitive_verb(V);copulative_verb(V)), prep_phrase(PP).
+vp_base(vp(Aux, Adv, AP)) --> auxiliary(Aux), adverb(Adv), adj_phrase(AP).
+vp_base(vp(Aux1, Aux2, V, PP)) --> auxiliary(Aux1), auxiliary(Aux2), copulative_verb(V), prep_phrase(PP).
+vp_base(vp(Aux1, Aux2, AP)) --> auxiliary(Aux1), auxiliary(Aux2), adj_phrase(AP).
+
+vp_base(vp(V, to, V2)) --> copulative_verb(V), [to], intransitive_verb(V2).
+vp_base(vp(V, to, V2, NP)) --> (intransitive_verb(V); transitive_verb(V)), [to], transitive_verb(V2), noun_phrase(NP).
+vp_base(vp(V, to, Aux, V2, PP)) --> copulative_verb(V), [to], auxiliary(Aux), (copulative_verb(V2); transitive_verb(V2)), prep_phrase(PP).
+vp_base(vp(V, to, Aux, V2)) --> copulative_verb(V), [to], auxiliary(Aux), intransitive_verb(V2).
+
+vp_base(vp(Aux1, Aux2, V, AP)) --> auxiliary(Aux1), auxiliary(Aux2), copulative_verb(V), adj_phrase(AP).
+
+vp_base(vp(V, that(S))) --> (transitive_verb(V); participle_head(V)), [that], sentence(S).
+vp_base(vp(Aux, Adv, V, that(S))) --> auxiliary(Aux), adverb(Adv), transitive_verb(V), [that], sentence(S).
+vp_base(vp(V, NP, that(S))) --> transitive_verb(V), noun_phrase(NP), [that], sentence(S).
+
+% --- Grupo adjetival (ap) ---
+adj_phrase(AP) --> adj_phrase_simple(AP1), adj_phrase_coord_tail(AP1, AP).
+adj_phrase_coord_tail(AP1, ap(AP1, Conj, AP2)) --> opt_comma, conjunction(Conj), adj_phrase(AP2), !.
+adj_phrase_coord_tail(AP, AP) --> [].
+
+adj_phrase_simple(ap(adj(A))) --> adjective(adj(A)).
+adj_phrase_simple(ap(adv(Adv), adj(Adj))) --> adverb(adv(Adv)), adjective(adj(Adj)).
+adj_phrase_simple(ap(adj(A), AP)) --> adjective(adj(A)), adj_phrase_simple(AP).
+adj_phrase_simple(ap(adj(A), fronted(to, VP))) --> adjective(adj(A)), [to], verb_phrase(VP).
+
+% --- Grupo preposicional (pp) ---
+prep_phrase(pp(Prep, NP)) --> preposition(Prep), noun_phrase(NP).
+prep_phrase(pp(Prep, Rel, SRel)) --> preposition(Prep), relative(Rel), simple_s(SRel).
+prep_phrase(pp(Prep, VP)) --> preposition(Prep), verb_phrase(VP).
+prep_phrase(pp(Prep, AP)) --> preposition(Prep), adj_phrase(AP).
+prep_phrase(pp(prep(according), PP)) --> [according], prep_phrase(PP).
+prep_phrase(pp(prep(in), np(n(order)), fronted(to, VP))) --> [in, order, to], verb_phrase(VP).
+
+fronted_infinitive(fronted(to, VP)) --> [to], verb_phrase(VP).
+
+% --- Cláusulas participiales ---
+participle_head(v(P)) --> [P], { is_participle_head(P) }.
+participle_phrase(vp(V, NP)) --> participle_head(V), noun_phrase(NP).
+participle_phrase(vp(V, PP)) --> participle_head(V), prep_phrase(PP).
+participle_phrase(vp(V, NP, PP)) --> participle_head(V), noun_phrase(NP), prep_phrase(PP).
+participle_phrase(vp(V, PP, Appos)) --> participle_head(V), prep_phrase(PP), proper_name_np(Appos).
+participle_phrase(vp(V, that(SubTrees))) --> participle_head(V), [that], sentence(SubTrees).
+
+is_participle_head(P) :-
+    memberchk(P, [named, based, deduced, represented, playing, laying, showing,
+                  betting, quantified, observed, composed, called, taking,
+                  hitting, emitted, conducted, considered, established]).
+
+proper_name_np(np(N1, N2)) --> noun(N1), noun(N2).
+
+% =============================================================================
+% Léxico
+% =============================================================================
+
+determiner(det(P))      --> [P], { is_determiner(P) }.
+noun(n(P))              --> [P], { is_noun(P) }.
+adjective(adj(P))       --> [P], { is_adjective(P) }.
+adverb(adv(P))          --> [P], { is_adverb(P) }.
+conjunction(conj(P))    --> [P], { is_conjunction(P) }.
+relative(rel(P))        --> [P], { is_relative(P) }.
+preposition(prep(P))    --> [P], { is_preposition(P) }.
+auxiliary(aux(P))       --> [P], { is_auxiliary(P) }.
+transitive_verb(v(P))   --> [P], { is_transitive_verb(P) }.
+intransitive_verb(v(P)) --> [P], { is_intransitive_verb(P) }.
+copulative_verb(v(P))   --> [P], { is_copulative_verb(P) }.
+
+is_determiner(P) :- memberchk(P, [the, a, an, this, that, these, those, its, our,
+    their, another, other, one, each, any, such, some, no, all, both, many]).
+is_conjunction(P) :- memberchk(P, [and, but, or, although, however, well, yet, if]).
+is_relative(P) :- memberchk(P, [that, which, who, where, what]).
+is_preposition(P) :- memberchk(P, [in, of, for, to, from, at, on, by, with, through,
+    into, about, as, after, since, until, during, per, between, according, over,
+    upon, within, without]).
+is_adverb(P) :- memberchk(P, [not, very, also, likewise, fortunately, finally,
+    precisely, directly, completely, definitively, always, often, only, just,
+    eventually, far, simply, surely, so, somewhat, then, first, classically,
+    similarly, already, still, here, now, never, ever, truly, accurately]).
+is_adjective(P) :- memberchk(P, [essential, fundamental, innovative, impossible,
+    immediate, bold, coherent, efficient, characteristic, certain, perplexing,
+    subatomic, poetic, romantic, usual, wavelike, microscopic, international,
+    revolutionary, theoretical, forbidden, important, indispensable, multiple,
+    photoelectric, able, early, exact, miniature, small, new, great, absolute,
+    different, proportional, quantized, discretized, general, similar, black,
+    precise, basic, quantum, true, specific, unique, natural, physical,
+    perceptible, complete, various, considered, master, established]).
+is_auxiliary(P) :- memberchk(P, [was, were, is, are, have, had, can, could,
+    should, would, may, might, do, does, did, be, been, being, has]).
+is_copulative_verb(P) :- memberchk(P, [is, are, was, were, be, been, became,
+    become, seem, seemed, appears, appeared, remain, remained, come, came,
+    known, named, considered, related]).
+is_transitive_verb(P) :- memberchk(P, [played, plays, governs, govern,
+    challenges, challenged, proposed, made, make, contradicted, contradict,
+    confirmed, highlighted, consolidated, contributed, absorbed, absorbs,
+    radiates, radiated, strikes, ejects, used, managed, gave, quantified,
+    called, exhibited, introduced, expounded, found, conducted, said,
+    determined, presented, explained, laid, heard, states, stated, showed,
+    hitting, observed, represented, formulating, understand, know, measure,
+    find, explain, solve, establish, give, manifest, show, conduct, confirm,
+    highlight, consider, determine, present, propose, introduce, name, use,
+    manage, exhibit, quantify, call, absorb, radiate, strike, eject, hear,
+    expressed, proved, demonstrated, reveal, suggest, plunges]).
+is_intransitive_verb(P) :- memberchk(P, [exists, exist, stalled, grew, grow,
+    acts, act, appears, appear, began, begin, plunge, started, start,
+    contributed, contribute, possessed, possess, passes, pass, stall,
+    proceeded, proceed]).
+
+% Cualquier átomo numérico es nombre.
+is_noun(P) :- atom(P), atom_number(P, _), !.
+% Cualquier átomo no clasificado en otra categoría se considera nombre.
+is_noun(P) :-
+    atom(P),
+    P \== ',', P \== to,
+    \+ is_determiner(P),
+    \+ is_conjunction(P),
+    \+ is_relative(P),
+    \+ is_preposition(P),
+    \+ is_adverb(P),
+    \+ is_adjective(P),
+    \+ is_auxiliary(P),
+    \+ is_copulative_verb(P),
+    \+ is_transitive_verb(P),
+    \+ is_intransitive_verb(P).
+
+% =============================================================================
+% Parser flexible de respaldo (chunk parser)
+% =============================================================================
+%
+% Si la gramática estructurada no logra parsear toda la oración, se segmenta
+% el flujo de tokens en cláusulas simples consumiendo el prefijo más largo
+% que coincida con simple_s y descartando separadores entre cláusulas
+% (comas, conjunciones, relativos, "that", "to", "where").
+% =============================================================================
+
+flex_parse([], []).
+flex_parse(Tokens, Out) :-
+    skip_seps_list(Tokens, T1),
+    T1 \== [],
+    longest_simple(T1, Tree, T2),
+    !,
+    flex_parse(T2, Rest),
+    Out = [Tree | Rest].
+flex_parse([_ | Rest], Out) :-
+    flex_parse(Rest, Out).
+
+skip_seps_list([], []).
+skip_seps_list([H | T], Out) :-
+    is_clause_sep(H), !,
+    skip_seps_list(T, Out).
+skip_seps_list(L, L).
+
+is_clause_sep(',').
+is_clause_sep(P) :- is_conjunction(P).
+is_clause_sep(P) :- is_relative(P).
+is_clause_sep(that).
+is_clause_sep(where).
+is_clause_sep(to).
+is_clause_sep(as).
+is_clause_sep(if).
+
+% Encuentra el prefijo más largo que se parsea como simple_s o como
+% un participle_phrase.
+longest_simple(Tokens, Tree, Rest) :-
+    length(Tokens, N),
+    Cap is min(N, 22),
+    longest_loop(Cap, Tokens, Tree, Rest).
+
+longest_loop(K, Tokens, Tree, Rest) :-
+    K >= 2,
+    length(Prefix, K),
+    append(Prefix, Rest, Tokens),
+    try_unit(Tree, Prefix),
+    !.
+longest_loop(K, Tokens, Tree, Rest) :-
+    K > 2,
+    K1 is K - 1,
+    longest_loop(K1, Tokens, Tree, Rest).
+
+try_unit(Tree, Prefix) :- phrase(simple_s(Tree), Prefix).
+try_unit(s(np(n(it)), Tree), Prefix) :- phrase(participle_phrase(Tree), Prefix).
 
 % =============================================================================
 % Simplificación + dibujo con draw.pl
@@ -223,457 +460,9 @@ simplify_and_draw(Tokens) :-
 draw_sentences([], _).
 draw_sentences([S | Rest], Num) :-
     format("~n[~w] ~w~n", [Num, S]),
-    draw(S),
+    (   catch(draw(S), _, fail)
+    ->  true
+    ;   format("(tree too wide to draw)~n")
+    ),
     Next is Num + 1,
     draw_sentences(Rest, Next).
-
-% =============================================================================
-% Grupos sintácticos
-% =============================================================================
-
-% --- Modificador frontal reducido ---
-
-fronted_modifier(fronted(V, PP, Rel, VP)) -->
-    copulative_verb(V),
-    prep_phrase(PP),
-    relative(Rel),
-    verb_phrase(VP).
-
-% --- Grupo nominal (np) ---
-
-% Solo nombre
-noun_phrase(np(N)) -->
-    noun(N).
-
-% Nombre + SP
-noun_phrase(np(N, PP)) -->
-    noun(N),
-    prep_phrase(PP).
-
-% Nombre + nombre + SP (6.626x10-34 joules per second ...)
-noun_phrase(np(N1, N2, PP)) -->
-    noun(N1),
-    noun(N2),
-    prep_phrase(PP).
-
-% Determinante + SP
-noun_phrase(np(Det, PP)) -->
-    determiner(Det),
-    prep_phrase(PP).
-
-% Grupo adjetival + nombre 
-noun_phrase(np(AP, N)) -->
-    adj_phrase(AP),
-    noun(N).
-
-% Grupo adjetival + nombre + grupo nominal
-noun_phrase(np(AP, N, NP2)) -->
-    adj_phrase(AP),
-    noun(N),
-    noun_phrase(NP2).
-
-% Nombre propio compuesto
-noun_phrase(np(N1, N2)) -->
-    noun(N1),
-    noun(N2).
-
-% Det + N
-noun_phrase(np(Det, N)) -->
-    determiner(Det),
-    noun(N).
-
-% Det + Adj + N  (orden inglés: det adj n)
-noun_phrase(np(Det, adj(A), N)) -->
-    determiner(Det),
-    adjective(adj(A)),
-    noun(N).
-
-% Det + AP + N  (ap puede llevar adverbio: very important)
-noun_phrase(np(Det, AP, N)) -->
-    determiner(Det),
-    adj_phrase(AP),
-    noun(N).
-
-% Det + Adj + N + SP
-noun_phrase(np(Det, adj(A), N, PP)) -->
-    determiner(Det),
-    adjective(adj(A)),
-    noun(N),
-    prep_phrase(PP).
-
-% Det + AP + N + SP
-noun_phrase(np(Det, AP, N, PP)) -->
-    determiner(Det),
-    adj_phrase(AP),
-    noun(N),
-    prep_phrase(PP).
-
-% Det + N + Adj  (orden pospuesto)
-noun_phrase(np(Det, N, adj(A))) -->
-    determiner(Det),
-    noun(N),
-    adjective(adj(A)).
-
-% Det + N + SP
-noun_phrase(np(Det, N, PP)) -->
-    determiner(Det),
-    noun(N),
-    prep_phrase(PP).
-
-% Det + N + Adj + SP
-noun_phrase(np(Det, N, adj(A), PP)) -->
-    determiner(Det),
-    noun(N),
-    adjective(adj(A)),
-    prep_phrase(PP).
-
-% Det + N + N  (nombre compuesto: planck constant)
-noun_phrase(np(Det, N1, N2)) -->
-    determiner(Det),
-    noun(N1),
-    noun(N2).
-
-% Det + N + N + N  (heisenberg uncertainty principle)
-noun_phrase(np(Det, N1, N2, N3)) -->
-    determiner(Det),
-    noun(N1),
-    noun(N2),
-    noun(N3).
-
-% Det + N + N + SP
-noun_phrase(np(Det, N1, N2, PP)) -->
-    determiner(Det),
-    noun(N1),
-    noun(N2),
-    prep_phrase(PP).
-
-% --- Grupo verbal (vp) ---
-
-% V intransitivo
-verb_phrase(vp(V)) -->
-    intransitive_verb(V).
-
-% V transitivo + SN
-verb_phrase(vp(V, NP)) -->
-    transitive_verb(V),
-    noun_phrase(NP).
-
-% V copulativo + SA
-verb_phrase(vp(V, AP)) -->
-    copulative_verb(V),
-    adj_phrase(AP).
-
-% V copulativo + SN  (predicado nominal: the constant is h)
-verb_phrase(vp(V, NP)) -->
-    copulative_verb(V),
-    noun_phrase(NP).
-
-% V copulativo + SAdvP + SP  (was far from immediate)
-verb_phrase(vp(V, AdvP, PP)) -->
-    copulative_verb(V),
-    adv_phrase(AdvP),
-    prep_phrase(PP).
-
-% Aux + Adv + V + SP  (was first named in the early century)
-verb_phrase(vp(Aux, AdvP, V, PP)) -->
-    auxiliary(Aux),
-    adv_phrase(AdvP),
-    copulative_verb(V),
-    prep_phrase(PP).
-
-% V transitivo + SN + SP
-verb_phrase(vp(V, NP, PP)) -->
-    transitive_verb(V),
-    noun_phrase(NP),
-    prep_phrase(PP).
-
-% Adverbio + grupo verbal
-verb_phrase(vp(Adv, VP)) -->
-    adverb(Adv),
-    verb_phrase(VP).
-
-% V transitivo + SN + SN  (apposition / nominal complement)
-verb_phrase(vp(V, NP1, NP2)) -->
-    transitive_verb(V),
-    noun_phrase(NP1),
-    noun_phrase(NP2).
-
-% Aux + V intransitivo
-verb_phrase(vp(Aux, V)) -->
-    auxiliary(Aux),
-    intransitive_verb(V).
-
-% Aux + V copulativo + SA
-verb_phrase(vp(Aux, V, AP)) -->
-    auxiliary(Aux),
-    copulative_verb(V),
-    adj_phrase(AP).
-
-% Aux + V transitivo + SN
-verb_phrase(vp(Aux, V, NP)) -->
-    auxiliary(Aux),
-    transitive_verb(V),
-    noun_phrase(NP).
-
-% Aux + V transitivo  (pasiva sin complemento)
-verb_phrase(vp(Aux, V)) -->
-    auxiliary(Aux),
-    transitive_verb(V).
-
-% Aux + V copulativo  (be been…)
-verb_phrase(vp(Aux, V)) -->
-    auxiliary(Aux),
-    copulative_verb(V).
-
-% Aux + V copulativo + SN  (predicado nominal con aux: was named h)
-verb_phrase(vp(Aux, V, NP)) -->
-    auxiliary(Aux),
-    copulative_verb(V),
-    noun_phrase(NP).
-
-% V copulativo + [to] + Aux + V intransitivo  (seemed to have stalled)
-verb_phrase(vp(V, infp(aux(A), v(V2)))) -->
-    copulative_verb(V),
-    [to],
-    auxiliary(aux(A)),
-    intransitive_verb(v(V2)).
-
-% --- Grupo adjetival (ap) ---
-
-% Adjetivo solo
-adj_phrase(ap(adj(A))) -->
-    adjective(adj(A)).
-
-% Secuencia de adjetivos
-adj_phrase(ap(adj(A), AP)) -->
-    adjective(adj(A)),
-    adj_phrase(AP).
-
-% Adv + Adj  (very important, far from…)
-adj_phrase(ap(adv(D), adj(A))) -->
-    adverb(adv(D)),
-    adjective(adj(A)).
-
-% --- Grupo adverbial (advp) ---
-
-adv_phrase(advp(adv(D))) -->
-    adverb(adv(D)).
-
-% --- Grupo preposicional (pp) ---
-
-% Prep + SN  (caso normal)
-prep_phrase(pp(Prep, NP)) -->
-    preposition(Prep),
-    noun_phrase(NP).
-
-% Prep + grupo verbal  (in formulating..., to understand...)
-prep_phrase(pp(Prep, VP)) -->
-    preposition(Prep),
-    verb_phrase(VP).
-
-% Prep + SA  (from immediate, as essential)
-prep_phrase(pp(Prep, AP)) -->
-    preposition(Prep),
-    adj_phrase(AP).
-
-% Prep compuesta: according to ...
-prep_phrase(pp(prep(according), PP)) -->
-    [according],
-    prep_phrase(PP).
-
-% Infinitivo adverbial
-fronted_infinitive(fronted(to, VP)) -->
-    [to],
-    verb_phrase(VP).
-
-% =============================================================================
-% Terminales DCG
-% =============================================================================
-
-determiner(det(P))      --> [P], { is_determiner(P) }.
-noun(n(P))              --> [P], { is_noun(P) }.
-adjective(adj(P))       --> [P], { is_adjective(P) }.
-adverb(adv(P))          --> [P], { is_adverb(P) }.
-conjunction(conj(P))    --> [P], { is_conjunction(P) }.
-relative(rel(P))        --> [P], { is_relative(P) }.
-preposition(prep(P))    --> [P], { is_preposition(P) }.
-auxiliary(aux(P))       --> [P], { is_auxiliary(P) }.
-
-transitive_verb(v(P))   --> [P], { is_transitive_verb(P) }.
-intransitive_verb(v(P)) --> [P], { is_intransitive_verb(P) }.
-copulative_verb(v(P))   --> [P], { is_copulative_verb(P) }.
-
-% =============================================================================
-% Clasificación léxica — inglés
-% =============================================================================
-
-is_determiner(P) :- memberchk(P, [
-    the, a, an, this, that, these, those, its, our, their,
-    another, other, one, each, any, such, some, no, all, both, many
-]).
-
-is_conjunction(P) :- memberchk(P, [
-    and, but, or, although, however, well, yet, if
-]).
-
-is_relative(P) :- memberchk(P, [
-    that, which, who, where, what
-]).
-
-is_preposition(P) :- memberchk(P, [
-    in, of, for, to, from, at, on, by, with, through, into, about,
-    as, after, since, until, during, per, between, according, over,
-    upon, within
-]).
-
-is_adverb(P) :- memberchk(P, [
-    not, very, also, likewise, fortunately, finally, precisely,
-    directly, completely, definitively, always, often, only, just,
-    eventually, far, simply, surely, so, somewhat, then, first,
-    classically, similarly, already, still, here, now,
-    never, ever, truly, accurately
-]).
-
-is_adjective(P) :- memberchk(P, [
-    essential, fundamental, innovative, impossible, immediate, bold,
-    coherent, efficient, characteristic, certain, perplexing, subatomic,
-    poetic, romantic, usual, wavelike, microscopic, international,
-    revolutionary, theoretical, forbidden, important, indispensable,
-    multiple, photoelectric, able, early, exact, miniature, small,
-    new, great, absolute, different, proportional, quantized, discretized,
-    general, similar, black, precise, basic, quantum, true,
-    specific, unique, natural, physical, perceptible, complete,
-    innovative, proportional, various
-]).
-
-is_auxiliary(P) :- memberchk(P, [
-    was, were, is, are, have, had, can, could, should, would,
-    may, might, do, does, did, be, been, being, has
-]).
-
-is_copulative_verb(P) :- memberchk(P, [
-    % Cópulas directas en inglés
-    is, are, was, were, be, been,
-    % Verbos atributivos
-    became, become, seem, seemed, appears, appeared, remain, remained,
-    come, came, known, named, considered, established, related
-]).
-
-is_transitive_verb(P) :- memberchk(P, [
-    played, plays, governs, govern, challenges, challenged, proposed,
-    made, make, contradicted, contradict,
-    confirmed, highlighted, consolidated, contributed, absorbed, absorbs,
-    radiates, radiated, strikes, ejects, used, managed, gave, quantified,
-    called, exhibited, introduced, expounded, found, conducted,
-    said, determined, presented, explained, laid, heard,
-    states, stated, showed, hitting, established, observed,
-    represented, formulating, understand, know, measure, find, explain,
-    solve, establish, give, manifest, show, conduct, confirm, highlight,
-    consider, determine, present, propose, introduce, name, use, manage,
-    exhibit, quantify, call, absorb, radiate, strike, eject, hear,
-    expressed, proved, demonstrated, reveal, suggest
-]).
-
-is_intransitive_verb(P) :- memberchk(P, [
-    exists, exist, stalled, grew, grow, acts, act, appears, appear,
-    began, begin, plunges, plunge, started, start, contributed,
-    contribute, possessed, possess, passes, pass, stall,
-    proceeded, proceed
-]).
-
-is_noun(P) :-
-    atom(P),
-    atom_number(P, _).
-
-is_noun(P) :-
-    corpus_token(P),
-    \+ is_determiner(P),
-    \+ is_conjunction(P),
-    \+ is_relative(P),
-    \+ is_preposition(P),
-    \+ is_adverb(P),
-    \+ is_adjective(P),
-    \+ is_auxiliary(P),
-    \+ is_copulative_verb(P),
-    \+ is_transitive_verb(P),
-    \+ is_intransitive_verb(P).
-
-% =============================================================================
-% Tokens del corpus (inglés) — usado para inferir nombres por exclusión
-% =============================================================================
-
-corpus_token(P) :- memberchk(P, [
-    % Números y valores especiales
-    1900, 1905, 1927, '1981', '6.626x10-34',
-    % Pronombres y expletivos (tratados como nombres en la gramática)
-    it, its, they, their, he, you, we, there, itself, themselves,
-    this, that, those, one, each,
-    % Determinantes
-    the, a, an, another, other, some, no, all, both, many, such, any,
-    % Conjunciones
-    and, but, or, although, however, well, yet,
-    % Relativos
-    that, which, who, where, what,
-    % Preposiciones
-    in, of, for, to, from, at, on, by, with, through, into, about, as,
-    after, since, until, during, per, between, according, over,
-    % Adverbios
-    not, very, also, likewise, fortunately, finally, precisely, directly,
-    completely, definitively, always, often, only, just, eventually, far,
-    simply, surely, so, somewhat, then, first, classically,
-    % Adjetivos
-    essential, fundamental, innovative, impossible, immediate, bold,
-    coherent, efficient, characteristic, certain, perplexing, subatomic,
-    poetic, romantic, usual, wavelike, microscopic, international,
-    revolutionary, theoretical, forbidden, important, indispensable,
-    multiple, photoelectric, able, early, exact, miniature, small,
-    new, great, absolute, different, proportional, quantized, discretized,
-    general, similar, black, true, quantum, constant,
-    % Auxiliares (también cópulas cuando son verbo principal)
-    was, were, is, are, have, had, can, could, should, would, may,
-    might, do, does, did, be, been, being, has,
-    % Verbos copulativos
-    became, become, seemed, seems, appeared, come, came,
-    known, named, considered, established, related,
-    % Pronombres / expletivos
-    there, itself, themselves, himself, herself,
-    % Verbos transitivos
-    played, governs, challenges, proposed, confirmed, highlighted,
-    consolidated, contributed, absorbed, absorbs, radiates, strikes,
-    ejects, used, managed, gave, quantified, called, exhibited,
-    introduced, expounded, found, conducted, said, determined,
-    presented, explained, laid, heard, states, showed, hitting,
-    represented, formulating, observed, manages,
-    % Verbos intransitivos
-    exists, exist, stalled, grew, grow, acts, began, plunges,
-    possessed, passes, pass, contributed, appeared,
-    % Nombres del dominio (física cuántica)
-    constant, role, formulation, approaches, heisenberg, uncertainty,
-    principle, physics, discipline, perception, reality, phrase, part,
-    behavior, particles, eyes, study, scientists, research, laws, context,
-    protagonist, world, planck, physicist, century, work, anxieties,
-    time, era, progress, dilemmas, radiation, body, object, quantity,
-    energy, phenomenon, idea, quantization, intervals, pockets, quanta,
-    value, quantities, acceptance, proposal, phenomena, theories, force,
-    physicists, importance, einstein, bohr, werner, breakthroughs, theory,
-    duality, mechanics, pillars, conception, way, letter, h, nature,
-    emission, postulate, integers, joules, second, units, system, approach,
-    precision, position, momentum, particle, case, impediment, limitation,
-    ability, presence, explanation, experiments, testimony, effect,
-    light, metal, electrons, hypothesis, photons, foundation, diffraction,
-    behaviors, waves, wave, element, barriers, multiples, microscope,
-    invention, tunnel, niels, bohr, albert, lester, germer, clinton,
-    davisson, max, werner, order, words, example, problem, body, object,
-    key, understanding, groundwork, many, anxieties, need, consider,
-    importance, consolidate, highlight, establish, show, give, manifest,
-    itself, photons, energy, intervals, pockets, quanta, integers,
-    multiples, barriers, diffraction, behaviors, waves, breakthroughs,
-    % Participios y gerundios usados como nombres/modificadores
-    emitted, observed, deduced, showing, laying, playing, betting,
-    hitting, taking, place, based, composed, called,
-    % Palabras adicionales que no caen en otras categorías
-    force, role, context, key, understanding, order, words, example,
-    constant, problem, body, object, groundwork, need, consider,
-    consolidate, highlight, establish, show, give, manifest, itself,
-    photons, quanta, diffraction, electron, master
-]).
