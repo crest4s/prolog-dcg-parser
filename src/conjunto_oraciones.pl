@@ -48,12 +48,12 @@
 % ---------------------------------------------------------------------------
 oracion(1, o, correcta,
     [this, constant, played, an, essential, role, in, the, formulation,
-     of, another, of, the, great, quantum, approaches, the, heisenberg,
+     of, another, of, the, great, quantum, approaches, ':', the, heisenberg,
      uncertainty, principle]).
 
 oracion_es(1,
     [esta, constante, desempeno, un, papel, esencial, en, la, formulacion,
-     de, otro, de, los, grandes, planteamientos, de, la, cuantica, el,
+     de, otro, de, los, grandes, planteamientos, de, la, cuantica, ':', el,
      principio, de, incertidumbre, de, heisenberg]).
 
 % ---------------------------------------------------------------------------
@@ -79,12 +79,12 @@ oracion_es(2,
 %     it can be considered true.
 % ---------------------------------------------------------------------------
 oracion(3, ocm, correcta,
-    [well, although, it, is, a, somewhat, poetic, and, romantic, phrase,
-     in, part, it, can, be, considered, true]).
+    [well, although, ',', it, is, a, somewhat, poetic, and, romantic, phrase, ',',
+     in, part, ',', it, can, be, considered, true]).
 
 oracion_es(3,
-    [pues, bien, aunque, es, una, frase, algo, poetica, y, romantica,
-     en, parte, puede, considerarse, cierta]).
+    [pues, bien, ',', aunque, es, una, frase, algo, poetica, y, romantica,
+     en, parte, ',', puede, considerarse, cierta]).
 
 % ---------------------------------------------------------------------------
 % Oración 4 — Compuesta relativa + coordinada + relativa (ocm) | Problemática
@@ -101,14 +101,14 @@ oracion_es(3,
 % ---------------------------------------------------------------------------
 oracion(4, ocm, problematica,
     [quantum, physics, is, what, governs, the, behavior, of, subatomic,
-     particles, those, so, small, that, they, are, not, perceptible,
-     to, our, eyes, and, their, study, often, plunges, scientists,
+     particles, ',', those, so, small, that, they, are, not, perceptible,
+     to, our, eyes, ',', and, their, study, often, plunges, scientists,
      into, research, where, the, usual, laws, do, not, exist]).
 
 oracion_es(4,
     [la, fisica, cuantica, es, la, que, gobierna, el, comportamiento,
-     de, las, particulas, subatomicas, aquellas, tan, pequenas, que, no,
-     son, perceptibles, para, nuestros, ojos, y, su, estudio, a, menudo,
+     de, las, particulas, subatomicas, ',', aquellas, tan, pequenas, que, no,
+     son, perceptibles, para, nuestros, ojos, y, ',', su, , ',', a, menudo,
      sumerge, a, los, cientificos, en, investigaciones, donde, las,
      leyes, habituales, no, existen]).
 
@@ -122,14 +122,14 @@ oracion_es(4,
 %     the Planck constant.
 % ---------------------------------------------------------------------------
 oracion(5, or, correcta,
-    [in, this, context, there, is, a, protagonist, which, you, have,
-     surely, heard, of, that, acts, as, a, master, key, to, understanding,
-     this, miniature, world, the, planck, constant]).
+    [in, this, context, ',', there, is, a, protagonist, ',', which, you, have,
+     surely, heard, of, ',', that, acts, as, a, master, key, to, understanding,
+     this, miniature, world, ':', the, planck, constant]).
 
 oracion_es(5,
-    [en, este, contexto, existe, una, protagonista, de, la, cual,
-     seguramente, hayas, oido, hablar, que, actua, como, una, llave,
-     maestra, para, entender, este, mundo, en, miniatura, la, constante,
+    [en, este, contexto, ',', existe, una, protagonista, ',', de, la, cual,
+     seguramente, hayas, oido, hablar, ',', que, actua, como, una, llave,
+     maestra, para, entender, este, mundo, en, miniatura, ':', la, constante,
      de, planck]).
 
 % ---------------------------------------------------------------------------
@@ -140,12 +140,12 @@ oracion_es(5,
 %     was first named in the early 20th century.
 % ---------------------------------------------------------------------------
 oracion(6, o, correcta,
-    [named, after, the, physicist, who, introduced, it, max, planck,
-     the, constant, was, first, named, in, the, early, century]).
+    [named, after, the, physicist, who, introduced, it, ',', max, planck, ',',
+     the, constant, was, first, named, in, the, early, 20th, century]).
 
 oracion_es(6,
-    [llamada, asi, en, honor, al, fisico, que, la, introdujo, max,
-     planck, la, constante, fue, nombrada, por, primera, vez, a,
+    [llamada, asi, en, honor, al, fisico, que, la, introdujo, ',', max,
+     planck, ',', la, constante, fue, nombrada, por, primera, vez, a,
      principios, del, siglo, xx]).
 
 % ---------------------------------------------------------------------------
@@ -159,16 +159,16 @@ oracion_es(6,
 %     the groundwork for a new era in physics: quantum.
 % ---------------------------------------------------------------------------
 oracion(7, oc, correcta,
-    [in, a, completely, revolutionary, work, planck, was, not, only,
+    [in, a, completely, revolutionary, work, ',', planck, was, not, only,
      finally, able, to, explain, a, great, many, of, the, anxieties,
      of, the, time, but, also, laid, the, groundwork, for, a, new,
-     era, in, physics, quantum]).
+     era, in, physics, ':', quantum]).
 
 oracion_es(7,
-    [en, un, trabajo, completamente, revolucionario, planck, no, solo,
+    [en, un, trabajo, completamente, revolucionario, ',', planck, no, solo,
      pudo, finalmente, dar, explicacion, a, una, gran, cantidad, de,
-     inquietudes, de, la, epoca, sino, que, sento, las, bases, para,
-     abrir, paso, a, una, nueva, era, en, la, fisica, la, cuantica]).
+     inquietudes, de, la, epoca, ',', sino, que, sento, las, bases, para,
+     abrir, paso, a, una, nueva, era, en, la, fisica, ':', la, cuantica]).
 
 % ---------------------------------------------------------------------------
 % Oración 8 — Simple (o) | Correcta
@@ -178,11 +178,11 @@ oracion_es(7,
 %     stalled.
 % ---------------------------------------------------------------------------
 oracion(8, o, correcta,
-    [since, the, early, century, progress, in, physics, seemed,
+    [since, the, early, 20th, century, ',', progress, in, physics, seemed,
      to, have, stalled]).
 
 oracion_es(8,
-    [desde, los, comienzos, del, siglo, xx, el, avance, en, fisica,
+    [desde, los, comienzos, del, siglo, xx, ',', el, avance, en, fisica,
      parecia, haberse, estancado]).
 
 % ---------------------------------------------------------------------------
@@ -215,15 +215,15 @@ oracion_es(9,
 %             a la energía (ambigüedad pronominal de "it").
 % ---------------------------------------------------------------------------
 oracion(10, oc, ambigua,
-    [one, such, problem, was, radiation, from, the, black, body,
-     that, is, an, object, that, absorbs, all, of, the, radiation,
+    [one, such, problem, was, radiation, from, the, black, body, ',',
+     that, is, ',', an, object, that, absorbs, all, of, the, radiation,
      that, strikes, it, but, radiates, a, quantity, of, energy,
      characteristic, of, it]).
 
 oracion_es(10,
     [uno, de, esos, problemas, era, el, de, la, radiacion, del,
-     cuerpo, negro, es, decir, un, objeto, que, absorbe, toda, la,
-     radiacion, que, incide, sobre, el, pero, irradia, una, cantidad,
+     cuerpo, negro, ',', es, decir, ',', un, objeto, que, absorbe, toda, la,
+     radiacion, que, incide, sobre, el, ',', pero, irradia, una, cantidad,
      de, energia, caracteristica, de, el]).
 
 % ---------------------------------------------------------------------------
@@ -238,17 +238,17 @@ oracion_es(10,
 %     called quanta.
 % ---------------------------------------------------------------------------
 oracion(11, ocm, correcta,
-    [in, order, to, solve, this, phenomenon, max, planck, presented,
+    [in, order, to, solve, this, phenomenon, ',', max, planck, presented,
      in, '1900', an, innovative, idea, about, the, quantization, of,
-     energy, he, proposed, that, energy, was, discretized, into,
-     small, intervals, or, pockets, which, he, called, quanta]).
+     energy, ':', he, proposed, that, energy, was, discretized, into,
+     small, intervals, or, pockets, ',', which, he, called, quanta]).
 
 oracion_es(11,
-    [con, el, objetivo, de, dar, solucion, a, ese, fenomeno, max,
+    [con, el, objetivo, de, dar, solucion, a, ese, fenomeno, ',', max,
      planck, presento, en, el, ano, '1900', una, idea, innovadora,
-     sobre, la, cuantizacion, de, la, energia, propuso, que, la,
+     sobre, la, cuantizacion, de, la, energia, ':', propuso, que, la,
      energia, estaba, discretizada, en, pequenos, intervalos, o,
-     bolsas, a, los, que, llamo, cuantos]).
+     bolsas, a, ',', los, que, llamo, cuantos]).
 
 % ---------------------------------------------------------------------------
 % Oración 12 — Subordinada sustantiva + coordinada adversativa (ocm) | Correcta
@@ -260,14 +260,14 @@ oracion_es(11,
 %     proportional to one value: the Planck constant.
 % ---------------------------------------------------------------------------
 oracion(12, ocm, correcta,
-    [in, other, words, he, expounded, the, idea, that, the, energy,
-     emitted, was, not, a, constant, value, but, was, emitted, in,
+    [in, other, words, ',', he, expounded, the, idea, that, the, energy,
+     emitted, was, not, a, constant, value, ',', but, was, emitted, in,
      small, quantities, always, proportional, to, one, value,
      the, planck, constant]).
 
 oracion_es(12,
-    [en, otras, palabras, expuso, la, idea, de, que, la, energia,
-     emitida, no, tenia, un, valor, constante, sino, que, se, emitia,
+    [en, otras, palabras, ',', expuso, la, idea, de, que, la, energia,
+     emitida, no, tenia, un, valor, constante, ',', sino, que, se, emitia,
      en, pequenas, cantidades, proporcionales, siempre, a, un, valor,
      la, constante, de, planck]).
 
@@ -278,10 +278,10 @@ oracion_es(12,
 % EN: However, acceptance of this idea was far from immediate.
 % ---------------------------------------------------------------------------
 oracion(13, o, correcta,
-    [however, acceptance, of, this, idea, was, far, from, immediate]).
+    [however, ',', acceptance, of, this, idea, was, far, from, immediate]).
 
 oracion_es(13,
-    [sin, embargo, la, aceptacion, de, esta, idea, no, fue, ni,
+    [sin, embargo, ',', la, aceptacion, de, esta, idea, no, fue, ni,
      mucho, menos, inmediata]).
 
 % ---------------------------------------------------------------------------
@@ -293,13 +293,13 @@ oracion_es(13,
 %     phenomena, it contradicted many theories then in force.
 % ---------------------------------------------------------------------------
 oracion(14, ocm, correcta,
-    [planck, proposal, was, bold, and, although, it, seemed, to,
-     explain, certain, phenomena, it, contradicted, many, theories,
+    [planck, proposal, was, bold, ',', and, although, it, seemed, to,
+     explain, certain, phenomena, ',', it, contradicted, many, theories,
      then, in, force]).
 
 oracion_es(14,
-    [la, propuesta, de, planck, era, atrevida, y, aunque, parecia,
-     explicar, ciertos, fenomenos, entraba, en, contradiccion, con,
+    [la, propuesta, de, planck, era, atrevida, y, ',', aunque, parecia,
+     explicar, ciertos, fenomenos, ',', entraba, en, contradiccion, con,
      muchas, teorias, vigentes, por, aquel, momento]).
 
 % ---------------------------------------------------------------------------
@@ -314,14 +314,14 @@ oracion_es(14,
 %     Planck s theory.
 % ---------------------------------------------------------------------------
 oracion(15, or, correcta,
-    [fortunately, other, physicists, of, great, importance, at, the,
-     time, such, as, albert, einstein, niels, bohr, or, werner,
-     heisenberg, contributed, to, other, fundamental, breakthroughs,
+    [fortunately, ',', other, physicists, of, great, importance, at, the,
+     time, ',', such, as, albert, einstein, ',', niels, bohr, or, werner,
+     heisenberg, ',', contributed, to, other, fundamental, breakthroughs,
      that, eventually, consolidated, planck, theory]).
 
 oracion_es(15,
-    [afortunadamente, otros, fisicos, de, gran, importancia, de, la,
-     epoca, como, albert, einstein, niels, bohr, o, werner, heisenberg,
+    [afortunadamente, ',', otros, fisicos, de, gran, importancia, de, la,
+     epoca, como, albert, einstein, ',', niels, bohr, o, werner, heisenberg, ',',
      contribuyeron, con, otros, avances, fundamentales, que, terminaron,
      por, consolidar, la, teoria, de, planck]).
 
@@ -337,12 +337,12 @@ oracion_es(15,
 %           "this" en vez de "that", alterando la deixis original.
 % ---------------------------------------------------------------------------
 oracion(16, or, problematica,
-    [in, general, wave, particle, duality, the, uncertainty, principle,
+    [in, general, ',', wave, particle, duality, ',', the, uncertainty, principle,
      and, quantum, mechanics, were, the, pillars, that, made, this,
      new, conception, of, the, microscopic, world, grow]).
 
 oracion_es(16,
-    [en, general, la, dualidad, onda, particula, el, principio, de,
+    [en, general, ',', la, dualidad, onda, particula, ',', el, principio, de,
      incertidumbre, y, la, mecanica, cuantica, fueron, los, pilares,
      que, hicieron, crecer, esa, nueva, concepcion, del, mundo,
      microscopico]).
@@ -362,15 +362,15 @@ oracion_es(16,
 %           español al introducir una nueva subordinada.
 % ---------------------------------------------------------------------------
 oracion(17, ocm, problematica,
-    [in, this, way, the, planck, constant, represented, by, the,
-     letter, h, became, established, as, one, of, the, fundamental,
-     pillars, of, quantum, physics, playing, a, fundamental, role,
+    [in, this, way, ',', the, planck, constant, ',', represented, by, the,
+     letter, h, ',', became, established, as, one, of, the, fundamental,
+     pillars, of, quantum, physics, ',', playing, a, fundamental, role,
      in, the, quantization, of, phenomena, taking, place, in, nature]).
 
 oracion_es(17,
-    [de, esta, forma, la, constante, de, planck, representada, por,
-     la, letra, h, se, asento, como, uno, de, los, pilares,
-     fundamentales, de, la, fisica, cuantica, jugando, un, papel,
+    [de, esta, forma, ',', la, constante, de, planck, ',', representada, por,
+     la, letra, h, ',', se, asento, como, uno, de, los, pilares,
+     fundamentales, de, la, fisica, cuantica, ',', jugando, un, papel,
      fundamental, en, la, cuantizacion, de, los, fenomenos, que,
      tienen, lugar, en, la, naturaleza]).
 
@@ -386,16 +386,16 @@ oracion_es(17,
 %     integers of the constant, h.
 % ---------------------------------------------------------------------------
 oracion(18, ocm, correcta,
-    [until, that, time, it, was, considered, that, an, emission, of,
-     energy, could, have, any, value, but, with, the, planck, postulate,
+    [until, that, time, ',', it, was, considered, that, an, emission, of,
+     energy, could, have, any, value, but, ',', with, the, planck, postulate, ',',
      it, was, determined, that, it, should, always, be, quantized,
      into, quantities, which, were, multiple, integers, of, the,
      constant, h]).
 
 oracion_es(18,
-    [hasta, ese, momento, se, consideraba, que, una, emision, de,
-     energia, podia, tener, cualquier, valor, pero, con, la,
-     postulacion, de, planck, se, determino, que, siempre, debia,
+    [hasta, ese, momento, ',', se, consideraba, que, una, emision, de,
+     energia, podia, tener, cualquier, valor, pero, ',', con, la,
+     postulacion, de, planck, ',', se, determino, que, siempre, debia,
      estar, cuantizada, en, cantidades, que, fueran, multiplos,
      enteros, de, la, constante, h]).
 
@@ -407,12 +407,12 @@ oracion_es(18,
 %     to the International System of Units.
 % ---------------------------------------------------------------------------
 oracion(19, o, correcta,
-    [to, be, exact, its, value, is, '6.626x10-34', joules, per,
-     second, according, to, the, international, system, of, units]).
+    [to, be, exact, ',', its, value, is, '6.626x10-34', joules, per,
+     second, ',', according, to, the, international, system, of, units]).
 
 oracion_es(19,
-    [para, ser, exactos, su, valor, es, de, '6.626x10-34', julios,
-     por, segundo, segun, el, sistema, internacional, de, unidades]).
+    [para, ser, exactos, ',', su, valor, es, de, '6.626x10-34', julios,
+     por, segundo, ',', segun, el, sistema, internacional, de, unidades]).
 
 % ---------------------------------------------------------------------------
 % Oración 20 — Simple (o) | Correcta
@@ -424,13 +424,13 @@ oracion_es(19,
 %     Heisenberg uncertainty principle.
 % ---------------------------------------------------------------------------
 oracion(20, o, correcta,
-    [likewise, the, planck, constant, also, played, an, essential,
+    [likewise, ',', the, planck, constant, also, played, an, essential,
      role, in, the, formulation, of, another, of, the, great,
      quantum, approaches, to, the, heisenberg, uncertainty,
      principle]).
 
 oracion_es(20,
-    [asimismo, la, constante, de, planck, tambien, desempeno, un,
+    [asimismo, ',', la, constante, de, planck, tambien, desempeno, un,
      papel, esencial, en, la, formulacion, de, otro, de, los, grandes,
      planteamientos, de, la, cuantica, el, principio, de, incertidumbre,
      de, heisenberg]).
@@ -463,13 +463,13 @@ oracion_es(21,
 %     accurately.
 % ---------------------------------------------------------------------------
 oracion(22, ocm, correcta,
-    [in, this, case, the, planck, constant, appears, as, an,
-     impediment, as, if, it, were, a, limitation, on, the, ability,
+    [in, this, case, ',', the, planck, constant, appears, as, an,
+     impediment, ',', as, if, it, were, a, limitation, on, the, ability,
      to, measure, certain, quantities, accurately]).
 
 oracion_es(22,
-    [en, este, caso, la, constante, de, planck, aparece, como, un,
-     impedimento, tal, y, como, si, fuera, una, limitacion, en, la,
+    [en, este, caso, ',', la, constante, de, planck, aparece, como, un,
+     impedimento, ',', tal, y, como, si, fuera, una, limitacion, en, la,
      capacidad, para, medir, ciertas, cantidades, con, precision]).
 
 % ---------------------------------------------------------------------------
@@ -484,15 +484,15 @@ oracion_es(22,
 %     importance.
 % ---------------------------------------------------------------------------
 oracion(23, or, correcta,
-    [its, presence, deduced, in, a, theoretical, way, manages, to,
+    [its, presence, ',', deduced, in, a, theoretical, way, ',', manages, to,
      give, explanation, and, manifest, itself, through, quantum,
-     phenomena, observed, in, different, experiments, which,
+     phenomena, observed, in, different, experiments, ',', which,
      definitively, consolidated, its, importance]).
 
 oracion_es(23,
-    [su, presencia, deducida, de, forma, teorica, consigue, dar,
+    [su, presencia, ',', deducida, de, forma, teorica, ',', consigue, dar,
      explicacion, y, manifestarse, a, traves, de, fenomenos, cuanticos,
-     observados, en, diferentes, experimentos, los, cuales, consolidaron,
+     observados, en, diferentes, experimentos, ',', los, cuales, ',', consolidaron,
      definitivamente, su, importancia]).
 
 % ---------------------------------------------------------------------------
@@ -509,15 +509,15 @@ oracion_es(23,
 %           libre, perdiendo la estructura de complemento directo.
 % ---------------------------------------------------------------------------
 oracion(24, ocm, problematica,
-    [for, example, based, on, the, testimony, of, planck, albert,
+    [for, example, ',', based, on, the, testimony, of, planck, ',', albert,
      einstein, proposed, in, '1905', a, quantum, explanation, for,
-     the, photoelectric, effect, betting, that, light, hitting,
+     the, photoelectric, effect, ',', betting, that, light, hitting,
      a, metal, ejects, electrons]).
 
 oracion_es(24,
-    [por, ejemplo, basandose, en, el, testimonio, de, planck, albert,
+    [por, ejemplo, ',', basandose, en, el, testimonio, de, planck, ',', albert,
      einstein, propuso, en, '1905', una, explicacion, cuantica, para,
-     el, efecto, fotoelectrico, apostando, a, que, la, luz, que,
+     el, efecto, fotoelectrico, ',', apostando, a, que, la, luz, que,
      incide, sobre, un, metal, arranca, electrones]).
 
 % ---------------------------------------------------------------------------
@@ -530,13 +530,13 @@ oracion_es(24,
 %     to Planck s constant.
 % ---------------------------------------------------------------------------
 oracion(25, ocm, correcta,
-    [to, establish, this, idea, einstein, used, the, hypothesis,
-     that, light, is, composed, of, particles, called, photons,
+    [to, establish, this, idea, ',', einstein, used, the, hypothesis,
+     that, light, is, composed, of, particles, called, photons, ',',
      each, with, energy, proportional, to, planck, constant]).
 
 oracion_es(25,
-    [para, establecer, esta, idea, einstein, utilizo, como, hipotesis,
-     que, la, luz, esta, compuesta, por, particulas, llamadas, fotones,
+    [para, establecer, esta, idea, ',', einstein, utilizo, como, hipotesis,
+     que, la, luz, esta, compuesta, por, particulas, llamadas, fotones, ',',
      cada, uno, con, energia, proporcional, a, la, constante, de,
      planck]).
 
@@ -551,13 +551,13 @@ oracion_es(25,
 % ---------------------------------------------------------------------------
 oracion(26, ocm, correcta,
     [it, was, precisely, this, phenomenon, that, managed, to, explain,
-     that, light, had, both, wave, and, particle, behaviors, laying,
+     that, light, had, both, wave, and, particle, behaviors, ',', laying,
      the, foundation, for, the, wave, particle, duality]).
 
 oracion_es(26,
     [fue, justamente, este, fenomeno, el, que, consiguio, explicar,
      que, la, luz, presentaba, comportamientos, tan, de, onda, como,
-     de, particula, sentando, las, bases, para, la, dualidad, onda,
+     de, particula, ',', sentando, las, bases, para, la, dualidad, onda,
      particula]).
 
 % ---------------------------------------------------------------------------
@@ -571,15 +571,15 @@ oracion_es(26,
 %     exhibited wavelike behaviors very similar to light waves.
 % ---------------------------------------------------------------------------
 oracion(27, ocm, correcta,
-    [likewise, in, '1927', clinton, davisson, and, lester, germer,
-     conducted, different, experiments, of, electron, diffraction,
+    [likewise, ',', in, '1927', ',', clinton, davisson, and, lester, germer,
+     conducted, different, experiments, of, electron, diffraction, ',',
      showing, that, they, exhibited, wavelike, behaviors, very,
      similar, to, light, waves]).
 
 oracion_es(27,
-    [asimismo, en, el, ano, '1927', clinton, davisson, y, lester,
+    [asimismo, ',', en, el, ano, '1927', ',', clinton, davisson, y, lester,
      germer, realizaron, diferentes, experimentos, de, difraccion,
-     de, electrones, demostrando, que, estos, exhibian,
+     de, electrones, ',', demostrando, que, estos, exhibian,
      comportamientos, ondulatorios, muy, similares, a, las, ondas,
      de, luz]).
 
@@ -595,15 +595,15 @@ oracion_es(27,
 %     study of the microscopic world.
 % ---------------------------------------------------------------------------
 oracion(28, ocm, correcta,
-    [this, phenomenon, which, came, to, be, known, as, electron,
-     diffraction, confirmed, this, wave, particle, duality, and,
+    [this, phenomenon, ',', which, came, to, be, known, as, electron,
+     diffraction, ',', confirmed, this, wave, particle, duality, and,
      highlighted, the, need, to, consider, the, planck, constant,
      as, an, indispensable, element, in, the, study, of, the,
      microscopic, world]).
 
 oracion_es(28,
-    [este, fenomeno, que, paso, a, conocerse, como, difraccion, de,
-     electrones, confirmo, esa, dualidad, onda, particula, y, resalto,
+    [este, fenomeno, ',', que, paso, a, conocerse, como, difraccion, de,
+     electrones, ',', confirmo, esa, dualidad, onda, particula, y, resalto,
      la, necesidad, de, considerar, la, constante, de, planck, como,
      un, elemento, indispensable, en, el, estudio, del, mundo,
      microscopico]).
@@ -642,13 +642,13 @@ oracion_es(29,
 % ---------------------------------------------------------------------------
 oracion(30, or, problematica,
     [this, is, a, phenomenon, in, which, particles, are, able, to,
-     pass, through, classically, forbidden, energy, barriers, which,
-     is, directly, related, to, the, energy, they, possess,
+     pass, through, classically, forbidden, energy, barriers, ',', which,
+     is, directly, related, to, the, energy, they, possess, ',',
      quantified, in, multiples, of, the, planck, constant]).
 
 oracion_es(30,
     [se, trata, de, un, fenomeno, en, el, cual, las, particulas,
      son, capaces, de, atravesar, barreras, energeticas, prohibidas,
-     clasicamente, lo, cual, se, relaciona, directamente, con, la,
-     energia, que, posee, cuantificada, en, multiplos, de, la,
+     clasicamente, ',', lo, cual, se, relaciona, directamente, con, la,
+     energia, que, posee, ',', cuantificada, en, multiplos, de, la,
      constante, de, planck]).
