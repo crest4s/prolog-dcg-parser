@@ -145,24 +145,36 @@ extract_all_subs(s(NP, VP), Subs) :-
     append(SubsVP, SubsNP, Subs).
 extract_all_subs(_, []).
 
-extract_from_vp(vp(_, Arg), Subj, Sub) :- nonvar(Arg), extract_from_np(Arg, Subj, Sub).
-extract_from_vp(vp(_, Arg, _), Subj, Sub) :- nonvar(Arg), extract_from_np(Arg, Subj, Sub).
-extract_from_vp(vp(_, _, Arg), Subj, Sub) :- nonvar(Arg), extract_from_np(Arg, Subj, Sub).
-extract_from_vp(vp(_, _, Arg, _), Subj, Sub) :- nonvar(Arg), extract_from_np(Arg, Subj, Sub).
-extract_from_vp(vp(_, that(SubTrees)), _, Sub) :- is_list(SubTrees), member(Sub, SubTrees).
-extract_from_vp(vp(_, _, that(SubTrees)), _, Sub) :- is_list(SubTrees), member(Sub, SubTrees).
-extract_from_vp(vp(VP1, _, VP2), Subj, Sub) :- (extract_from_vp(VP1, Subj, Sub) ; extract_from_vp(VP2, Subj, Sub)).
-extract_from_vp(vp(_, VP_inner), Subj, Sub) :- extract_from_vp(VP_inner, Subj, Sub).
+% that-complement in position 2
+extract_from_vp(vp(_, that(SubTrees)), _, Sub) :- is_list(SubTrees), !, member(Sub, SubTrees).
+% that-complement in position 3
+extract_from_vp(vp(_, _, that(SubTrees)), _, Sub) :- is_list(SubTrees), !, member(Sub, SubTrees).
+% direct embedded sentence in position 2 or 3
+extract_from_vp(vp(_, S), _, S) :- S = s(_, _), !.
+extract_from_vp(vp(_, _, S), _, S) :- S = s(_, _), !.
+% relative clause inside an NP argument of the VP
+extract_from_vp(vp(_, NP), Subj, Sub) :- nonvar(NP), compound(NP), NP =.. [np|_], extract_from_np(NP, Subj, Sub).
+extract_from_vp(vp(_, _, NP), Subj, Sub) :- nonvar(NP), compound(NP), NP =.. [np|_], extract_from_np(NP, Subj, Sub).
+extract_from_vp(vp(_, _, _, NP), Subj, Sub) :- nonvar(NP), compound(NP), NP =.. [np|_], extract_from_np(NP, Subj, Sub).
+% coordinated VP: recurse into both branches
+extract_from_vp(vp(VP1, _, VP2), Subj, Sub) :-
+    (functor(VP1, vp, _) ; functor(VP2, vp, _)), !,
+    (extract_from_vp(VP1, Subj, Sub) ; extract_from_vp(VP2, Subj, Sub)).
+% inner VP wrapper (adv/conj/pp prefix)
+extract_from_vp(vp(_, VP_inner), Subj, Sub) :- functor(VP_inner, vp, _), extract_from_vp(VP_inner, Subj, Sub).
 
-extract_from_np(np(Base, relcl(_, VPRel)), _, s(Base, VPRel)).
-extract_from_np(np(_, relcl(_, _, S)), _, S).
-extract_from_np(np(_, relcl(_, S1, _, _)), _, S1).
-extract_from_np(np(_, relcl(_, _, _, pp(_, _, S2))), _, S2).
-extract_from_np(np(Base, relcl(contact, S)), _, s(Base, VP)) :- S = s(_, VP).
-extract_from_np(np(_, that(SubTrees)), _, Sub) :- is_list(SubTrees), member(Sub, SubTrees).
-extract_from_np(np(_, S), _, S) :- S = s(_, _).
-extract_from_np(np(Base, VP_part), _, s(Base, VP_part)) :- VP_part = vp(V, _), is_participle_head(V).
-extract_from_np(np(Base, VP_part), _, s(Base, VP_part)) :- VP_part = vp(V, _, _), is_participle_head(V).
+% Object relative clause: relative pronoun is object, inner S has its own subject
+extract_from_np(np(_, relcl(_, S)), _, S) :- S = s(_, _), !.
+% Subject relative clause: relative pronoun is subject, attach head NP as subject
+extract_from_np(np(Base, relcl(_, VP)), _, s(Base, VP)) :- functor(VP, vp, _), !.
+extract_from_np(np(_, relcl(_, _, S)), _, S) :- !.
+extract_from_np(np(_, relcl(_, S1, _, _)), _, S1) :- !.
+extract_from_np(np(_, relcl(_, _, _, pp(_, _, S2))), _, S2) :- !.
+extract_from_np(np(Base, relcl(contact, S)), _, s(Base, VP)) :- S = s(_, VP), !.
+extract_from_np(np(_, that(SubTrees)), _, Sub) :- is_list(SubTrees), !, member(Sub, SubTrees).
+extract_from_np(np(_, S), _, S) :- S = s(_, _), !.
+extract_from_np(np(Base, VP_part), _, s(Base, VP_part)) :- VP_part = vp(V, _), is_participle_head(V), !.
+extract_from_np(np(Base, VP_part), _, s(Base, VP_part)) :- VP_part = vp(V, _, _), is_participle_head(V), !.
 extract_from_np(np(_, _, NP2), Subj, Sub) :- compound(NP2), extract_from_np(NP2, Subj, Sub).
 
 remove_relcl(s(NP, VP), s(CleanNP, CleanVP)) :- clean_np(NP, CleanNP), clean_vp(VP, CleanVP).
@@ -181,7 +193,6 @@ clean_np(NP, NP).
 clean_vp(vp(conj(_), vp(conj(_), VP)), Clean) :- clean_vp(VP, Clean), !.
 clean_vp(vp(conj(_), VP), Clean) :- clean_vp(VP, Clean), !.
 clean_vp(vp(adv(_), VP), Clean) :- clean_vp(VP, Clean), !.
-clean_vp(vp(PP, VP), Clean) :- PP = pp(_,_), clean_vp(VP, Clean), !.
 clean_vp(vp(V, NP), vp(V, CleanNP)) :- (V = v(_) ; V = aux(_)), clean_np(NP, CleanNP), !.
 clean_vp(vp(V, NP, X), vp(V, CleanNP, X)) :- (V = v(_) ; V = aux(_)), clean_np(NP, CleanNP), !.
 clean_vp(vp(V, X, NP), vp(V, X, CleanNP)) :- (V = v(_) ; V = aux(_)), clean_np(NP, CleanNP), !.
@@ -416,13 +427,10 @@ skip_seps_list([H | T], Out) :-
 skip_seps_list(L, L).
 
 is_clause_sep(',').
+is_clause_sep(';').
+is_clause_sep(':').
 is_clause_sep(P) :- is_conjunction(P).
 is_clause_sep(P) :- is_relative(P).
-is_clause_sep(that).
-is_clause_sep(where).
-is_clause_sep(to).
-is_clause_sep(as).
-is_clause_sep(if).
 
 % Encuentra el prefijo más largo que se parsea como simple_s o como
 % un participle_phrase.
@@ -442,8 +450,9 @@ longest_loop(K, Tokens, Tree, Rest) :-
     K1 is K - 1,
     longest_loop(K1, Tokens, Tree, Rest).
 
-try_unit(Tree, Prefix) :- phrase(simple_s(Tree), Prefix).
-try_unit(s(np(n(it)), Tree), Prefix) :- phrase(participle_phrase(Tree), Prefix).
+try_unit(Tree, Prefix) :- phrase(simple_s(Tree), Prefix), !.
+try_unit(s(np(n(it)), VP), Prefix) :- phrase(participle_phrase(VP), Prefix), !.
+try_unit(s(np(n(it)), VP), Prefix) :- phrase(vp_base(VP), Prefix).
 
 % =============================================================================
 % Simplificación + dibujo con draw.pl

@@ -140,13 +140,17 @@ test(oracion_simple_trans_gn) :-
         [])),
     nonvar(Tree).
 
-% Oración inválida: empieza con verbo
-test(oracion_invalida, fail) :-
-    sintactico:parse(_, [is, the, constant, essential], []).
+% VP sin sujeto se acepta ahora con 'it' implícito
+test(bare_vp_it_implicito) :-
+    once(sintactico:parse([s(np(n(it)), _)], [is, the, constant, essential], [])).
 
-% Oración inválida: empieza con conjunción seguida de verbo
+% Oración inválida: empieza con adjetivo (no hay categoría inicial válida)
+test(oracion_invalida, fail) :-
+    sintactico:parse(_, [essential, the, constant], []).
+
+% Oración inválida: SN sin verbo (det + n + det es estructura incompleta)
 test(oracion_invalida_conj, fail) :-
-    sintactico:parse(_, [and, is, the, constant, essential], []).
+    sintactico:parse(_, [the, constant, the], []).
 
 :- end_tests(sintactico_dcg).
 
