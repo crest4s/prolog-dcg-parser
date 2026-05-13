@@ -598,6 +598,10 @@ clausula_relativa(cr(adv(where), GN, GV)) --> [where], g_nominal(GN), g_verbal(G
 clausula_relativa(cr(GP, GV)) --> g_preposicional(GP), g_verbal(GV).
 clausula_relativa(cr(GP, GN, GV)) --> g_preposicional(GP), g_nominal(GN), g_verbal(GV).
 
+%  Relativo + GV1 + conj_coord + GV2  (GV coordinado en relativo: "that absorbs… but radiates…")
+clausula_relativa(cr(Pron, GV1, C, GV2)) -->
+    pronrel(Pron), g_verbal(GV1), conj_coord(C), g_verbal(GV2).
+
 
 % ===========================================================
 %  GRUPO NOMINAL COORDINADO  (gn_coord)
@@ -870,11 +874,11 @@ oracion(ocm(GP, GN, GV1, C, GV2, CR)) -->
     g_nominal(GN), g_verbal(GV1), conjuncion(C), g_verbal(GV2),
     clausula_relativa(CR).
 
-%  GN + GV + CR1 + conj + CR2  (dos relativas coordinadas)
+%  GN + GV + CR1 + conj_coord + CR2  (dos relativas coordinadas)
 %  — Oración 9: "dilemmas that they could not explain and for which there were no… laws"
 oracion(ocm(GN, GV, CR1, C, CR2)) -->
     g_nominal(GN), g_verbal(GV),
-    clausula_relativa(CR1), conjuncion(C), clausula_relativa(CR2).
+    clausula_relativa(CR1), conj_coord(C), clausula_relativa(CR2).
 
 %  --- Adjunto gerundival ---
 

@@ -247,7 +247,7 @@ n('1927').          % año de experimentos Davisson-Germer
 n('1981').          % año del microscopio de efecto túnel
 
 % --- Símbolos y expresiones especiales ---
-n('20th').          % ordinal: "the early 20th century"
+adj('20th').        % ordinal: "the early 20th century"
 n('6.626x10-34').   % valor numérico de la constante de Planck
 n('wave-particle'). % compuesto con guion: "wave-particle duality"
 
