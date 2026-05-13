@@ -73,7 +73,7 @@ frase(20, o,
 % "Also in 1981 it played a very important role during
 %  the invention of the tunnel effect microscope."
 frase(29, o,
-    [also, in, 1981, it, played, a, very, important, role,
+    [also, in, '1981', it, played, a, very, important, role,
      during, the, invention, of, the, tunnel, effect, microscope]).
 
 % ----------------------------------------------------------
@@ -213,7 +213,7 @@ frase(9, ocm,
 %  small intervals or pockets, which he called quanta."
 frase(11, ocm,
     [in, order, to, solve, this, phenomenon,
-     max, planck, presented, in, 1900,
+     max, planck, presented, in, '1900',
      an, innovative, idea, about, the, quantization, of, energy,
      he, proposed, that, energy, was, discretized,
      into, small, intervals, or, pockets,
@@ -294,7 +294,7 @@ frase(22, ocm,
 %  ejects electrons."
 frase(24, ocm,
     [for, example, based, on, the, testimony, of, planck,
-     albert, einstein, proposed, in, 1905,
+     albert, einstein, proposed, in, '1905',
      a, quantum, explanation, for, the, photoelectric, effect,
      betting, that, light, hitting, a, metal, ejects, electrons]).
 
@@ -324,7 +324,7 @@ frase(26, ocm,
 %  showing that they exhibited wavelike behaviors very
 %  similar to light waves."
 frase(27, ocm,
-    [likewise, in, 1927, clinton, davisson,
+    [likewise, in, '1927', clinton, davisson,
      and, lester, germer,
      conducted, different, experiments,
      of, electron, diffraction,

@@ -241,10 +241,10 @@ n('planck''s').   % "Planck's" — posesivo sajón
 n('quantum''s').  % "quantum's" — posesivo sajón
 
 % --- Años y números del corpus ---
-n(1900).            % año de presentación de la constante
-n(1905).            % año del efecto fotoeléctrico (Einstein)
-n(1927).            % año de experimentos Davisson-Germer
-n(1981).            % año del microscopio de efecto túnel
+n('1900').          % año de presentación de la constante
+n('1905').          % año del efecto fotoeléctrico (Einstein)
+n('1927').          % año de experimentos Davisson-Germer
+n('1981').          % año del microscopio de efecto túnel
 
 % --- Símbolos y expresiones especiales ---
 n('20th').          % ordinal: "the early 20th century"
