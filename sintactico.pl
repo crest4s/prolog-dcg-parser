@@ -172,6 +172,10 @@ g_nominal(gn(N1, N2, GP)) --> nombre(N1), nombre(N2), g_preposicional(GP).
 %  N + N  (sin det: "planck's proposal", "wave-particle duality", "electron diffraction")
 g_nominal(gn(N1, N2)) --> nombre(N1), nombre(N2).
 
+%  [both] + N1 + conj_coord + N2 + N3  (e.g., "both wave and particle behaviors")
+g_nominal(gn(conj(both), N1, C, N2, N3)) -->
+    [both], nombre(N1), conj_coord(C), nombre(N2), nombre(N3).
+
 %  GADJ + N  (sin det: "perplexing dilemmas", "quantum physics", "classically forbidden barriers")
 g_nominal(gn(GADJ, N)) --> g_adjetival(GADJ), nombre(N).
 
@@ -222,6 +226,11 @@ g_nominal(gn(D, N, gpart(V, GP))) -->
 %  Det + N + N + gpart(V, GP)  (e.g., "the Planck constant named after Max Planck")
 g_nominal(gn(D, N1, N2, gpart(V, GP))) -->
     determinante(D), nombre(N1), nombre(N2), verbo(V), g_preposicional(GP).
+
+%  Det + N + Pron + V1 + gpart(V2, GP)
+%  (e.g., "the energy they possess quantified in multiples of the constant")
+g_nominal(gn(D, N, pron(P), V1, gpart(V2, GP))) -->
+    determinante(D), nombre(N), pronombre(P), verbo(V1), verbo(V2), g_preposicional(GP).
 
 
 % ===========================================================
@@ -952,6 +961,12 @@ oracion(ocm(GNC, GV, GV_ger)) -->
 
 %  GNC + GV + GV_ger + [that] + clausula_base
 oracion(ocm(GNC, GV, GV_ger, conj(that), O)) -->
+    g_nominal_coord(GNC), g_verbal(GV), g_verbal(GV_ger), [that], clausula_base(O).
+
+%  GADV + GP + GNC + GV + GV_ger + [that] + clausula_base
+%  (e.g., "In this sense, both Bohr and Heisenberg argued, using uncertainty, that…")
+oracion(ocm(GADV, GP, GNC, GV, GV_ger, conj(that), O)) -->
+    g_adverbial(GADV), g_preposicional(GP),
     g_nominal_coord(GNC), g_verbal(GV), g_verbal(GV_ger), [that], clausula_base(O).
 
 %  GP + gpart(V, GP2) + clausula_base + GV_ger  (participio inicial + cláusula + gerundio)
