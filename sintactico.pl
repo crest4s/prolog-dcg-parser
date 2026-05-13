@@ -607,9 +607,9 @@ clausula_relativa(cr(C, GN, GV)) -->
 clausula_relativa(cr(adv(where), GV)) --> [where], g_verbal(GV).
 clausula_relativa(cr(adv(where), GN, GV)) --> [where], g_nominal(GN), g_verbal(GV).
 
-%  GP relativo + GV  ("for which there were no laws", "in which particles are able to pass")
-clausula_relativa(cr(GP, GV)) --> g_preposicional(GP), g_verbal(GV).
-clausula_relativa(cr(GP, GN, GV)) --> g_preposicional(GP), g_nominal(GN), g_verbal(GV).
+%  GP relativo estricto ("in which", "for which")
+clausula_relativa(cr(gp(P, pron(which)), GV)) --> preposicion(P), [which], g_verbal(GV).
+clausula_relativa(cr(gp(P, pron(which)), GN, GV)) --> preposicion(P), [which], g_nominal(GN), g_verbal(GV).
 
 %  Relativo + GV1 + conj_coord + GV2  (GV coordinado en relativo: "that absorbs… but radiates…")
 clausula_relativa(cr(Pron, GV1, C, GV2)) -->
@@ -710,6 +710,11 @@ oracion(oc(GP, GN, V, notonly(GV1), butalso(GV2))) -->
     g_verbal(GV1),
     [but, also],
     g_verbal(GV2).
+
+%  GP + GN + Aux + not only + GV1 + but also + GV2
+oracion(oc(GP, GN, aux(V_aux), notonly(GV1), butalso(GV2))) -->
+    g_preposicional(GP), g_nominal(GN), verbo(V_aux),
+    [not, only], g_verbal(GV1), [but, also], g_verbal(GV2).
 
 %  GN + GV + CR + conj + GV2  — relativo en primera coord. + segunda coordinada
 oracion(oc(GN, GV, CR, C, GV2)) -->
