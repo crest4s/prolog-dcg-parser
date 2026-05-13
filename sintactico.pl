@@ -74,6 +74,28 @@ oracion(o(GI, GN, GV)) -->
     g_nominal(GN),
     g_verbal(GV).
 
+%  GN + gpart(V, GP) + GV  — participio parentético intercalado entre sujeto y predicado
+%  — "This phenomenon, confirmed by experiments, changed everything."
+%  El V es el participio (también verbo en léxico), GP su adjunto preposicional.
+oracion(o(GN, gpart(V, GP), GV)) -->
+    g_nominal(GN),
+    verbo(V), g_preposicional(GP),
+    g_verbal(GV).
+
+%  GADV + GN + gpart(V, GP) + GV
+oracion(o(GADV, GN, gpart(V, GP), GV)) -->
+    g_adverbial(GADV),
+    g_nominal(GN),
+    verbo(V), g_preposicional(GP),
+    g_verbal(GV).
+
+%  GP + GN + gpart(V, GP2) + GV
+oracion(o(GP1, GN, gpart(V, GP2), GV)) -->
+    g_preposicional(GP1),
+    g_nominal(GN),
+    verbo(V), g_preposicional(GP2),
+    g_verbal(GV).
+
 
 % ===========================================================
 %  GRUPO NOMINAL  (gn)
@@ -139,6 +161,41 @@ g_nominal(gn(N1, N2)) --> nombre(N1), nombre(N2).
 
 %  GADJ + N  (sin det: "perplexing dilemmas", "quantum physics", "classically forbidden barriers")
 g_nominal(gn(GADJ, N)) --> g_adjetival(GADJ), nombre(N).
+
+%  --- Grupos nominales con cláusula de relativo integrada ---
+%  Permiten que el GN contenga directamente una CR sin necesitar
+%  una regla de oracion(or) separada para el antecedente.
+
+%  Det + N + CR  (e.g., "the constant that Planck introduced")
+g_nominal(gn(D, N, CR)) --> determinante(D), nombre(N), clausula_relativa(CR).
+
+%  Det + N + N + CR  (e.g., "the Planck constant that was named")
+g_nominal(gn(D, N1, N2, CR)) -->
+    determinante(D), nombre(N1), nombre(N2), clausula_relativa(CR).
+
+%  Det + GADJ + N + CR  (e.g., "an essential role that Planck played")
+g_nominal(gn(D, GADJ, N, CR)) -->
+    determinante(D), g_adjetival(GADJ), nombre(N), clausula_relativa(CR).
+
+%  Det + N + GP + CR  (e.g., "the idea of physics that challenged reality")
+g_nominal(gn(D, N, GP, CR)) -->
+    determinante(D), nombre(N), g_preposicional(GP), clausula_relativa(CR).
+
+%  N + CR  (sin det: "physics that challenges reality")
+g_nominal(gn(N, CR)) --> nombre(N), clausula_relativa(CR).
+
+%  --- Participio postnominal (cláusula relativa reducida) ---
+%  Modela construcciones como "the energy emitted by the electron"
+%  (equivalente a "the energy that was emitted by the electron").
+%  Se exige un GP a continuación para reducir ambigüedad con el GV.
+
+%  Det + N + gpart(V, GP)  (e.g., "the energy emitted by the electron")
+g_nominal(gn(D, N, gpart(V, GP))) -->
+    determinante(D), nombre(N), verbo(V), g_preposicional(GP).
+
+%  Det + N + N + gpart(V, GP)  (e.g., "the Planck constant named after Max Planck")
+g_nominal(gn(D, N1, N2, gpart(V, GP))) -->
+    determinante(D), nombre(N1), nombre(N2), verbo(V), g_preposicional(GP).
 
 
 % ===========================================================
@@ -424,6 +481,10 @@ clausula_base(o(GN, GV, CR)) -->
 clausula_base(o(GN, GV1, C, GV2)) -->
     g_nominal(GN), g_verbal(GV1), conjuncion(C), g_verbal(GV2).
 
+%  Participio parentético en cláusula embebida (p.ej., dentro de oc/ocm)
+clausula_base(o(GN, gpart(V, GP), GV)) -->
+    g_nominal(GN), verbo(V), g_preposicional(GP), g_verbal(GV).
+
 
 % ===========================================================
 %  CLÁUSULA DE RELATIVO  (cr)
@@ -456,9 +517,17 @@ clausula_relativa(cr(GP, GN, GV)) --> g_preposicional(GP), g_nominal(GN), g_verb
 %  Usado en cabeceras de reglas de oracion(or/ocm).
 % ===========================================================
 
-%  GN1 + and/or + GN2
+%  GN1 + and/or + GN2  (par)
 g_nominal_coord(gn_coord(GN1, C, GN2)) -->
     g_nominal(GN1), conjuncion(C), g_nominal(GN2).
+
+%  GN1, GN2 + and/or + GN3  (lista de 3: "duality, mechanics and physics")
+g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
+    g_nominal(GN1), [','], g_nominal(GN2), conjuncion(C), g_nominal(GN3).
+
+%  GN1, GN2, GN3 + and/or + GN4  (lista de 4 con Oxford comma)
+g_nominal_coord(gn_coord(GN1, GN2, GN3, C, GN4)) -->
+    g_nominal(GN1), [','], g_nominal(GN2), [','], g_nominal(GN3), conjuncion(C), g_nominal(GN4).
 
 
 % ===========================================================
