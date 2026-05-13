@@ -143,6 +143,9 @@ g_nominal(gn(D, N, GADJ)) --> determinante(D), nombre(N), g_adjetival(GADJ).
 %  Det + N + GP  (e.g., "the formulation of another...")
 g_nominal(gn(D, N, GP)) --> determinante(D), nombre(N), g_preposicional(GP).
 
+%  Det + N + GI  (e.g., "the ability to measure certain quantities")
+g_nominal(gn(D, N, GI)) --> determinante(D), nombre(N), g_infinitivo(GI).
+
 %  Det + N + N + GP  (e.g., "the Planck constant" + complemento prep)
 g_nominal(gn(D, N1, N2, GP)) -->
     determinante(D), nombre(N1), nombre(N2), g_preposicional(GP).
@@ -860,6 +863,11 @@ oracion(ocm(GN, GV, conj(as_if), O_sub)) -->
 %  GN + GV + GP + [as if] + clausula_base
 oracion(ocm(GN, GV, GP, conj(as_if), O_sub)) -->
     g_nominal(GN), g_verbal(GV), g_preposicional(GP), [as, if], clausula_base(O_sub).
+
+%  GP + GN + GV + [as if] + clausula_base  (adjunto preposicional inicial)
+%  — Oración 22: "In this case, the Planck constant appears as…, as if it were…"
+oracion(ocm(GP, GN, GV, conj(as_if), O_sub)) -->
+    g_preposicional(GP), g_nominal(GN), g_verbal(GV), [as, if], clausula_base(O_sub).
 
 %  --- Adjunto distributivo postnominal "each with ..." ---
 %  — GN + GV + ',' + each + GP

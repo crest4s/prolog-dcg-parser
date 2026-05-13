@@ -268,6 +268,11 @@ test(ginf_v_gp_gnc) :-
                       [to, know, with, absolute, precision,
                        the, position, and, momentum], [])).
 
+% GN: Det + N + GI  ("the ability to measure certain quantities")
+test(gn_det_n_gi) :-
+    once(g_nominal(gn(det(the), n(ability), ginf(v(measure), _)),
+                   [the, ability, to, measure, certain, quantities], [])).
+
 :- end_tests(grupos).
 
 
