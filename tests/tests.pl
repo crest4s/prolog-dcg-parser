@@ -121,6 +121,11 @@ test(gv_transitivo) :-
 test(gp_basico) :-
     once(g_preposicional(gp(prep(in), _), [in, physics], [])).
 
+% GInf: to + V + GP  (e.g., "to pass through barriers")
+test(ginf_v_gp) :-
+    once(g_infinitivo(ginf(v(pass), gp(prep(through), _)),
+                      [to, pass, through, barriers], [])).
+
 % GADJ: adjetivo solo
 test(gadj_simple) :-
     once(g_adjetival(gadj(adj(essential)), [essential], [])).
@@ -147,6 +152,7 @@ test(adjetivo)   :- once(adjetivo(adj(essential), [essential], [])).
 test(adverbio)   :- once(adverbio(adv(however),   [however],   [])).
 test(preposicion):- once(preposicion(prep(in),    [in],    [])).
 test(conjuncion) :- once(conjuncion(conj(and),    [and],   [])).
+test(pron_this)  :- once(pronombre(pron(this),   [this],  [])).
 
 :- end_tests(lexico).
 

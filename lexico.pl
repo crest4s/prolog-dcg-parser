@@ -42,6 +42,7 @@ pron(who).      % pronombre relativo personal
 pron(what).     % pronombre relativo / wh-word
 pron(itself).   % reflexivo 3sg neutro
 pron(those).    % pronombre demostrativo plural
+pron(this).     % pronombre demostrativo singular
 pron(one).      % pronombre indefinido
 pron(there).    % expletivo existencial ("there is")
 pron(them).     % pronombre objeto 3pl

@@ -254,6 +254,9 @@ g_infinitivo(ginf(V, GADJ)) --> [to], verbo(V), g_adjetival(GADJ).
 %  to + V + GN  (e.g., "to understanding this miniature world")
 g_infinitivo(ginf(V, GN)) --> [to], verbo(V), g_nominal(GN).
 
+%  to + V + GP  (e.g., "to contribute to the field", "to pass through barriers")
+g_infinitivo(ginf(V, GP)) --> [to], verbo(V), g_preposicional(GP).
+
 %  to + V + V + GN
 g_infinitivo(ginf(V1, V2, GN)) --> [to], verbo(V1), verbo(V2), g_nominal(GN).
 
