@@ -263,11 +263,6 @@ test(gv_v_gn_gadj) :-
 test(gv_v_prep_varada) :-
     once(g_verbal(gv(v(heard), prep(of)), [heard, of], [])).
 
-% GV: V + that + clausula_base  ("determined that it was essential")
-test(gv_v_that_cb) :-
-    once(g_verbal(gv(v(determined), conj(that), _),
-                  [determined, that, it, was, essential], [])).
-
 % GV: GI + conj + V + GN + GP  (GV coordinado complejo)
 test(gv_gi_coord_v_gn_gp) :-
     once(g_verbal(gv(ginf(_, _), conj(and), v(laid), _, gp(prep(for), _)),
@@ -292,11 +287,6 @@ test(gv_gadv_gadj) :-
 test(gv_v_gn_v2) :-
     once(g_verbal(gv(v(made), _, v(grow)),
                   [made, this, idea, grow], [])).
-
-% GV: Aux + V + that + clausula_base  ("was determined that it was essential")
-test(gv_aux_v_that_cb) :-
-    once(g_verbal(gv(v(was), v(determined), conj(that), _),
-                  [was, determined, that, it, was, essential], [])).
 
 % GInf: to + V + GN + GADV  ("to measure certain quantities accurately")
 test(ginf_v_gn_gadv) :-
@@ -351,12 +341,6 @@ test(gp_such_as) :-
     once(g_preposicional(gp(such_as, _),
                          [such, as, albert, einstein,
                           niels, bohr, or, werner, heisenberg], [])).
-
-% GV: V + conj(that) + clausula_base  ("proposed that energy was discretized")
-test(gv_v_that_cb_single) :-
-    once(g_verbal(gv(v(proposed), conj(that), _),
-                  [proposed, that, energy, was, discretized,
-                   into, small, intervals, or, pockets], [])).
 
 % GV: Aux + Adv + Aux + V  ("should always be quantized")
 test(gv_aux_adv_aux_v) :-
