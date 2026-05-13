@@ -232,6 +232,16 @@ test(gv_gi_coord_v_gn_gp) :-
     once(g_verbal(gv(ginf(_, _), conj(and), v(laid), _, gp(prep(for), _)),
                   [to, give, role, and, laid, the, groundwork, for, physics], [])).
 
+% GN: Det + GADJ + GP  ("a great many of the anxieties")
+test(gn_det_gadj_gp) :-
+    once(g_nominal(gn(det(a), _, gp(prep(of), _)),
+                   [a, great, many, of, the, anxieties], [])).
+
+% GN: GADJ + N + GP sin det  ("multiple integers of the constant")
+test(gn_gadj_n_gp) :-
+    once(g_nominal(gn(_, n(integers), gp(prep(of), _)),
+                   [multiple, integers, of, the, constant], [])).
+
 :- end_tests(grupos).
 
 
@@ -251,6 +261,9 @@ test(adverbio)   :- once(adverbio(adv(however),   [however],   [])).
 test(preposicion):- once(preposicion(prep(in),    [in],    [])).
 test(conjuncion) :- once(conjuncion(conj(and),    [and],   [])).
 test(pron_this)  :- once(pronombre(pron(this),   [this],  [])).
+test(adj_many)   :- once(adjetivo(adj(many),     [many],  [])).
+test(v_make)     :- once(verbo(v(make),           [make],  [])).
+test(v_made)     :- once(verbo(v(made),           [made],  [])).
 
 :- end_tests(lexico).
 

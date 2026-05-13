@@ -115,6 +115,10 @@ g_nominal(gn(D, N)) --> determinante(D), nombre(N).
 %  Det + GP  (e.g., "another of the great quantum approaches")
 g_nominal(gn(D, GP)) --> determinante(D), g_preposicional(GP).
 
+%  Det + GADJ + GP  (e.g., "a great many of the anxieties of the time")
+g_nominal(gn(D, GADJ, GP)) -->
+    determinante(D), g_adjetival(GADJ), g_preposicional(GP).
+
 %  Det + N + N  (nombre compuesto: "the Planck constant")
 g_nominal(gn(D, N1, N2)) --> determinante(D), nombre(N1), nombre(N2).
 
@@ -161,6 +165,10 @@ g_nominal(gn(N1, N2)) --> nombre(N1), nombre(N2).
 
 %  GADJ + N  (sin det: "perplexing dilemmas", "quantum physics", "classically forbidden barriers")
 g_nominal(gn(GADJ, N)) --> g_adjetival(GADJ), nombre(N).
+
+%  GADJ + N + GP  (sin det: "multiple integers of the constant")
+g_nominal(gn(GADJ, N, GP)) -->
+    g_adjetival(GADJ), nombre(N), g_preposicional(GP).
 
 %  --- Grupos nominales con cláusula de relativo integrada ---
 %  Permiten que el GN contenga directamente una CR sin necesitar

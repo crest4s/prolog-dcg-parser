@@ -306,6 +306,7 @@ v(introduce).   v(introduced).                   % introducir
 v(know).        v(knew).        v(known).        % conocer, saber
 v(lay).         v(laid).        v(laying).       % sentar (las bases)
 v(manage).      v(manages).     v(managed).      % lograr, conseguir
+v(make).        v(made).                         % hacer, causar (causativa)
 v(manifest).    v(manifested).                   % manifestarse
 v(measure).     v(measured).                     % medir
 v(name).        v(named).                        % nombrar, llamar
@@ -368,6 +369,7 @@ adj(innovative).     % innovador
 adj(international).  % internacional
 adj(known).          % conocido (participio adj: "known as")
 adj(light).          % luminoso (ante n, p.ej. "light waves")
+adj(many).           % cuantificador: "a great many of"
 adj(master).         % maestro, principal ("master key")
 adj(microscopic).    % microscópico
 adj(miniature).      % en miniatura
