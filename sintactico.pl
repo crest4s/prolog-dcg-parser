@@ -176,8 +176,16 @@ g_nominal(gn(N1, N2)) --> nombre(N1), nombre(N2).
 g_nominal(gn(conj(both), N1, C, N2, N3)) -->
     [both], nombre(N1), conj_coord(C), nombre(N2), nombre(N3).
 
+%  Det + N + conj_coord + N + N  (e.g., "both wave and particle behaviors" con det)
+g_nominal(gn(D, N1, C, N2, N3)) -->
+    determinante(D), nombre(N1), conj_coord(C), nombre(N2), nombre(N3).
+
 %  GADJ + N  (sin det: "perplexing dilemmas", "quantum physics", "classically forbidden barriers")
 g_nominal(gn(GADJ, N)) --> g_adjetival(GADJ), nombre(N).
+
+%  GADJ + N + N  (e.g., "classically forbidden energy barriers")
+g_nominal(gn(GADJ, N1, N2)) -->
+    g_adjetival(GADJ), nombre(N1), nombre(N2).
 
 %  GADJ + N + GP  (sin det: "multiple integers of the constant")
 g_nominal(gn(GADJ, N, GP)) -->
@@ -226,6 +234,10 @@ g_nominal(gn(D, N, gpart(V, GP))) -->
 %  Det + N + N + gpart(V, GP)  (e.g., "the Planck constant named after Max Planck")
 g_nominal(gn(D, N1, N2, gpart(V, GP))) -->
     determinante(D), nombre(N1), nombre(N2), verbo(V), g_preposicional(GP).
+
+%  Det + N + Pron + V  (e.g., "the energy they possess")
+g_nominal(gn(D, N, pron(P), V)) -->
+    determinante(D), nombre(N), pronombre(P), verbo(V).
 
 %  Det + N + Pron + V1 + gpart(V2, GP)
 %  (e.g., "the energy they possess quantified in multiples of the constant")
@@ -607,9 +619,9 @@ clausula_relativa(cr(C, GN, GV)) -->
 clausula_relativa(cr(adv(where), GV)) --> [where], g_verbal(GV).
 clausula_relativa(cr(adv(where), GN, GV)) --> [where], g_nominal(GN), g_verbal(GV).
 
-%  GP relativo estricto ("in which", "for which")
-clausula_relativa(cr(gp(P, pron(which)), GV)) --> preposicion(P), [which], g_verbal(GV).
-clausula_relativa(cr(gp(P, pron(which)), GN, GV)) --> preposicion(P), [which], g_nominal(GN), g_verbal(GV).
+%  GP relativo + GV  ("for which there were no laws", "in which particles are able to pass")
+clausula_relativa(cr(GP, GV)) --> g_preposicional(GP), g_verbal(GV).
+clausula_relativa(cr(GP, GN, GV)) --> g_preposicional(GP), g_nominal(GN), g_verbal(GV).
 
 %  Relativo + GV1 + conj_coord + GV2  (GV coordinado en relativo: "that absorbs… but radiates…")
 clausula_relativa(cr(Pron, GV1, C, GV2)) -->
@@ -639,6 +651,55 @@ g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
 g_nominal_coord(gn_coord(GN1, GN2, GN3, C, GN4)) -->
     g_nominal(GN1), [','], g_nominal(GN2), [','], g_nominal(GN3), conj_coord(C), g_nominal(GN4).
 
+
+% ===========================================================
+%  ORACIÓN COMPUESTA — SUSTANTIVAS  (ocm con [that])
+%  Movidas antes que oc para que el analizador priorice el
+%  árbol ocm correcto frente a lecturas oc con GN+CR absorto.
+% ===========================================================
+
+%  GN + GV + [that] + clausula_base
+oracion(ocm(GN, GV, conj(that), O)) -->
+    g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+%  GN + GV + [that] + clausula_base + CR
+oracion(ocm(GN, GV, conj(that), O, CR)) -->
+    g_nominal(GN), g_verbal(GV), [that], clausula_base(O), clausula_relativa(CR).
+
+%  GADV + GN + GV + [that] + clausula_base
+oracion(ocm(GADV, GN, GV, conj(that), O)) -->
+    g_adverbial(GADV), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+oracion(ocm(GADV, GN, GV, conj(that), O, CR)) -->
+    g_adverbial(GADV), g_nominal(GN), g_verbal(GV),
+    [that], clausula_base(O), clausula_relativa(CR).
+
+%  GP + GN + GV + [that] + clausula_base
+oracion(ocm(GP, GN, GV, conj(that), O)) -->
+    g_preposicional(GP), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+%  GN + GV + GN_obj + [that] + clausula_base
+%  — Oración 12: "he expounded the idea that the energy emitted was not a constant value"
+oracion(ocm(GN1, GV, GN2, conj(that), O)) -->
+    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
+
+oracion(ocm(GP, GN1, GV, GN2, conj(that), O)) -->
+    g_preposicional(GP),
+    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
+
+%  GI + GN + GV + GN_obj + [that] + clausula_base
+%  — Oración 25: "To establish this idea, Einstein used the hypothesis that…"
+oracion(ocm(GI, GN1, GV, GN2, conj(that), O)) -->
+    g_infinitivo(GI),
+    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
+
+oracion(ocm(GI, GN, GV, conj(that), O)) -->
+    g_infinitivo(GI), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+%  GN + GV + GP + [that] + clausula_base  (sustantiva en obj preposicional)
+%  — Oración 21: "The idea of this approach states that it is impossible…"
+oracion(ocm(GN, GV, GP, conj(that), O)) -->
+    g_nominal(GN), g_verbal(GV), g_preposicional(GP), [that], clausula_base(O).
 
 % ===========================================================
 %  ORACIÓN COORDINADA  (oc)
@@ -710,11 +771,6 @@ oracion(oc(GP, GN, V, notonly(GV1), butalso(GV2))) -->
     g_verbal(GV1),
     [but, also],
     g_verbal(GV2).
-
-%  GP + GN + Aux + not only + GV1 + but also + GV2
-oracion(oc(GP, GN, aux(V_aux), notonly(GV1), butalso(GV2))) -->
-    g_preposicional(GP), g_nominal(GN), verbo(V_aux),
-    [not, only], g_verbal(GV1), [but, also], g_verbal(GV2).
 
 %  GN + GV + CR + conj + GV2  — relativo en primera coord. + segunda coordinada
 oracion(oc(GN, GV, CR, C, GV2)) -->
@@ -806,6 +862,18 @@ oracion(or(GP, GN, GV, CR1, CR2)) -->
     g_preposicional(GP), g_nominal(GN), g_verbal(GV),
     clausula_relativa(CR1), clausula_relativa(CR2).
 
+%  GN + GV + CR1 + CR2  (dos relativas; variante sin GP inicial)
+oracion(or(GN, GV, CR1, CR2)) -->
+    g_nominal(GN), g_verbal(GV),
+    clausula_relativa(CR1), clausula_relativa(CR2).
+
+%  GN + GV + GN_obj + CR1 + CR2 + gpart  (predicado nominal + dos relativas + participio)
+%  — Oración 30: "This is a phenomenon in which… which… quantified in multiples of the constant."
+oracion(or(GN, GV, GN_obj, CR1, CR2, gpart(V_part, GP_part))) -->
+    g_nominal(GN), g_verbal(GV), g_nominal(GN_obj),
+    clausula_relativa(CR1), clausula_relativa(CR2),
+    verbo(V_part), g_preposicional(GP_part).
+
 
 % ===========================================================
 %  ORACIÓN COMPUESTA  (ocm)
@@ -814,52 +882,13 @@ oracion(or(GP, GN, GV, CR1, CR2)) -->
 %  y coordinación con cláusulas de relativo.
 % ===========================================================
 
-%  --- Sustantiva directa ---
-
-%  GN + GV + [that] + clausula_base
-%  — Oración 2 (principal): "It is often said that…"
-oracion(ocm(GN, GV, conj(that), O)) -->
-    g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
-
-%  GN + GV + [that] + clausula_base + CR  (sustantiva con relativo anidado)
-%  — Oración 2 completa: "…that quantum physics is a discipline that challenges…"
-oracion(ocm(GN, GV, conj(that), O, CR)) -->
-    g_nominal(GN), g_verbal(GV), [that], clausula_base(O), clausula_relativa(CR).
-
-%  GADV + GN + GV + [that] + clausula_base
-oracion(ocm(GADV, GN, GV, conj(that), O)) -->
-    g_adverbial(GADV), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
-
-oracion(ocm(GADV, GN, GV, conj(that), O, CR)) -->
-    g_adverbial(GADV), g_nominal(GN), g_verbal(GV),
-    [that], clausula_base(O), clausula_relativa(CR).
-
-%  GP + GN + GV + [that] + clausula_base
-oracion(ocm(GP, GN, GV, conj(that), O)) -->
-    g_preposicional(GP), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
-
-%  GN + GV + GN_obj + [that] + clausula_base
-%  — Oración 12: "he expounded the idea that the energy emitted was not a constant value…"
-oracion(ocm(GN1, GV, GN2, conj(that), O)) -->
-    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
-
-oracion(ocm(GP, GN1, GV, GN2, conj(that), O)) -->
-    g_preposicional(GP),
-    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
+%  --- Sustantiva directa (reglas movidas antes del bloque oc) ---
+%  Ver bloque "ORACIÓN COMPUESTA — SUSTANTIVAS" encima de oracion(oc(...)).
 
 %  GN + GV + GN_apos + C + clausula_base  (aposición demostrativa + coordinación)
 %  — Oración 4: "…particles, those so small that…, and their study…"
 oracion(ocm(GN1, GV, GN2, C, O)) -->
     g_nominal(GN1), g_verbal(GV), g_nominal(GN2), conjuncion(C), clausula_base(O).
-
-%  GI + GN + GV + GN_obj + [that] + clausula_base
-%  — Oración 25: "To establish this idea, Einstein used the hypothesis that…"
-oracion(ocm(GI, GN1, GV, GN2, conj(that), O)) -->
-    g_infinitivo(GI),
-    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
-
-oracion(ocm(GI, GN, GV, conj(that), O)) -->
-    g_infinitivo(GI), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
 
 %  GI + O1 + O2  (adjunto de finalidad + dos cláusulas yuxtapuestas)
 %  — Oración 11: "In order to solve this phenomenon, Max Planck presented…; he proposed…"
@@ -872,11 +901,6 @@ oracion(ocm(GI, O1, O2)) -->
 %  — Oración 11: "In order to solve this, Planck presented an idea; he proposed energy was discrete"
 oracion(ocm(GP, GN, GV, O2)) -->
     g_preposicional(GP), g_nominal(GN), g_verbal(GV), clausula_base(O2).
-
-%  GN + GV + GP + [that] + clausula_base  (sustantiva en obj preposicional)
-%  — Oración 21: "The idea of this approach states that it is impossible…"
-oracion(ocm(GN, GV, GP, conj(that), O)) -->
-    g_nominal(GN), g_verbal(GV), g_preposicional(GP), [that], clausula_base(O).
 
 %  --- Adverbial concesiva ---
 
@@ -979,6 +1003,12 @@ oracion(ocm(GADV, GP, GNC, GV, GV_ger, conj(that), O)) -->
 oracion(ocm(GP, gpart(V, GP2), O, GV_ger)) -->
     g_preposicional(GP), verbo(V), g_preposicional(GP2),
     clausula_base(O), g_verbal(GV_ger).
+
+%  GP + gpart(V_p, GP_p) + GN_subj + GV_main + V_ger + [that] + clausula_base
+%  Variante donde el gerundio "betting" precede al [that] como predicado explícito.
+oracion(ocm(GP_adv, gpart(V_p, GP_p), GN_subj, GV_main, gv_ger(V_ger), conj(that), O_sub)) -->
+    g_preposicional(GP_adv), verbo(V_p), g_preposicional(GP_p),
+    g_nominal(GN_subj), g_verbal(GV_main), verbo(V_ger), [that], clausula_base(O_sub).
 
 %  --- Comparativa concesiva "as if" ---
 %  — "it appears as an impediment, as if it were a limitation"
