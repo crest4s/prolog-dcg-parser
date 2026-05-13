@@ -95,7 +95,6 @@ singular(waves,          wave).
 singular(pockets,        pocket).
 singular(multiples,      multiple).
 singular(energies,       energy).
-singular(behaviors,      behavior).
 
 % Regla general para -s/-es: sólo se aplica si el singular resultante
 % está reconocido en el léxico (n/2 o adj/2), evitando falsos positivos.
@@ -190,3 +189,136 @@ analizar_texto(Input) :-
     ;  true
     ),
     explicar_analisis(Normalizados).
+
+
+% ===========================================================================
+%  TOKENIZE/2  —  Tokenización básica (sin normalización morfológica)
+%  Igual que preprocesar/2 pero expuesta con nombre canónico para
+%  facilitar la interoperabilidad con otros módulos.
+%
+%  tokenize(+InputAtomOrString, -Tokens)
+%
+%  Ejemplo:
+%    ?- tokenize('Particles absorbed energies.', Ts).
+%    Ts = [particles, absorbed, energies]
+% ===========================================================================
+
+tokenize(Input, Tokens) :-
+    ( atom(Input) -> Atom = Input ; atom_string(Atom, Input) ),
+    downcase_atom(Atom, Lower),
+    atom_string(Lower, S),
+    split_string(S, " \t\n", "", Parts),
+    include([P]>>(P \= ""), Parts, Parts2),
+    maplist(limpiar_token, Parts2, Tokens).
+
+
+% ===========================================================================
+%  NORMALIZE/2  —  Tokenización + normalización morfológica en un paso
+%  Convierte texto libre en lista de tokens con plurales normalizados.
+%
+%  normalize(+InputAtomOrString, -Normalized)
+%
+%  Ejemplo:
+%    ?- normalize('Particles absorbed energies.', Ns).
+%    Ns = [particle, absorbed, energy]
+% ===========================================================================
+
+normalize(Input, Normalized) :-
+    tokenize(Input, Tokens),
+    normalizar_tokens(Tokens, Normalized).
+
+
+% ===========================================================================
+%  INFLECT/3  —  Flexión morfológica dirigida
+%  Dado el lema canónico y un rasgo morfológico, produce la forma flexionada.
+%  Apoya los rasgos: singular | plural | base.
+%
+%  inflect(+Lema, +Rasgo, -Forma)
+%
+%  Ejemplos:
+%    ?- inflect(phenomenon, plural, X).   X = phenomena
+%    ?- inflect(particle, plural, X).     X = particles
+%    ?- inflect(energy, singular, X).     X = energy
+% ===========================================================================
+
+inflect(Word, singular, Word) :- !.
+inflect(Word, base,     Word) :- !.
+inflect(Word, plural, Plural) :-
+    ( singular(Plural, Word) -> true
+    ; atom_concat(Word, s, Plural)
+    ), !.
+inflect(Word, _, Word).
+
+
+% ===========================================================================
+%  SYNTACTIC_FUNCTION/3  —  Categoría léxico-sintáctica de un token
+%  Consulta el léxico para determinar la función sintáctica principal
+%  de un átomo. El tercer argumento (contexto) está reservado para
+%  extensiones futuras que requieran información posicional.
+%
+%  syntactic_function(+Token, -Categoria, +_Contexto)
+%
+%  Categorías devueltas: det | n | v | adj | adv | prep | pron | conj | unknown
+%
+%  Ejemplo:
+%    ?- syntactic_function(constant, Cat, []).   Cat = n
+%    ?- syntactic_function(played,   Cat, []).   Cat = v
+% ===========================================================================
+
+syntactic_function(Token, det,  _) :- det(Token),  !.
+syntactic_function(Token, n,    _) :- n(Token),    !.
+syntactic_function(Token, v,    _) :- v(Token),    !.
+syntactic_function(Token, adj,  _) :- adj(Token),  !.
+syntactic_function(Token, adv,  _) :- adv(Token),  !.
+syntactic_function(Token, prep, _) :- prep(Token), !.
+syntactic_function(Token, pron, _) :- pron(Token), !.
+syntactic_function(Token, conj, _) :- conj(Token), !.
+syntactic_function(_,     unknown, _).
+
+
+% ===========================================================================
+%  TRANSLATION_NOTE/2  —  Glosario de términos de física cuántica
+%  Mapea términos especializados del corpus en inglés a su nota de
+%  traducción en español, útil para el informe de análisis.
+%
+%  translation_note(+TerminoIngles, -NotaEspaniol)
+%
+%  Ejemplo:
+%    ?- translation_note(quantum, N).   N = 'cuántico/cuántica'
+% ===========================================================================
+
+translation_note(quantum,       'cuántico/cuántica').
+translation_note(constant,      'constante').
+translation_note(energy,        'energía').
+translation_note(photon,        'fotón').
+translation_note(electron,      'electrón').
+translation_note(particle,      'partícula').
+translation_note(wave,          'onda').
+translation_note(frequency,     'frecuencia').
+translation_note(radiation,     'radiación').
+translation_note(phenomenon,    'fenómeno').
+translation_note(duality,       'dualidad').
+translation_note(mechanics,     'mecánica').
+translation_note(physics,       'física').
+translation_note(theory,        'teoría').
+translation_note(hypothesis,    'hipótesis').
+translation_note(experiment,    'experimento').
+translation_note(value,         'valor').
+translation_note(integer,       'entero').
+translation_note(multiple,      'múltiplo').
+translation_note(joule,         'julio').
+translation_note(barrier,       'barrera').
+translation_note(breakthrough,  'avance/descubrimiento').
+translation_note(formulation,   'formulación').
+translation_note(conception,    'concepción').
+translation_note(tunnel,        'túnel').
+translation_note(microscope,    'microscopio').
+translation_note(pillar,        'pilar').
+translation_note(anxiety,       'inquietud/dilema').
+translation_note(discipline,    'disciplina').
+translation_note(dilemma,       'dilema').
+translation_note(proposal,      'propuesta').
+translation_note(groundwork,    'base/fundamento').
+translation_note(conception,    'concepción').
+translation_note(microscopic,   'microscópico/a').
+translation_note(proportional,  'proporcional').

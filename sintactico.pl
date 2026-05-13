@@ -875,6 +875,7 @@ simplificar(Tokens, [Tokens]).
 
 split_compleja(T, P1, P2) :- split_coord_adv(T, P1, P2), !.
 split_compleja(T, P1, P2) :- split_coord_cop(T, P1, P2), !.
+split_compleja(T, P1, P2) :- split_coord_shared(T, P1, P2), !.
 split_compleja(T, P1, P2) :- split_adverbial(T, P1, P2), !.
 split_compleja(T, P1, P2) :- split_relativa(T, P1, P2), !.
 split_compleja(T, P1, P2) :- split_complemento(T, P1, P2), !.
@@ -905,6 +906,31 @@ split_coord_cop(T, P1, P2) :-
     split_en(T, [and], P1, P2),
     P2 = [W|_],
     ( pron(W) ; det(W) ).
+
+% ----------------------------------------------------------
+%  2b. Coordinación con sujeto compartido
+%      Cuando el lado derecho del coordinante empieza con verbo
+%      (sin sujeto propio), se extrae el sujeto de la primera
+%      cláusula y se copia explícitamente en la segunda.
+%      Ejemplo: [planck played a role and laid the groundwork]
+%               -> [planck played a role] + [planck laid the groundwork]
+% ----------------------------------------------------------
+
+split_coord_shared(T, P1, P2_full) :-
+    ( split_en(T, [and], P1, P2)
+    ; split_en(T, [or],  P1, P2)
+    ),
+    P2 = [W|_],
+    v(W),
+    extract_subject_tokens(P1, Subj),
+    Subj \= [],
+    append(Subj, P2, P2_full).
+
+% extract_subject_tokens/2 — devuelve los tokens anteriores al primer verbo
+extract_subject_tokens(Tokens, Subj) :-
+    append(Subj, [V|_], Tokens),
+    v(V), !.
+extract_subject_tokens(_, []).
 
 % ----------------------------------------------------------
 %  3. Subordinada adverbial con "although"

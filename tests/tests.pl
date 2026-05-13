@@ -272,4 +272,72 @@ test(normalizar_conserva) :-
 test(normalizar_plural) :-
     normalizar_tokens([the, particles], [the, particle]).
 
+% tokenize/2
+test(tokenize_basico) :-
+    tokenize('Particles absorbed energies.', Ts),
+    Ts = [particles, absorbed, energies].
+
+test(tokenize_mayusculas) :-
+    tokenize('The Constant', Ts),
+    Ts = [the, constant].
+
+% normalize/2
+test(normalize_plurales) :-
+    normalize('Particles absorbed energies.', Ns),
+    Ns = [particle, absorbed, energy].
+
+% inflect/3
+test(inflect_singular) :-
+    inflect(energy, singular, energy).
+
+test(inflect_plural_irregular) :-
+    inflect(phenomenon, plural, phenomena).
+
+test(inflect_plural_regular) :-
+    inflect(particle, plural, particles).
+
+test(inflect_base) :-
+    inflect(constant, base, constant).
+
+% syntactic_function/3
+test(synfun_verbo) :-
+    syntactic_function(played, v, []).
+
+test(synfun_nombre) :-
+    syntactic_function(constant, n, []).
+
+test(synfun_desconocido) :-
+    syntactic_function(xyzzy, unknown, []).
+
+% translation_note/2
+test(translation_note_quantum) :-
+    translation_note(quantum, 'cuántico/cuántica').
+
+test(translation_note_energy) :-
+    translation_note(energy, 'energía').
+
 :- end_tests(mejoras).
+
+
+% =============================================================================
+% Tests: simplificar (split_coord_shared)
+% =============================================================================
+:- begin_tests(simplificar).
+
+test(simplificar_sujeto_compartido_and) :-
+    simplificar([planck, played, a, role, and, laid, the, groundwork], Ss),
+    Ss = [[planck, played, a, role], [planck, laid, the, groundwork]].
+
+test(simplificar_sujeto_independiente_and) :-
+    simplificar([planck, played, a, role, and, it, was, revolutionary], Ss),
+    Ss = [[planck, played, a, role], [it, was, revolutionary]].
+
+test(simplificar_but) :-
+    simplificar([it, absorbs, radiation, but, radiates, energy], Ss),
+    Ss = [[it, absorbs, radiation], [radiates, energy]].
+
+test(simplificar_atomico) :-
+    simplificar([this, constant, played, a, role], Ss),
+    Ss = [[this, constant, played, a, role]].
+
+:- end_tests(simplificar).
