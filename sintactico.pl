@@ -771,12 +771,20 @@ oracion(or(GP1, GN, GV, GP2, CR)) -->
 oracion(or(GNC, GV, CR)) -->
     g_nominal_coord(GNC), g_verbal(GV), clausula_relativa(CR).
 
-oracion(or(GP, GNC, GV, CR)) -->
-    g_preposicional(GP), g_nominal_coord(GNC), g_verbal(GV), clausula_relativa(CR).
-
+%  GP + GNC + GV + GN2 + CR  (antes que la versión sin GN2 para forzar adjunción al objeto)
 oracion(or(GP, GNC, GV, GN2, CR)) -->
     g_preposicional(GP),
     g_nominal_coord(GNC), g_verbal(GV), g_nominal(GN2), clausula_relativa(CR).
+
+oracion(or(GP, GNC, GV, CR)) -->
+    g_preposicional(GP), g_nominal_coord(GNC), g_verbal(GV), clausula_relativa(CR).
+
+%  GN + gpart(V_p1, GP_p1) + GV1 + conj + GV2 + gpart(V_p2, GP_p2) + CR
+%  — Oración 23: sujeto + participio intercalado + GV coord. + participio + relativa
+oracion(or(GN, gpart(V_p1, GP_p1), GV1, C, GV2, gpart(V_p2, GP_p2), CR)) -->
+    g_nominal(GN), verbo(V_p1), g_preposicional(GP_p1),
+    g_verbal(GV1), conj_coord(C), g_verbal(GV2),
+    verbo(V_p2), g_preposicional(GP_p2), clausula_relativa(CR).
 
 %  GP + GN + GV + CR1 + CR2  (dos relativas sobre el mismo antecedente)
 %  — Oración 5: "In this context, there is a protagonist, which…heard of, that acts…"
@@ -967,6 +975,15 @@ oracion(ocm(GN, GV, GP, conj(as_if), O_sub)) -->
 %  — Oración 22: "In this case, the Planck constant appears as…, as if it were…"
 oracion(ocm(GP, GN, GV, conj(as_if), O_sub)) -->
     g_preposicional(GP), g_nominal(GN), g_verbal(GV), [as, if], clausula_base(O_sub).
+
+%  GP + GN + gpart(V_p, GP_p, N_p) + GV + gv_ger(V_g1, GN_g1, GP_g1) + gv_ger(V_g2, N_g2, GP_g2)
+%  — Oración 17: PP inicial + sujeto + participio con aposición + GV + dos adjuntos gerundivos
+oracion(ocm(GP, GN, gpart(V_p, GP_p, N_p), GV, gv_ger(V_g1, GN_g1, GP_g1), gv_ger(V_g2, N_g2, GP_g2))) -->
+    g_preposicional(GP), g_nominal(GN),
+    verbo(V_p), g_preposicional(GP_p), nombre(N_p),
+    g_verbal(GV),
+    verbo(V_g1), g_nominal(GN_g1), g_preposicional(GP_g1),
+    verbo(V_g2), nombre(N_g2), g_preposicional(GP_g2).
 
 %  --- Adjunto distributivo postnominal "each with ..." ---
 %  — GN + GV + ',' + each + GP
