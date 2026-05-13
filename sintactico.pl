@@ -282,6 +282,14 @@ g_verbal(gv(V1, V2, V3, GP)) -->
 g_verbal(gv(V1, V2, V3, GADJ)) -->
     verbo(V1), verbo(V2), verbo(V3), g_adjetival(GADJ).
 
+%  Aux + Adv + Aux + V  (e.g., "should always be quantized")
+g_verbal(gv(V1, GADV, V2, V3)) -->
+    verbo(V1), g_adverbial(GADV), verbo(V2), verbo(V3).
+
+%  Aux + Adv + Aux + V + GP  (e.g., "should always be quantized into quantities")
+g_verbal(gv(V1, GADV, V2, V3, GP)) -->
+    verbo(V1), g_adverbial(GADV), verbo(V2), verbo(V3), g_preposicional(GP).
+
 %  --- Adverbio modificando dentro del GV ---
 
 %  GADV + V  (e.g., "also played", "first named")
