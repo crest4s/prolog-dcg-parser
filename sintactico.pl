@@ -211,6 +211,10 @@ g_nominal(gn(P, GADJ, CR)) -->
 %  (equivalente a "the energy that was emitted by the electron").
 %  Se exige un GP a continuación para reducir ambigüedad con el GV.
 
+%  N + gpart(V, GN2)  (participio/gerundio activo sin det: "light hitting a metal")
+%  — Oración 24 (sub): "light hitting a metal ejects electrons"
+g_nominal(gn(N, gpart(V, GN2))) --> nombre(N), verbo(V), g_nominal(GN2).
+
 %  Det + N + gpart(V, GP)  (e.g., "the energy emitted by the electron")
 g_nominal(gn(D, N, gpart(V, GP))) -->
     determinante(D), nombre(N), verbo(V), g_preposicional(GP).
@@ -406,6 +410,10 @@ g_infinitivo(ginf(V, GP, GNC)) --> [to], verbo(V), g_preposicional(GP), g_nomina
 %  to + V + V + GN
 g_infinitivo(ginf(V1, V2, GN)) --> [to], verbo(V1), verbo(V2), g_nominal(GN).
 
+%  in order to + V + GN  (locución de finalidad)
+%  — Oración 11: "in order to solve this phenomenon"
+g_infinitivo(ginf(inorder, V, GN)) --> [in, order, to], verbo(V), g_nominal(GN).
+
 
 % ===========================================================
 %  GRUPO ADJETIVAL  (gadj)
@@ -469,6 +477,14 @@ g_preposicional(gp(P, V, GN)) --> preposicion(P), verbo(V), g_nominal(GN).
 
 %  Prep + GADJ  (complemento adjetival: "from immediate")
 g_preposicional(gp(P, GADJ)) --> preposicion(P), g_adjetival(GADJ).
+
+%  Prep + GNC  (prep + nominal coordinado: "into small intervals or pockets")
+%  — Oración 11 (GV interno)
+g_preposicional(gp(P, GNC)) --> preposicion(P), g_nominal_coord(GNC).
+
+%  "such as" + GNC  (locución ejemplificativa: "such as Albert Einstein…")
+%  — Oración 15
+g_preposicional(gp(such_as, GNC)) --> [such, as], g_nominal_coord(GNC).
 
 
 % ===========================================================
@@ -586,6 +602,11 @@ g_nominal_coord(gn_coord(GN1, C, GN2)) -->
 %  GN1, GN2 + and/or + GN3  (lista de 3: "duality, mechanics and physics")
 g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
     g_nominal(GN1), [','], g_nominal(GN2), conjuncion(C), g_nominal(GN3).
+
+%  GN1 GN2 + and/or + GN3  (lista asindética sin coma: "albert einstein niels bohr or werner")
+%  — Oración 15 (dentro de "such as")
+g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
+    g_nominal(GN1), g_nominal(GN2), conjuncion(C), g_nominal(GN3).
 
 %  GN1, GN2, GN3 + and/or + GN4  (lista de 4 con Oxford comma)
 g_nominal_coord(gn_coord(GN1, GN2, GN3, C, GN4)) -->
@@ -705,6 +726,12 @@ oracion(or(GADV, GN1, GV, GN2, CR)) -->
     g_adverbial(GADV),
     g_nominal(GN1), g_verbal(GV), g_nominal(GN2), clausula_relativa(CR).
 
+%  GADV + GN + GP + GV + CR  (parentético "such as" entre sujeto y verbo)
+%  — Oración 15: "Fortunately, other physicists…, such as Einstein…, contributed to…that…"
+oracion(or(GADV, GN, GP, GV, CR)) -->
+    g_adverbial(GADV), g_nominal(GN), g_preposicional(GP),
+    g_verbal(GV), clausula_relativa(CR).
+
 %  GN + GV + GP + CR  — CR tras complemento preposicional
 %  — Oración 23: "…through quantum phenomena…, which definitively consolidated…"
 oracion(or(GN, GV, GP, CR)) -->
@@ -788,6 +815,11 @@ oracion(ocm(GI, GN1, GV, GN2, conj(that), O)) -->
 
 oracion(ocm(GI, GN, GV, conj(that), O)) -->
     g_infinitivo(GI), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+%  GI + O1 + O2  (adjunto de finalidad + dos cláusulas yuxtapuestas)
+%  — Oración 11: "In order to solve this phenomenon, Max Planck presented…; he proposed…"
+oracion(ocm(GI, O1, O2)) -->
+    g_infinitivo(GI), clausula_base(O1), clausula_base(O2).
 
 %  GN + GV + GP + [that] + clausula_base  (sustantiva en obj preposicional)
 %  — Oración 21: "The idea of this approach states that it is impossible…"
@@ -883,6 +915,12 @@ oracion(ocm(GNC, GV, GV_ger)) -->
 %  GNC + GV + GV_ger + [that] + clausula_base
 oracion(ocm(GNC, GV, GV_ger, conj(that), O)) -->
     g_nominal_coord(GNC), g_verbal(GV), g_verbal(GV_ger), [that], clausula_base(O).
+
+%  GP + gpart(V, GP2) + clausula_base + GV_ger  (participio inicial + cláusula + gerundio)
+%  — Oración 24: "For example, based on the testimony of Planck, Einstein proposed…, betting that…"
+oracion(ocm(GP, gpart(V, GP2), O, GV_ger)) -->
+    g_preposicional(GP), verbo(V), g_preposicional(GP2),
+    clausula_base(O), g_verbal(GV_ger).
 
 %  --- Comparativa concesiva "as if" ---
 %  — "it appears as an impediment, as if it were a limitation"

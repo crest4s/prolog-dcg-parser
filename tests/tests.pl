@@ -171,6 +171,24 @@ test(oracion_6) :-
     once(oracion(Tree, T, [])),
     functor(Tree, o, _).
 
+% Oración 11 — locución "in order to" + dos cláusulas yuxtapuestas
+test(oracion_11) :-
+    frase(11, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, ocm, _))).
+
+% Oración 15 — "such as" ejemplificativo entre sujeto y verbo
+test(oracion_15) :-
+    frase(15, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, or, _))).
+
+% Oración 24 — GP + participio inicial + cláusula + gerundio "betting that"
+test(oracion_24) :-
+    frase(24, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, ocm, _))).
+
 :- end_tests(dcg_complejas).
 
 
@@ -307,6 +325,33 @@ test(gv_v_gp_gi) :-
     once(g_verbal(gv(v(acts), gp(prep(as), _), ginf(v(understanding), _)),
                   [acts, as, a, master, key,
                    to, understanding, this, miniature, world], [])).
+
+% GN: N + gpart(V, GN2)  ("light hitting a metal")
+test(gn_n_gpart_gn) :-
+    once(g_nominal(gn(n(light), gpart(v(hitting), gn(det(a), n(metal)))),
+                   [light, hitting, a, metal], [])).
+
+% GI: in order to + V + GN  ("in order to solve this phenomenon")
+test(ginf_inorder) :-
+    once(g_infinitivo(ginf(inorder, v(solve), gn(det(this), n(phenomenon))),
+                      [in, order, to, solve, this, phenomenon], [])).
+
+% GP: prep + GNC  ("into small intervals or pockets")
+test(gp_prep_gnc) :-
+    once(g_preposicional(gp(prep(into), gn_coord(_, _, _)),
+                         [into, small, intervals, or, pockets], [])).
+
+% GP: such as + GNC  ("such as albert einstein niels bohr or werner heisenberg")
+test(gp_such_as) :-
+    once(g_preposicional(gp(such_as, _),
+                         [such, as, albert, einstein,
+                          niels, bohr, or, werner, heisenberg], [])).
+
+% GV: V + conj(that) + clausula_base  ("proposed that energy was discretized")
+test(gv_v_that_cb_single) :-
+    once(g_verbal(gv(v(proposed), conj(that), _),
+                  [proposed, that, energy, was, discretized,
+                   into, small, intervals, or, pockets], [])).
 
 :- end_tests(grupos).
 
