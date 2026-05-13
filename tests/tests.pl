@@ -110,6 +110,11 @@ test(oc_sujetos_distintos) :-
         [planck, played, a, role, and, it, was, essential], [])),
     functor(Tree, oc, _).
 
+% 'that'/'which' no deben generar un árbol oc (false-positive check)
+test(oc_no_falso_positivo_that, fail) :-
+    oracion(Tree, [planck, played, a, role, that, was, essential], []),
+    functor(Tree, oc, _).
+
 % --- Subordinadas de relativo (or) ---
 
 % CR postverbal (modifica el sujeto): GN + GV + CR
@@ -386,6 +391,13 @@ test(pron_this)  :- once(pronombre(pron(this),   [this],  [])).
 test(adj_many)   :- once(adjetivo(adj(many),     [many],  [])).
 test(v_make)     :- once(verbo(v(make),           [make],  [])).
 test(v_made)     :- once(verbo(v(made),           [made],  [])).
+
+% conj_coord solo acepta coordinantes puros (and, but, or)
+test(conj_coord_and) :- once(conj_coord(conj(and), [and], [])).
+test(conj_coord_but) :- once(conj_coord(conj(but), [but], [])).
+test(conj_coord_or)  :- once(conj_coord(conj(or),  [or],  [])).
+test(conj_coord_no_that,  fail) :- conj_coord(_, [that],  []).
+test(conj_coord_no_which, fail) :- conj_coord(_, [which], []).
 
 :- end_tests(lexico).
 

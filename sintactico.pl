@@ -507,6 +507,8 @@ adjetivo(adj(X))     --> [X], { adj(X) }.
 adverbio(adv(X))     --> [X], { adv(X) }.
 preposicion(prep(X)) --> [X], { prep(X) }.
 conjuncion(conj(X))  --> [X], { conj(X) }.
+% Solo conjunciones coordinantes puras (excluye 'that', 'although', relativos)
+conj_coord(conj(C))  --> [C], { member(C, [and, but, or]) }.
 
 
 % ===========================================================
@@ -605,20 +607,20 @@ clausula_relativa(cr(GP, GN, GV)) --> g_preposicional(GP), g_nominal(GN), g_verb
 
 %  GN1 + and/or + GN2  (par)
 g_nominal_coord(gn_coord(GN1, C, GN2)) -->
-    g_nominal(GN1), conjuncion(C), g_nominal(GN2).
+    g_nominal(GN1), conj_coord(C), g_nominal(GN2).
 
 %  GN1, GN2 + and/or + GN3  (lista de 3: "duality, mechanics and physics")
 g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
-    g_nominal(GN1), [','], g_nominal(GN2), conjuncion(C), g_nominal(GN3).
+    g_nominal(GN1), [','], g_nominal(GN2), conj_coord(C), g_nominal(GN3).
 
 %  GN1 GN2 + and/or + GN3  (lista asindética sin coma: "albert einstein niels bohr or werner")
 %  — Oración 15 (dentro de "such as")
 g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
-    g_nominal(GN1), g_nominal(GN2), conjuncion(C), g_nominal(GN3).
+    g_nominal(GN1), g_nominal(GN2), conj_coord(C), g_nominal(GN3).
 
 %  GN1, GN2, GN3 + and/or + GN4  (lista de 4 con Oxford comma)
 g_nominal_coord(gn_coord(GN1, GN2, GN3, C, GN4)) -->
-    g_nominal(GN1), [','], g_nominal(GN2), [','], g_nominal(GN3), conjuncion(C), g_nominal(GN4).
+    g_nominal(GN1), [','], g_nominal(GN2), [','], g_nominal(GN3), conj_coord(C), g_nominal(GN4).
 
 
 % ===========================================================
@@ -631,7 +633,7 @@ g_nominal_coord(gn_coord(GN1, GN2, GN3, C, GN4)) -->
 oracion(oc(GN, GV1, C, GV2)) -->
     g_nominal(GN),
     g_verbal(GV1),
-    conjuncion(C),
+    conj_coord(C),
     g_verbal(GV2).
 
 %  GP + GN + GV1 + conj + GV2
@@ -639,7 +641,7 @@ oracion(oc(GP, GN, GV1, C, GV2)) -->
     g_preposicional(GP),
     g_nominal(GN),
     g_verbal(GV1),
-    conjuncion(C),
+    conj_coord(C),
     g_verbal(GV2).
 
 %  GADV + GN + GV1 + conj + GV2
@@ -647,13 +649,13 @@ oracion(oc(GADV, GN, GV1, C, GV2)) -->
     g_adverbial(GADV),
     g_nominal(GN),
     g_verbal(GV1),
-    conjuncion(C),
+    conj_coord(C),
     g_verbal(GV2).
 
 %  O1 + conj + O2  — sujetos distintos
 oracion(oc(O1, C, O2)) -->
     clausula_base(O1),
-    conjuncion(C),
+    conj_coord(C),
     clausula_base(O2).
 
 %  Correlativa "not only … but also"
@@ -697,7 +699,7 @@ oracion(oc(GN, GV, CR, C, GV2)) -->
     g_nominal(GN),
     g_verbal(GV),
     clausula_relativa(CR),
-    conjuncion(C),
+    conj_coord(C),
     g_verbal(GV2).
 
 
