@@ -75,7 +75,7 @@ test(oracion_8) :-
 % Oración 29 — adverbial + preposicional iniciales
 test(oracion_29) :-
     once(oracion(Tree,
-        [also, in, 1981, it, played, a, very, important, role,
+        [also, in, '1981', it, played, a, very, important, role,
          during, the, invention, of, the, tunnel, effect, microscope], [])),
     functor(Tree, o, _).
 
@@ -242,7 +242,7 @@ test(gv_v_gadj_gi) :-
 % GV: V + GP + GN  ("presented in 1900 an innovative idea")
 test(gv_v_gp_gn) :-
     once(g_verbal(gv(v(presented), gp(_, _), _),
-                  [presented, in, 1900, an, innovative, idea], [])).
+                  [presented, in, '1900', an, innovative, idea], [])).
 
 % GV: V + GADV + GN  ("was not a constant value")
 test(gv_v_gadv_gn) :-
