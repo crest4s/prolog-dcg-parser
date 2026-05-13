@@ -318,6 +318,21 @@ g_verbal(gv(V, conj(that), O)) --> verbo(V), [that], clausula_base(O).
 g_verbal(gv(GI, C, V, GN, GP)) -->
     g_infinitivo(GI), conjuncion(C), verbo(V), g_nominal(GN), g_preposicional(GP).
 
+%  V + [what] + GV  (relativa libre copulativa: "is what governs the energy of photons")
+g_verbal(gv(V, rel_what(GV2))) --> verbo(V), [what], g_verbal(GV2).
+
+%  Aux + V + GP + GADV + GADJ  (e.g., "is often described as fundamentally important")
+g_verbal(gv(V1, V2, GP, GADV, GADJ)) -->
+    verbo(V1), verbo(V2), g_preposicional(GP), g_adverbial(GADV), g_adjetival(GADJ).
+
+%  V + GN + ',' + each + GP  (distributivo dentro del GV: "emitted n quanta, each with energy hf")
+g_verbal(gv(V, GN, dist(each, GP))) -->
+    verbo(V), g_nominal(GN), [','], [each], g_preposicional(GP).
+
+%  V + GN + each + GP  (distributivo sin coma explícita)
+g_verbal(gv(V, GN, dist(each, GP))) -->
+    verbo(V), g_nominal(GN), [each], g_preposicional(GP).
+
 
 % ===========================================================
 %  GRUPO INFINITIVO  (ginf)
@@ -582,6 +597,25 @@ oracion(oc(GN, notonly(GV1), butalso(GV2))) -->
     [but, also],
     g_verbal(GV2).
 
+%  Correlativa con auxiliar entre GN y "not only"
+%  — "Planck was not only finally able to explain… but also laid…"
+oracion(oc(GN, V, notonly(GV1), butalso(GV2))) -->
+    g_nominal(GN),
+    verbo(V),
+    [not, only],
+    g_verbal(GV1),
+    [but, also],
+    g_verbal(GV2).
+
+oracion(oc(GP, GN, V, notonly(GV1), butalso(GV2))) -->
+    g_preposicional(GP),
+    g_nominal(GN),
+    verbo(V),
+    [not, only],
+    g_verbal(GV1),
+    [but, also],
+    g_verbal(GV2).
+
 %  GN + GV + CR + conj + GV2  — relativo en primera coord. + segunda coordinada
 oracion(oc(GN, GV, CR, C, GV2)) -->
     g_nominal(GN),
@@ -781,6 +815,32 @@ oracion(ocm(GP, GN, GV, GV_ger, conj(that), O)) -->
 oracion(ocm(GADV, GP, GN, GV, GV_ger, conj(that), O)) -->
     g_adverbial(GADV), g_preposicional(GP),
     g_nominal(GN), g_verbal(GV), g_verbal(GV_ger), [that], clausula_base(O).
+
+%  --- Sujeto coordinado con adjunto gerundival ---
+
+%  GNC + GV + GV_ger
+oracion(ocm(GNC, GV, GV_ger)) -->
+    g_nominal_coord(GNC), g_verbal(GV), g_verbal(GV_ger).
+
+%  GNC + GV + GV_ger + [that] + clausula_base
+oracion(ocm(GNC, GV, GV_ger, conj(that), O)) -->
+    g_nominal_coord(GNC), g_verbal(GV), g_verbal(GV_ger), [that], clausula_base(O).
+
+%  --- Comparativa concesiva "as if" ---
+%  — "it appears as an impediment, as if it were a limitation"
+
+%  GN + GV + [as if] + clausula_base
+oracion(ocm(GN, GV, conj(as_if), O_sub)) -->
+    g_nominal(GN), g_verbal(GV), [as, if], clausula_base(O_sub).
+
+%  GN + GV + GP + [as if] + clausula_base
+oracion(ocm(GN, GV, GP, conj(as_if), O_sub)) -->
+    g_nominal(GN), g_verbal(GV), g_preposicional(GP), [as, if], clausula_base(O_sub).
+
+%  --- Adjunto distributivo postnominal "each with ..." ---
+%  — GN + GV + ',' + each + GP
+oracion(ocm(GN, GV, dist(det(each), GP))) -->
+    g_nominal(GN), g_verbal(GV), [','], [each], g_preposicional(GP).
 
 
 % ===========================================================
