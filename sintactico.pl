@@ -96,6 +96,12 @@ oracion(o(GP1, GN, gpart(V, GP2), GV)) -->
     verbo(V), g_preposicional(GP2),
     g_verbal(GV).
 
+%  gpart(V, GP, GN_app) + GN + GV  (participial inicial + aposición nominal)
+%  — Oración 6: "Named after the physicist who introduced it, Max Planck, the constant was…"
+oracion(o(gpart(V, GP, GN_app), GN, GV)) -->
+    verbo(V), g_preposicional(GP), g_nominal(GN_app),
+    g_nominal(GN), g_verbal(GV).
+
 
 % ===========================================================
 %  GRUPO NOMINAL  (gn)
@@ -195,6 +201,11 @@ g_nominal(gn(D, N, GP, CR)) -->
 %  N + CR  (sin det: "physics that challenges reality")
 g_nominal(gn(N, CR)) --> nombre(N), clausula_relativa(CR).
 
+%  Pron + GADJ + CR  (aposición demostrativa: "those so small that…")
+%  — Oración 4: "those so small that they are not perceptible to our eyes"
+g_nominal(gn(P, GADJ, CR)) -->
+    pronombre(P), g_adjetival(GADJ), clausula_relativa(CR).
+
 %  --- Participio postnominal (cláusula relativa reducida) ---
 %  Modela construcciones como "the energy emitted by the electron"
 %  (equivalente a "the energy that was emitted by the electron").
@@ -290,6 +301,11 @@ g_verbal(gv(V1, GADV, V2)) -->
 g_verbal(gv(V1, GADV, V2, GP)) -->
     verbo(V1), g_adverbial(GADV), verbo(V2), g_preposicional(GP).
 
+%  V + GADV + V2 + Prep  (preposición varada: "have surely heard of")
+%  — Oración 5 (CR1): "which you have surely heard of"
+g_verbal(gv(V1, GADV, V2, P)) -->
+    verbo(V1), g_adverbial(GADV), verbo(V2), preposicion(P).
+
 %  V + GADV + V2 + GN + GP
 g_verbal(gv(V1, GADV, V2, GN, GP)) -->
     verbo(V1), g_adverbial(GADV), verbo(V2), g_nominal(GN), g_preposicional(GP).
@@ -304,6 +320,10 @@ g_verbal(gv(GADV, GADJ)) --> g_adverbial(GADV), g_adjetival(GADJ).
 %  (e.g., "seemed to have stalled", "is 6.626... joules")
 g_verbal(gv(V, GI)) --> verbo(V), g_infinitivo(GI).
 g_verbal(gv(V, GI, GP)) --> verbo(V), g_infinitivo(GI), g_preposicional(GP).
+
+%  V + GP + GI  (e.g., "acts as a master key to understanding…")
+%  — Oración 5 (CR2): "that acts as a master key to understanding this miniature world"
+g_verbal(gv(V, GP, GI)) --> verbo(V), g_preposicional(GP), g_infinitivo(GI).
 
 %  --- Reglas adicionales de GV ---
 
@@ -708,6 +728,12 @@ oracion(or(GP, GNC, GV, GN2, CR)) -->
     g_preposicional(GP),
     g_nominal_coord(GNC), g_verbal(GV), g_nominal(GN2), clausula_relativa(CR).
 
+%  GP + GN + GV + CR1 + CR2  (dos relativas sobre el mismo antecedente)
+%  — Oración 5: "In this context, there is a protagonist, which…heard of, that acts…"
+oracion(or(GP, GN, GV, CR1, CR2)) -->
+    g_preposicional(GP), g_nominal(GN), g_verbal(GV),
+    clausula_relativa(CR1), clausula_relativa(CR2).
+
 
 % ===========================================================
 %  ORACIÓN COMPUESTA  (ocm)
@@ -748,6 +774,11 @@ oracion(ocm(GN1, GV, GN2, conj(that), O)) -->
 oracion(ocm(GP, GN1, GV, GN2, conj(that), O)) -->
     g_preposicional(GP),
     g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
+
+%  GN + GV + GN_apos + C + clausula_base  (aposición demostrativa + coordinación)
+%  — Oración 4: "…particles, those so small that…, and their study…"
+oracion(ocm(GN1, GV, GN2, C, O)) -->
+    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), conjuncion(C), clausula_base(O).
 
 %  GI + GN + GV + GN_obj + [that] + clausula_base
 %  — Oración 25: "To establish this idea, Einstein used the hypothesis that…"

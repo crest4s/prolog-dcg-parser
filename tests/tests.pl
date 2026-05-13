@@ -153,6 +153,24 @@ test(oracion_9) :-
          coherent, and, efficient, laws], []), Trees),
     once((member(Tree, Trees), functor(Tree, ocm, _))).
 
+% Oración 4 — aposición demostrativa + coord. con sujeto nuevo
+test(oracion_4) :-
+    frase(4, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, ocm, _))).
+
+% Oración 5 — dos cláusulas relativas sobre el mismo antecedente
+test(oracion_5) :-
+    frase(5, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, or, _))).
+
+% Oración 6 — adjunto participial inicial con aposición nominal
+test(oracion_6) :-
+    frase(6, _, T),
+    once(oracion(Tree, T, [])),
+    functor(Tree, o, _).
+
 :- end_tests(dcg_complejas).
 
 
@@ -272,6 +290,23 @@ test(ginf_v_gp_gnc) :-
 test(gn_det_n_gi) :-
     once(g_nominal(gn(det(the), n(ability), ginf(v(measure), _)),
                    [the, ability, to, measure, certain, quantities], [])).
+
+% GN: Pron + GADJ + CR  ("those so small that they are not perceptible")
+test(gn_pron_gadj_cr) :-
+    once(g_nominal(gn(pron(those), gadj(adv(so), adj(small)), _),
+                   [those, so, small, that, they, are, not,
+                    perceptible, to, our, eyes], [])).
+
+% GV: V + GADV + V2 + Prep  ("have surely heard of")
+test(gv_v_gadv_v2_prep) :-
+    once(g_verbal(gv(v(have), gadv(adv(surely)), v(heard), prep(of)),
+                  [have, surely, heard, of], [])).
+
+% GV: V + GP + GI  ("acts as a master key to understanding…")
+test(gv_v_gp_gi) :-
+    once(g_verbal(gv(v(acts), gp(prep(as), _), ginf(v(understanding), _)),
+                  [acts, as, a, master, key,
+                   to, understanding, this, miniature, world], [])).
 
 :- end_tests(grupos).
 
