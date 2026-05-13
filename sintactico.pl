@@ -134,6 +134,12 @@ g_nominal(gn(N1, GADJ, N2)) --> nombre(N1), g_adjetival(GADJ), nombre(N2).
 %  N + N + GP  (sin det: "6.626x10-34 joules per second")
 g_nominal(gn(N1, N2, GP)) --> nombre(N1), nombre(N2), g_preposicional(GP).
 
+%  N + N  (sin det: "planck's proposal", "wave-particle duality", "electron diffraction")
+g_nominal(gn(N1, N2)) --> nombre(N1), nombre(N2).
+
+%  GADJ + N  (sin det: "perplexing dilemmas", "quantum physics", "classically forbidden barriers")
+g_nominal(gn(GADJ, N)) --> g_adjetival(GADJ), nombre(N).
+
 
 % ===========================================================
 %  GRUPO VERBAL  (gv)
@@ -189,6 +195,10 @@ g_verbal(gv(V1, V2, V3, GN)) -->
 g_verbal(gv(V1, V2, V3, GP)) -->
     verbo(V1), verbo(V2), verbo(V3), g_preposicional(GP).
 
+%  Aux + Aux + V + GADJ  (e.g., "can be considered true", "was first named early")
+g_verbal(gv(V1, V2, V3, GADJ)) -->
+    verbo(V1), verbo(V2), verbo(V3), g_adjetival(GADJ).
+
 %  --- Adverbio modificando dentro del GV ---
 
 %  GADV + V  (e.g., "also played", "first named")
@@ -215,6 +225,9 @@ g_verbal(gv(V1, GADV, V2, GP)) -->
 %  V + GADV + V2 + GN + GP
 g_verbal(gv(V1, GADV, V2, GN, GP)) -->
     verbo(V1), g_adverbial(GADV), verbo(V2), g_nominal(GN), g_preposicional(GP).
+
+%  V + GADV + GADJ  (e.g., "was finally able to explain…")
+g_verbal(gv(V, GADV, GADJ)) --> verbo(V), g_adverbial(GADV), g_adjetival(GADJ).
 
 %  --- Complemento infinitivo ---
 %  (e.g., "seemed to have stalled", "is 6.626... joules")
@@ -269,6 +282,18 @@ g_adjetival(gadj(ADV, GP)) --> adverbio(ADV), g_preposicional(GP).
 
 %  Adv + Adj + GP
 g_adjetival(gadj(ADV, A, GP)) --> adverbio(ADV), adjetivo(A), g_preposicional(GP).
+
+%  Adj + conj + Adj  (e.g., "poetic and romantic", "coherent and efficient")
+g_adjetival(gadj(A1, C, A2)) --> adjetivo(A1), conjuncion(C), adjetivo(A2).
+
+%  Adv + Adj + conj + Adj  (e.g., "somewhat poetic and romantic")
+g_adjetival(gadj(ADV, A1, C, A2)) --> adverbio(ADV), adjetivo(A1), conjuncion(C), adjetivo(A2).
+
+%  Adj + GInf  (e.g., "able to explain", "able to pass", "key to understanding")
+g_adjetival(gadj(A, GI)) --> adjetivo(A), g_infinitivo(GI).
+
+%  Adv + Adj + GInf  (e.g., "finally able to explain" como GADJ embebida en GV)
+g_adjetival(gadj(ADV, A, GI)) --> adverbio(ADV), adjetivo(A), g_infinitivo(GI).
 
 
 % ===========================================================
