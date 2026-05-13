@@ -4,6 +4,10 @@
 %  Encoding: UTF-8  (solo ASCII en este archivo)
 % ===========================================================================
 
+:- discontiguous n/1.
+:- discontiguous v/1.
+:- discontiguous adj/1.
+
 % ---------------------------------------------------------------------------
 %  DETERMINANTES  (det)
 %  Incluye artículos, demostrativos, posesivos, cuantificadores
