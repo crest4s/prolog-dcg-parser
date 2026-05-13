@@ -96,6 +96,12 @@ oracion(o(GP1, GN, gpart(V, GP2), GV)) -->
     verbo(V), g_preposicional(GP2),
     g_verbal(GV).
 
+%  gpart(V, GP, GN_app) + GN + GV  (participial inicial + aposición nominal)
+%  — Oración 6: "Named after the physicist who introduced it, Max Planck, the constant was…"
+oracion(o(gpart(V, GP, GN_app), GN, GV)) -->
+    verbo(V), g_preposicional(GP), g_nominal(GN_app),
+    g_nominal(GN), g_verbal(GV).
+
 
 % ===========================================================
 %  GRUPO NOMINAL  (gn)
@@ -114,6 +120,10 @@ g_nominal(gn(D, N)) --> determinante(D), nombre(N).
 
 %  Det + GP  (e.g., "another of the great quantum approaches")
 g_nominal(gn(D, GP)) --> determinante(D), g_preposicional(GP).
+
+%  Det + GADJ + GP  (e.g., "a great many of the anxieties of the time")
+g_nominal(gn(D, GADJ, GP)) -->
+    determinante(D), g_adjetival(GADJ), g_preposicional(GP).
 
 %  Det + N + N  (nombre compuesto: "the Planck constant")
 g_nominal(gn(D, N1, N2)) --> determinante(D), nombre(N1), nombre(N2).
@@ -139,6 +149,9 @@ g_nominal(gn(D, N, GADJ)) --> determinante(D), nombre(N), g_adjetival(GADJ).
 %  Det + N + GP  (e.g., "the formulation of another...")
 g_nominal(gn(D, N, GP)) --> determinante(D), nombre(N), g_preposicional(GP).
 
+%  Det + N + GI  (e.g., "the ability to measure certain quantities")
+g_nominal(gn(D, N, GI)) --> determinante(D), nombre(N), g_infinitivo(GI).
+
 %  Det + N + N + GP  (e.g., "the Planck constant" + complemento prep)
 g_nominal(gn(D, N1, N2, GP)) -->
     determinante(D), nombre(N1), nombre(N2), g_preposicional(GP).
@@ -162,6 +175,10 @@ g_nominal(gn(N1, N2)) --> nombre(N1), nombre(N2).
 %  GADJ + N  (sin det: "perplexing dilemmas", "quantum physics", "classically forbidden barriers")
 g_nominal(gn(GADJ, N)) --> g_adjetival(GADJ), nombre(N).
 
+%  GADJ + N + GP  (sin det: "multiple integers of the constant")
+g_nominal(gn(GADJ, N, GP)) -->
+    g_adjetival(GADJ), nombre(N), g_preposicional(GP).
+
 %  --- Grupos nominales con cláusula de relativo integrada ---
 %  Permiten que el GN contenga directamente una CR sin necesitar
 %  una regla de oracion(or) separada para el antecedente.
@@ -184,10 +201,19 @@ g_nominal(gn(D, N, GP, CR)) -->
 %  N + CR  (sin det: "physics that challenges reality")
 g_nominal(gn(N, CR)) --> nombre(N), clausula_relativa(CR).
 
+%  Pron + GADJ + CR  (aposición demostrativa: "those so small that…")
+%  — Oración 4: "those so small that they are not perceptible to our eyes"
+g_nominal(gn(P, GADJ, CR)) -->
+    pronombre(P), g_adjetival(GADJ), clausula_relativa(CR).
+
 %  --- Participio postnominal (cláusula relativa reducida) ---
 %  Modela construcciones como "the energy emitted by the electron"
 %  (equivalente a "the energy that was emitted by the electron").
 %  Se exige un GP a continuación para reducir ambigüedad con el GV.
+
+%  N + gpart(V, GN2)  (participio/gerundio activo sin det: "light hitting a metal")
+%  — Oración 24 (sub): "light hitting a metal ejects electrons"
+g_nominal(gn(N, gpart(V, GN2))) --> nombre(N), verbo(V), g_nominal(GN2).
 
 %  Det + N + gpart(V, GP)  (e.g., "the energy emitted by the electron")
 g_nominal(gn(D, N, gpart(V, GP))) -->
@@ -279,6 +305,11 @@ g_verbal(gv(V1, GADV, V2)) -->
 g_verbal(gv(V1, GADV, V2, GP)) -->
     verbo(V1), g_adverbial(GADV), verbo(V2), g_preposicional(GP).
 
+%  V + GADV + V2 + Prep  (preposición varada: "have surely heard of")
+%  — Oración 5 (CR1): "which you have surely heard of"
+g_verbal(gv(V1, GADV, V2, P)) -->
+    verbo(V1), g_adverbial(GADV), verbo(V2), preposicion(P).
+
 %  V + GADV + V2 + GN + GP
 g_verbal(gv(V1, GADV, V2, GN, GP)) -->
     verbo(V1), g_adverbial(GADV), verbo(V2), g_nominal(GN), g_preposicional(GP).
@@ -286,10 +317,17 @@ g_verbal(gv(V1, GADV, V2, GN, GP)) -->
 %  V + GADV + GADJ  (e.g., "was finally able to explain…")
 g_verbal(gv(V, GADV, GADJ)) --> verbo(V), g_adverbial(GADV), g_adjetival(GADJ).
 
+%  GADV + GADJ  (e.g., "finally able to explain…" tras correlativa "not only")
+g_verbal(gv(GADV, GADJ)) --> g_adverbial(GADV), g_adjetival(GADJ).
+
 %  --- Complemento infinitivo ---
 %  (e.g., "seemed to have stalled", "is 6.626... joules")
 g_verbal(gv(V, GI)) --> verbo(V), g_infinitivo(GI).
 g_verbal(gv(V, GI, GP)) --> verbo(V), g_infinitivo(GI), g_preposicional(GP).
+
+%  V + GP + GI  (e.g., "acts as a master key to understanding…")
+%  — Oración 5 (CR2): "that acts as a master key to understanding this miniature world"
+g_verbal(gv(V, GP, GI)) --> verbo(V), g_preposicional(GP), g_infinitivo(GI).
 
 %  --- Reglas adicionales de GV ---
 
@@ -306,12 +344,19 @@ g_verbal(gv(V, GADV, GN)) --> verbo(V), g_adverbial(GADV), g_nominal(GN).
 %  V + GN + GADJ  (atributo predicativo postnominal: "exhibited behaviors very similar to light")
 g_verbal(gv(V, GN, GADJ)) --> verbo(V), g_nominal(GN), g_adjetival(GADJ).
 
+%  V + GN + V2  (causativa: "made this new conception grow")
+g_verbal(gv(V, GN, V2)) --> verbo(V), g_nominal(GN), verbo(V2).
+
 %  V + Prep  (preposición varada: "heard of", "spoken about")
 g_verbal(gv(V, P)) --> verbo(V), preposicion(P).
 
 %  V + [that] + clausula_base  (cláusula sustantiva embebida en GV)
 %  (e.g., "was determined that it should always be quantized")
 g_verbal(gv(V, conj(that), O)) --> verbo(V), [that], clausula_base(O).
+
+%  Aux + V + [that] + clausula_base  (pasiva biauxiliar + sustantiva)
+%  (e.g., "was considered that…", "was determined that…")
+g_verbal(gv(V1, V2, conj(that), O)) --> verbo(V1), verbo(V2), [that], clausula_base(O).
 
 %  GI + conj + V + GN + GP  (GV coordinado complejo)
 %  (e.g., "to give explanation and manifest itself through quantum phenomena")
@@ -353,11 +398,21 @@ g_infinitivo(ginf(V, GADJ)) --> [to], verbo(V), g_adjetival(GADJ).
 %  to + V + GN  (e.g., "to understanding this miniature world")
 g_infinitivo(ginf(V, GN)) --> [to], verbo(V), g_nominal(GN).
 
+%  to + V + GN + GADV  (e.g., "to measure certain quantities accurately")
+g_infinitivo(ginf(V, GN, GADV)) --> [to], verbo(V), g_nominal(GN), g_adverbial(GADV).
+
 %  to + V + GP  (e.g., "to contribute to the field", "to pass through barriers")
 g_infinitivo(ginf(V, GP)) --> [to], verbo(V), g_preposicional(GP).
 
+%  to + V + GP + GNC  (e.g., "to know with absolute precision the position and momentum")
+g_infinitivo(ginf(V, GP, GNC)) --> [to], verbo(V), g_preposicional(GP), g_nominal_coord(GNC).
+
 %  to + V + V + GN
 g_infinitivo(ginf(V1, V2, GN)) --> [to], verbo(V1), verbo(V2), g_nominal(GN).
+
+%  in order to + V + GN  (locución de finalidad)
+%  — Oración 11: "in order to solve this phenomenon"
+g_infinitivo(ginf(inorder, V, GN)) --> [in, order, to], verbo(V), g_nominal(GN).
 
 
 % ===========================================================
@@ -422,6 +477,14 @@ g_preposicional(gp(P, V, GN)) --> preposicion(P), verbo(V), g_nominal(GN).
 
 %  Prep + GADJ  (complemento adjetival: "from immediate")
 g_preposicional(gp(P, GADJ)) --> preposicion(P), g_adjetival(GADJ).
+
+%  Prep + GNC  (prep + nominal coordinado: "into small intervals or pockets")
+%  — Oración 11 (GV interno)
+g_preposicional(gp(P, GNC)) --> preposicion(P), g_nominal_coord(GNC).
+
+%  "such as" + GNC  (locución ejemplificativa: "such as Albert Einstein…")
+%  — Oración 15
+g_preposicional(gp(such_as, GNC)) --> [such, as], g_nominal_coord(GNC).
 
 
 % ===========================================================
@@ -539,6 +602,11 @@ g_nominal_coord(gn_coord(GN1, C, GN2)) -->
 %  GN1, GN2 + and/or + GN3  (lista de 3: "duality, mechanics and physics")
 g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
     g_nominal(GN1), [','], g_nominal(GN2), conjuncion(C), g_nominal(GN3).
+
+%  GN1 GN2 + and/or + GN3  (lista asindética sin coma: "albert einstein niels bohr or werner")
+%  — Oración 15 (dentro de "such as")
+g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
+    g_nominal(GN1), g_nominal(GN2), conjuncion(C), g_nominal(GN3).
 
 %  GN1, GN2, GN3 + and/or + GN4  (lista de 4 con Oxford comma)
 g_nominal_coord(gn_coord(GN1, GN2, GN3, C, GN4)) -->
@@ -658,6 +726,12 @@ oracion(or(GADV, GN1, GV, GN2, CR)) -->
     g_adverbial(GADV),
     g_nominal(GN1), g_verbal(GV), g_nominal(GN2), clausula_relativa(CR).
 
+%  GADV + GN + GP + GV + CR  (parentético "such as" entre sujeto y verbo)
+%  — Oración 15: "Fortunately, other physicists…, such as Einstein…, contributed to…that…"
+oracion(or(GADV, GN, GP, GV, CR)) -->
+    g_adverbial(GADV), g_nominal(GN), g_preposicional(GP),
+    g_verbal(GV), clausula_relativa(CR).
+
 %  GN + GV + GP + CR  — CR tras complemento preposicional
 %  — Oración 23: "…through quantum phenomena…, which definitively consolidated…"
 oracion(or(GN, GV, GP, CR)) -->
@@ -680,6 +754,12 @@ oracion(or(GP, GNC, GV, CR)) -->
 oracion(or(GP, GNC, GV, GN2, CR)) -->
     g_preposicional(GP),
     g_nominal_coord(GNC), g_verbal(GV), g_nominal(GN2), clausula_relativa(CR).
+
+%  GP + GN + GV + CR1 + CR2  (dos relativas sobre el mismo antecedente)
+%  — Oración 5: "In this context, there is a protagonist, which…heard of, that acts…"
+oracion(or(GP, GN, GV, CR1, CR2)) -->
+    g_preposicional(GP), g_nominal(GN), g_verbal(GV),
+    clausula_relativa(CR1), clausula_relativa(CR2).
 
 
 % ===========================================================
@@ -722,6 +802,11 @@ oracion(ocm(GP, GN1, GV, GN2, conj(that), O)) -->
     g_preposicional(GP),
     g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
 
+%  GN + GV + GN_apos + C + clausula_base  (aposición demostrativa + coordinación)
+%  — Oración 4: "…particles, those so small that…, and their study…"
+oracion(ocm(GN1, GV, GN2, C, O)) -->
+    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), conjuncion(C), clausula_base(O).
+
 %  GI + GN + GV + GN_obj + [that] + clausula_base
 %  — Oración 25: "To establish this idea, Einstein used the hypothesis that…"
 oracion(ocm(GI, GN1, GV, GN2, conj(that), O)) -->
@@ -730,6 +815,11 @@ oracion(ocm(GI, GN1, GV, GN2, conj(that), O)) -->
 
 oracion(ocm(GI, GN, GV, conj(that), O)) -->
     g_infinitivo(GI), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+%  GI + O1 + O2  (adjunto de finalidad + dos cláusulas yuxtapuestas)
+%  — Oración 11: "In order to solve this phenomenon, Max Planck presented…; he proposed…"
+oracion(ocm(GI, O1, O2)) -->
+    g_infinitivo(GI), clausula_base(O1), clausula_base(O2).
 
 %  GN + GV + GP + [that] + clausula_base  (sustantiva en obj preposicional)
 %  — Oración 21: "The idea of this approach states that it is impossible…"
@@ -826,6 +916,12 @@ oracion(ocm(GNC, GV, GV_ger)) -->
 oracion(ocm(GNC, GV, GV_ger, conj(that), O)) -->
     g_nominal_coord(GNC), g_verbal(GV), g_verbal(GV_ger), [that], clausula_base(O).
 
+%  GP + gpart(V, GP2) + clausula_base + GV_ger  (participio inicial + cláusula + gerundio)
+%  — Oración 24: "For example, based on the testimony of Planck, Einstein proposed…, betting that…"
+oracion(ocm(GP, gpart(V, GP2), O, GV_ger)) -->
+    g_preposicional(GP), verbo(V), g_preposicional(GP2),
+    clausula_base(O), g_verbal(GV_ger).
+
 %  --- Comparativa concesiva "as if" ---
 %  — "it appears as an impediment, as if it were a limitation"
 
@@ -836,6 +932,11 @@ oracion(ocm(GN, GV, conj(as_if), O_sub)) -->
 %  GN + GV + GP + [as if] + clausula_base
 oracion(ocm(GN, GV, GP, conj(as_if), O_sub)) -->
     g_nominal(GN), g_verbal(GV), g_preposicional(GP), [as, if], clausula_base(O_sub).
+
+%  GP + GN + GV + [as if] + clausula_base  (adjunto preposicional inicial)
+%  — Oración 22: "In this case, the Planck constant appears as…, as if it were…"
+oracion(ocm(GP, GN, GV, conj(as_if), O_sub)) -->
+    g_preposicional(GP), g_nominal(GN), g_verbal(GV), [as, if], clausula_base(O_sub).
 
 %  --- Adjunto distributivo postnominal "each with ..." ---
 %  — GN + GV + ',' + each + GP

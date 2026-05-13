@@ -134,7 +134,7 @@ frase(15, or,
 %  principle and quantum mechanics were the pillars that
 %  made this new conception of the microscopic world grow."
 frase(16, or,
-    [in, general, 'wave-particle', duality,
+    [in, general, 'wave-particle', duality, ',',
      the, uncertainty, principle, and, quantum, mechanics,
      were, the, pillars, that, made, this, new,
      conception, of, the, microscopic, world, grow]).

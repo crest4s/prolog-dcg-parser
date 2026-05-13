@@ -153,6 +153,42 @@ test(oracion_9) :-
          coherent, and, efficient, laws], []), Trees),
     once((member(Tree, Trees), functor(Tree, ocm, _))).
 
+% Oración 4 — aposición demostrativa + coord. con sujeto nuevo
+test(oracion_4) :-
+    frase(4, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, ocm, _))).
+
+% Oración 5 — dos cláusulas relativas sobre el mismo antecedente
+test(oracion_5) :-
+    frase(5, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, or, _))).
+
+% Oración 6 — adjunto participial inicial con aposición nominal
+test(oracion_6) :-
+    frase(6, _, T),
+    once(oracion(Tree, T, [])),
+    functor(Tree, o, _).
+
+% Oración 11 — locución "in order to" + dos cláusulas yuxtapuestas
+test(oracion_11) :-
+    frase(11, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, ocm, _))).
+
+% Oración 15 — "such as" ejemplificativo entre sujeto y verbo
+test(oracion_15) :-
+    frase(15, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, or, _))).
+
+% Oración 24 — GP + participio inicial + cláusula + gerundio "betting that"
+test(oracion_24) :-
+    frase(24, _, T),
+    findall(Tree, oracion(Tree, T, []), Trees),
+    once((member(Tree, Trees), functor(Tree, ocm, _))).
+
 :- end_tests(dcg_complejas).
 
 
@@ -232,6 +268,91 @@ test(gv_gi_coord_v_gn_gp) :-
     once(g_verbal(gv(ginf(_, _), conj(and), v(laid), _, gp(prep(for), _)),
                   [to, give, role, and, laid, the, groundwork, for, physics], [])).
 
+% GN: Det + GADJ + GP  ("a great many of the anxieties")
+test(gn_det_gadj_gp) :-
+    once(g_nominal(gn(det(a), _, gp(prep(of), _)),
+                   [a, great, many, of, the, anxieties], [])).
+
+% GN: GADJ + N + GP sin det  ("multiple integers of the constant")
+test(gn_gadj_n_gp) :-
+    once(g_nominal(gn(_, n(integers), gp(prep(of), _)),
+                   [multiple, integers, of, the, constant], [])).
+
+% GV: GADV + GADJ  ("finally able to explain…" tras correlativa)
+test(gv_gadv_gadj) :-
+    once(g_verbal(gv(gadv(adv(finally)), _),
+                  [finally, able, to, explain, a, role], [])).
+
+% GV: V + GN + V2  causativa ("made this idea grow")
+test(gv_v_gn_v2) :-
+    once(g_verbal(gv(v(made), _, v(grow)),
+                  [made, this, idea, grow], [])).
+
+% GV: Aux + V + that + clausula_base  ("was determined that it was essential")
+test(gv_aux_v_that_cb) :-
+    once(g_verbal(gv(v(was), v(determined), conj(that), _),
+                  [was, determined, that, it, was, essential], [])).
+
+% GInf: to + V + GN + GADV  ("to measure certain quantities accurately")
+test(ginf_v_gn_gadv) :-
+    once(g_infinitivo(ginf(v(measure), _, gadv(adv(accurately))),
+                      [to, measure, certain, quantities, accurately], [])).
+
+% GInf: to + V + GP + GNC  ("to know with precision the position and momentum")
+test(ginf_v_gp_gnc) :-
+    once(g_infinitivo(ginf(v(know), gp(prep(with), _), _),
+                      [to, know, with, absolute, precision,
+                       the, position, and, momentum], [])).
+
+% GN: Det + N + GI  ("the ability to measure certain quantities")
+test(gn_det_n_gi) :-
+    once(g_nominal(gn(det(the), n(ability), ginf(v(measure), _)),
+                   [the, ability, to, measure, certain, quantities], [])).
+
+% GN: Pron + GADJ + CR  ("those so small that they are not perceptible")
+test(gn_pron_gadj_cr) :-
+    once(g_nominal(gn(pron(those), gadj(adv(so), adj(small)), _),
+                   [those, so, small, that, they, are, not,
+                    perceptible, to, our, eyes], [])).
+
+% GV: V + GADV + V2 + Prep  ("have surely heard of")
+test(gv_v_gadv_v2_prep) :-
+    once(g_verbal(gv(v(have), gadv(adv(surely)), v(heard), prep(of)),
+                  [have, surely, heard, of], [])).
+
+% GV: V + GP + GI  ("acts as a master key to understanding…")
+test(gv_v_gp_gi) :-
+    once(g_verbal(gv(v(acts), gp(prep(as), _), ginf(v(understanding), _)),
+                  [acts, as, a, master, key,
+                   to, understanding, this, miniature, world], [])).
+
+% GN: N + gpart(V, GN2)  ("light hitting a metal")
+test(gn_n_gpart_gn) :-
+    once(g_nominal(gn(n(light), gpart(v(hitting), gn(det(a), n(metal)))),
+                   [light, hitting, a, metal], [])).
+
+% GI: in order to + V + GN  ("in order to solve this phenomenon")
+test(ginf_inorder) :-
+    once(g_infinitivo(ginf(inorder, v(solve), gn(det(this), n(phenomenon))),
+                      [in, order, to, solve, this, phenomenon], [])).
+
+% GP: prep + GNC  ("into small intervals or pockets")
+test(gp_prep_gnc) :-
+    once(g_preposicional(gp(prep(into), gn_coord(_, _, _)),
+                         [into, small, intervals, or, pockets], [])).
+
+% GP: such as + GNC  ("such as albert einstein niels bohr or werner heisenberg")
+test(gp_such_as) :-
+    once(g_preposicional(gp(such_as, _),
+                         [such, as, albert, einstein,
+                          niels, bohr, or, werner, heisenberg], [])).
+
+% GV: V + conj(that) + clausula_base  ("proposed that energy was discretized")
+test(gv_v_that_cb_single) :-
+    once(g_verbal(gv(v(proposed), conj(that), _),
+                  [proposed, that, energy, was, discretized,
+                   into, small, intervals, or, pockets], [])).
+
 :- end_tests(grupos).
 
 
@@ -251,6 +372,9 @@ test(adverbio)   :- once(adverbio(adv(however),   [however],   [])).
 test(preposicion):- once(preposicion(prep(in),    [in],    [])).
 test(conjuncion) :- once(conjuncion(conj(and),    [and],   [])).
 test(pron_this)  :- once(pronombre(pron(this),   [this],  [])).
+test(adj_many)   :- once(adjetivo(adj(many),     [many],  [])).
+test(v_make)     :- once(verbo(v(make),           [make],  [])).
+test(v_made)     :- once(verbo(v(made),           [made],  [])).
 
 :- end_tests(lexico).
 
