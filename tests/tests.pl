@@ -92,6 +92,71 @@ test(invalida_adj_inicial, fail) :-
 
 
 % =============================================================================
+% Tests: DCG — oraciones complejas (oc, or, ocm)
+% =============================================================================
+:- begin_tests(dcg_complejas).
+
+% --- Coordinadas (oc) ---
+
+% Sujeto compartido: GN + GV1 + conj + GV2
+test(oc_sujeto_compartido) :-
+    once(oracion(Tree,
+        [it, played, a, role, and, laid, the, groundwork], [])),
+    functor(Tree, oc, _).
+
+% Sujetos distintos: clausula_base + conj + clausula_base
+test(oc_sujetos_distintos) :-
+    once(oracion(Tree,
+        [planck, played, a, role, and, it, was, essential], [])),
+    functor(Tree, oc, _).
+
+% --- Subordinadas de relativo (or) ---
+
+% CR postverbal (modifica el sujeto): GN + GV + CR
+% Hay parses oc y or — verificamos que exista al menos uno or.
+test(or_cr_postverbal) :-
+    findall(T, oracion(T, [the,constant,exists,which,planck,introduced], []), Trees),
+    member(Tree, Trees),
+    functor(Tree, or, _).
+
+% CR modifica el objeto: GN1 + GV + GN2 + CR
+% La gramática genera varios functores; verificamos la presencia de or.
+test(or_cr_sobre_objeto) :-
+    findall(T, oracion(T, [scientists,found,dilemmas,that,they,could,not,explain], []), Trees),
+    once((member(Tree, Trees), functor(Tree, or, _))).
+
+% --- Compuestas (ocm) ---
+
+% Oración 2 — sustantiva + relativa anidada
+% once da oc porque oc < or < ocm en el orden de reglas; buscamos ocm entre todos.
+test(oracion_2) :-
+    findall(T, oracion(T,
+        [it, is, often, said, that, quantum, physics,
+         is, a, discipline, that, challenges,
+         the, perception, of, reality], []), Trees),
+    once((member(Tree, Trees), functor(Tree, ocm, _))).
+
+% Oración 3 — adverbial concesiva (well, although…)
+test(oracion_3) :-
+    once(oracion(Tree,
+        [well, although, it, is, a, somewhat, poetic,
+         and, romantic, phrase, in, part,
+         it, can, be, considered, true], [])),
+    functor(Tree, ocm, _).
+
+% Oración 9 — dos cláusulas de relativo coordinadas
+test(oracion_9) :-
+    findall(T, oracion(T,
+        [scientists, began, to, find, perplexing, dilemmas,
+         that, they, could, not, explain,
+         and, for, which, there, were, no,
+         coherent, and, efficient, laws], []), Trees),
+    once((member(Tree, Trees), functor(Tree, ocm, _))).
+
+:- end_tests(dcg_complejas).
+
+
+% =============================================================================
 % Tests: grupos nominales y verbales
 % =============================================================================
 :- begin_tests(grupos).
@@ -339,5 +404,32 @@ test(simplificar_but) :-
 test(simplificar_atomico) :-
     simplificar([this, constant, played, a, role], Ss),
     Ss = [[this, constant, played, a, role]].
+
+% although al inicio — subordinada concesiva separada de cláusula principal
+test(simplificar_although) :-
+    simplificar(
+        [although, it, was, bold, it, was, essential], Ss),
+    Ss = [[it, was, bold], [it, was, essential]].
+
+% which — cláusula de relativo separada del antecedente
+test(simplificar_which) :-
+    simplificar(
+        [the, constant, exists, which, planck, introduced], Ss),
+    Ss = [[the, constant, exists], [planck, introduced]].
+
+% that — complemento sustantivo
+test(simplificar_that) :-
+    simplificar(
+        [planck, proposed, that, energy, exists], Ss),
+    Ss = [[planck, proposed], [energy, exists]].
+
+% división recursiva: although + that anidados producen tres fragmentos
+test(simplificar_recursivo) :-
+    simplificar(
+        [although, it, was, bold,
+         it, contradicted, theories, that, were, essential], Ss),
+    Ss = [[it, was, bold],
+          [it, contradicted, theories],
+          [were, essential]].
 
 :- end_tests(simplificar).
