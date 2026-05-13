@@ -34,6 +34,56 @@
 
 
 % ===========================================================
+%  ORACIÓN COMPUESTA — SUSTANTIVAS  (ocm con [that])
+%  Definidas ANTES que oracion(o) para que el analizador priorice
+%  el árbol ocm correcto frente a lecturas o con GV+that absorbido.
+% ===========================================================
+
+%  GN + GV + [that] + clausula_base
+oracion(ocm(GN, GV, conj(that), O)) -->
+    g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+%  GN + GV + [that] + clausula_base + CR
+oracion(ocm(GN, GV, conj(that), O, CR)) -->
+    g_nominal(GN), g_verbal(GV), [that], clausula_base(O), clausula_relativa(CR).
+
+%  GADV + GN + GV + [that] + clausula_base
+oracion(ocm(GADV, GN, GV, conj(that), O)) -->
+    g_adverbial(GADV), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+oracion(ocm(GADV, GN, GV, conj(that), O, CR)) -->
+    g_adverbial(GADV), g_nominal(GN), g_verbal(GV),
+    [that], clausula_base(O), clausula_relativa(CR).
+
+%  GP + GN + GV + [that] + clausula_base
+oracion(ocm(GP, GN, GV, conj(that), O)) -->
+    g_preposicional(GP), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+%  GN + GV + GN_obj + [that] + clausula_base
+%  — Oración 12: "he expounded the idea that the energy emitted was not a constant value"
+oracion(ocm(GN1, GV, GN2, conj(that), O)) -->
+    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
+
+oracion(ocm(GP, GN1, GV, GN2, conj(that), O)) -->
+    g_preposicional(GP),
+    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
+
+%  GI + GN + GV + GN_obj + [that] + clausula_base
+%  — Oración 25: "To establish this idea, Einstein used the hypothesis that…"
+oracion(ocm(GI, GN1, GV, GN2, conj(that), O)) -->
+    g_infinitivo(GI),
+    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
+
+oracion(ocm(GI, GN, GV, conj(that), O)) -->
+    g_infinitivo(GI), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
+
+%  GN + GV + GP + [that] + clausula_base  (sustantiva en obj preposicional)
+%  — Oración 21: "The idea of this approach states that it is impossible…"
+oracion(ocm(GN, GV, GP, conj(that), O)) -->
+    g_nominal(GN), g_verbal(GV), g_preposicional(GP), [that], clausula_base(O).
+
+
+% ===========================================================
 %  ORACIÓN SIMPLE  (o)
 %  Estructura canónica: [Adjunto*]  GN  GV
 %  Los adjuntos iniciales pueden ser adverbiales,
@@ -379,14 +429,6 @@ g_verbal(gv(V, GN, V2)) --> verbo(V), g_nominal(GN), verbo(V2).
 %  V + Prep  (preposición varada: "heard of", "spoken about")
 g_verbal(gv(V, P)) --> verbo(V), preposicion(P).
 
-%  V + [that] + clausula_base  (cláusula sustantiva embebida en GV)
-%  (e.g., "was determined that it should always be quantized")
-g_verbal(gv(V, conj(that), O)) --> verbo(V), [that], clausula_base(O).
-
-%  Aux + V + [that] + clausula_base  (pasiva biauxiliar + sustantiva)
-%  (e.g., "was considered that…", "was determined that…")
-g_verbal(gv(V1, V2, conj(that), O)) --> verbo(V1), verbo(V2), [that], clausula_base(O).
-
 %  GI + conj + V + GN + GP  (GV coordinado complejo)
 %  (e.g., "to give explanation and manifest itself through quantum phenomena")
 g_verbal(gv(GI, C, V, GN, GP)) -->
@@ -651,55 +693,6 @@ g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
 g_nominal_coord(gn_coord(GN1, GN2, GN3, C, GN4)) -->
     g_nominal(GN1), [','], g_nominal(GN2), [','], g_nominal(GN3), conj_coord(C), g_nominal(GN4).
 
-
-% ===========================================================
-%  ORACIÓN COMPUESTA — SUSTANTIVAS  (ocm con [that])
-%  Movidas antes que oc para que el analizador priorice el
-%  árbol ocm correcto frente a lecturas oc con GN+CR absorto.
-% ===========================================================
-
-%  GN + GV + [that] + clausula_base
-oracion(ocm(GN, GV, conj(that), O)) -->
-    g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
-
-%  GN + GV + [that] + clausula_base + CR
-oracion(ocm(GN, GV, conj(that), O, CR)) -->
-    g_nominal(GN), g_verbal(GV), [that], clausula_base(O), clausula_relativa(CR).
-
-%  GADV + GN + GV + [that] + clausula_base
-oracion(ocm(GADV, GN, GV, conj(that), O)) -->
-    g_adverbial(GADV), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
-
-oracion(ocm(GADV, GN, GV, conj(that), O, CR)) -->
-    g_adverbial(GADV), g_nominal(GN), g_verbal(GV),
-    [that], clausula_base(O), clausula_relativa(CR).
-
-%  GP + GN + GV + [that] + clausula_base
-oracion(ocm(GP, GN, GV, conj(that), O)) -->
-    g_preposicional(GP), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
-
-%  GN + GV + GN_obj + [that] + clausula_base
-%  — Oración 12: "he expounded the idea that the energy emitted was not a constant value"
-oracion(ocm(GN1, GV, GN2, conj(that), O)) -->
-    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
-
-oracion(ocm(GP, GN1, GV, GN2, conj(that), O)) -->
-    g_preposicional(GP),
-    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
-
-%  GI + GN + GV + GN_obj + [that] + clausula_base
-%  — Oración 25: "To establish this idea, Einstein used the hypothesis that…"
-oracion(ocm(GI, GN1, GV, GN2, conj(that), O)) -->
-    g_infinitivo(GI),
-    g_nominal(GN1), g_verbal(GV), g_nominal(GN2), [that], clausula_base(O).
-
-oracion(ocm(GI, GN, GV, conj(that), O)) -->
-    g_infinitivo(GI), g_nominal(GN), g_verbal(GV), [that], clausula_base(O).
-
-%  GN + GV + GP + [that] + clausula_base  (sustantiva en obj preposicional)
-%  — Oración 21: "The idea of this approach states that it is impossible…"
-oracion(ocm(GN, GV, GP, conj(that), O)) -->
-    g_nominal(GN), g_verbal(GV), g_preposicional(GP), [that], clausula_base(O).
 
 % ===========================================================
 %  ORACIÓN COORDINADA  (oc)
