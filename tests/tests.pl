@@ -353,6 +353,17 @@ test(gv_v_that_cb_single) :-
                   [proposed, that, energy, was, discretized,
                    into, small, intervals, or, pockets], [])).
 
+% GV: Aux + Adv + Aux + V  ("should always be quantized")
+test(gv_aux_adv_aux_v) :-
+    once(g_verbal(gv(v(should), gadv(adv(always)), v(be), v(quantized)),
+                  [should, always, be, quantized], [])).
+
+% GV: Aux + Adv + Aux + V + GP  ("should always be quantized into quantities")
+test(gv_aux_adv_aux_v_gp) :-
+    once(g_verbal(gv(v(should), gadv(adv(always)), v(be), v(quantized),
+                     gp(prep(into), _)),
+                  [should, always, be, quantized, into, quantities], [])).
+
 :- end_tests(grupos).
 
 
