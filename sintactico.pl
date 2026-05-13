@@ -569,6 +569,10 @@ clausula_base(o(GN, GV, CR)) -->
 clausula_base(o(GN, GV1, C, GV2)) -->
     g_nominal(GN), g_verbal(GV1), conjuncion(C), g_verbal(GV2).
 
+%  Coordinación de predicados con conj_coord (but/and/or): árbol oc para distinguir de o
+clausula_base(oc(GN, GV1, C, GV2)) -->
+    g_nominal(GN), g_verbal(GV1), conj_coord(C), g_verbal(GV2).
+
 %  Participio parentético en cláusula embebida (p.ej., dentro de oc/ocm)
 clausula_base(o(GN, gpart(V, GP), GV)) -->
     g_nominal(GN), verbo(V), g_preposicional(GP), g_verbal(GV).
@@ -751,6 +755,11 @@ oracion(or(GADV, GN, GP, GV, CR)) -->
 oracion(or(GN, GV, GP, CR)) -->
     g_nominal(GN), g_verbal(GV), g_preposicional(GP), clausula_relativa(CR).
 
+%  GADV + GN + GV + GP + CR  — adverbio inicial + GP objeto + relativa sobre GP
+%  — Oración 15: "Fortunately, other physicists contributed to breakthroughs that consolidated…"
+oracion(or(GADV, GN, GV, GP, CR)) -->
+    g_adverbial(GADV), g_nominal(GN), g_verbal(GV), g_preposicional(GP), clausula_relativa(CR).
+
 %  GP1 + GN + GV + GP2 + CR
 oracion(or(GP1, GN, GV, GP2, CR)) -->
     g_preposicional(GP1),
@@ -834,6 +843,13 @@ oracion(ocm(GI, GN, GV, conj(that), O)) -->
 %  — Oración 11: "In order to solve this phenomenon, Max Planck presented…; he proposed…"
 oracion(ocm(GI, O1, O2)) -->
     g_infinitivo(GI), clausula_base(O1), clausula_base(O2).
+
+%  --- Yuxtaposición sin conjunción explícita ---
+
+%  GP + GN + GV + O2  (GP inicial + cláusula principal + segunda cláusula yuxtapuesta)
+%  — Oración 11: "In order to solve this, Planck presented an idea; he proposed energy was discrete"
+oracion(ocm(GP, GN, GV, O2)) -->
+    g_preposicional(GP), g_nominal(GN), g_verbal(GV), clausula_base(O2).
 
 %  GN + GV + GP + [that] + clausula_base  (sustantiva en obj preposicional)
 %  — Oración 21: "The idea of this approach states that it is impossible…"
