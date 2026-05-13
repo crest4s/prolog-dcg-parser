@@ -134,6 +134,39 @@ test(gadj_simple) :-
 test(gadj_adv_adj) :-
     once(g_adjetival(gadj(adv(very), adj(important)), [very, important], [])).
 
+% GV: V + GADJ + GI  ("is impossible to know")
+test(gv_v_gadj_gi) :-
+    once(g_verbal(gv(v(is), _, ginf(_)), [is, impossible, to, know], [])).
+
+% GV: V + GP + GN  ("presented in 1900 an innovative idea")
+test(gv_v_gp_gn) :-
+    once(g_verbal(gv(v(presented), gp(_, _), _),
+                  [presented, in, 1900, an, innovative, idea], [])).
+
+% GV: V + GADV + GN  ("was not a constant value")
+test(gv_v_gadv_gn) :-
+    once(g_verbal(gv(v(was), gadv(adv(not)), _),
+                  [was, not, a, constant, value], [])).
+
+% GV: V + GN + GADJ  ("considered this idea essential")
+test(gv_v_gn_gadj) :-
+    once(g_verbal(gv(v(considered), _, gadj(adj(essential))),
+                  [considered, this, idea, essential], [])).
+
+% GV: V + Prep  (preposición varada "heard of")
+test(gv_v_prep_varada) :-
+    once(g_verbal(gv(v(heard), prep(of)), [heard, of], [])).
+
+% GV: V + that + clausula_base  ("determined that it was essential")
+test(gv_v_that_cb) :-
+    once(g_verbal(gv(v(determined), conj(that), _),
+                  [determined, that, it, was, essential], [])).
+
+% GV: GI + conj + V + GN + GP  (GV coordinado complejo)
+test(gv_gi_coord_v_gn_gp) :-
+    once(g_verbal(gv(ginf(_, _), conj(and), v(laid), _, gp(prep(for), _)),
+                  [to, give, role, and, laid, the, groundwork, for, physics], [])).
+
 :- end_tests(grupos).
 
 

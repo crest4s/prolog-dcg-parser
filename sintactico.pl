@@ -234,6 +234,33 @@ g_verbal(gv(V, GADV, GADJ)) --> verbo(V), g_adverbial(GADV), g_adjetival(GADJ).
 g_verbal(gv(V, GI)) --> verbo(V), g_infinitivo(GI).
 g_verbal(gv(V, GI, GP)) --> verbo(V), g_infinitivo(GI), g_preposicional(GP).
 
+%  --- Reglas adicionales de GV ---
+
+%  V + GADJ + GI  (e.g., "is impossible to know", "are able to pass through")
+%  Distinto de gv(V,GADJ) con GADJ=gadj(A,GI): aquí GADJ y GI son constituyentes separados.
+g_verbal(gv(V, GADJ, GI)) --> verbo(V), g_adjetival(GADJ), g_infinitivo(GI).
+
+%  V + GP + GN  (GP precede al CD: "presented in 1900 an innovative idea")
+g_verbal(gv(V, GP, GN)) --> verbo(V), g_preposicional(GP), g_nominal(GN).
+
+%  V + GADV + GN  (e.g., "was not a constant value", "was precisely this phenomenon")
+g_verbal(gv(V, GADV, GN)) --> verbo(V), g_adverbial(GADV), g_nominal(GN).
+
+%  V + GN + GADJ  (atributo predicativo postnominal: "exhibited behaviors very similar to light")
+g_verbal(gv(V, GN, GADJ)) --> verbo(V), g_nominal(GN), g_adjetival(GADJ).
+
+%  V + Prep  (preposición varada: "heard of", "spoken about")
+g_verbal(gv(V, P)) --> verbo(V), preposicion(P).
+
+%  V + [that] + clausula_base  (cláusula sustantiva embebida en GV)
+%  (e.g., "was determined that it should always be quantized")
+g_verbal(gv(V, conj(that), O)) --> verbo(V), [that], clausula_base(O).
+
+%  GI + conj + V + GN + GP  (GV coordinado complejo)
+%  (e.g., "to give explanation and manifest itself through quantum phenomena")
+g_verbal(gv(GI, C, V, GN, GP)) -->
+    g_infinitivo(GI), conjuncion(C), verbo(V), g_nominal(GN), g_preposicional(GP).
+
 
 % ===========================================================
 %  GRUPO INFINITIVO  (ginf)
