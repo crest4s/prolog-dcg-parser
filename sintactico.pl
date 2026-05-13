@@ -294,6 +294,9 @@ g_verbal(gv(V1, GADV, V2, GN, GP)) -->
 %  V + GADV + GADJ  (e.g., "was finally able to explain…")
 g_verbal(gv(V, GADV, GADJ)) --> verbo(V), g_adverbial(GADV), g_adjetival(GADJ).
 
+%  GADV + GADJ  (e.g., "finally able to explain…" tras correlativa "not only")
+g_verbal(gv(GADV, GADJ)) --> g_adverbial(GADV), g_adjetival(GADJ).
+
 %  --- Complemento infinitivo ---
 %  (e.g., "seemed to have stalled", "is 6.626... joules")
 g_verbal(gv(V, GI)) --> verbo(V), g_infinitivo(GI).
@@ -314,12 +317,19 @@ g_verbal(gv(V, GADV, GN)) --> verbo(V), g_adverbial(GADV), g_nominal(GN).
 %  V + GN + GADJ  (atributo predicativo postnominal: "exhibited behaviors very similar to light")
 g_verbal(gv(V, GN, GADJ)) --> verbo(V), g_nominal(GN), g_adjetival(GADJ).
 
+%  V + GN + V2  (causativa: "made this new conception grow")
+g_verbal(gv(V, GN, V2)) --> verbo(V), g_nominal(GN), verbo(V2).
+
 %  V + Prep  (preposición varada: "heard of", "spoken about")
 g_verbal(gv(V, P)) --> verbo(V), preposicion(P).
 
 %  V + [that] + clausula_base  (cláusula sustantiva embebida en GV)
 %  (e.g., "was determined that it should always be quantized")
 g_verbal(gv(V, conj(that), O)) --> verbo(V), [that], clausula_base(O).
+
+%  Aux + V + [that] + clausula_base  (pasiva biauxiliar + sustantiva)
+%  (e.g., "was considered that…", "was determined that…")
+g_verbal(gv(V1, V2, conj(that), O)) --> verbo(V1), verbo(V2), [that], clausula_base(O).
 
 %  GI + conj + V + GN + GP  (GV coordinado complejo)
 %  (e.g., "to give explanation and manifest itself through quantum phenomena")
@@ -361,8 +371,14 @@ g_infinitivo(ginf(V, GADJ)) --> [to], verbo(V), g_adjetival(GADJ).
 %  to + V + GN  (e.g., "to understanding this miniature world")
 g_infinitivo(ginf(V, GN)) --> [to], verbo(V), g_nominal(GN).
 
+%  to + V + GN + GADV  (e.g., "to measure certain quantities accurately")
+g_infinitivo(ginf(V, GN, GADV)) --> [to], verbo(V), g_nominal(GN), g_adverbial(GADV).
+
 %  to + V + GP  (e.g., "to contribute to the field", "to pass through barriers")
 g_infinitivo(ginf(V, GP)) --> [to], verbo(V), g_preposicional(GP).
+
+%  to + V + GP + GNC  (e.g., "to know with absolute precision the position and momentum")
+g_infinitivo(ginf(V, GP, GNC)) --> [to], verbo(V), g_preposicional(GP), g_nominal_coord(GNC).
 
 %  to + V + V + GN
 g_infinitivo(ginf(V1, V2, GN)) --> [to], verbo(V1), verbo(V2), g_nominal(GN).

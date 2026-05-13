@@ -242,6 +242,32 @@ test(gn_gadj_n_gp) :-
     once(g_nominal(gn(_, n(integers), gp(prep(of), _)),
                    [multiple, integers, of, the, constant], [])).
 
+% GV: GADV + GADJ  ("finally able to explain…" tras correlativa)
+test(gv_gadv_gadj) :-
+    once(g_verbal(gv(gadv(adv(finally)), _),
+                  [finally, able, to, explain, a, role], [])).
+
+% GV: V + GN + V2  causativa ("made this idea grow")
+test(gv_v_gn_v2) :-
+    once(g_verbal(gv(v(made), _, v(grow)),
+                  [made, this, idea, grow], [])).
+
+% GV: Aux + V + that + clausula_base  ("was determined that it was essential")
+test(gv_aux_v_that_cb) :-
+    once(g_verbal(gv(v(was), v(determined), conj(that), _),
+                  [was, determined, that, it, was, essential], [])).
+
+% GInf: to + V + GN + GADV  ("to measure certain quantities accurately")
+test(ginf_v_gn_gadv) :-
+    once(g_infinitivo(ginf(v(measure), _, gadv(adv(accurately))),
+                      [to, measure, certain, quantities, accurately], [])).
+
+% GInf: to + V + GP + GNC  ("to know with precision the position and momentum")
+test(ginf_v_gp_gnc) :-
+    once(g_infinitivo(ginf(v(know), gp(prep(with), _), _),
+                      [to, know, with, absolute, precision,
+                       the, position, and, momentum], [])).
+
 :- end_tests(grupos).
 
 
