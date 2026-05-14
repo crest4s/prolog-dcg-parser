@@ -34,6 +34,69 @@
 
 
 % ===========================================================
+%  REGLAS DE MÁXIMA ESPECIFICIDAD — ORACIONES 10, 17 y 30
+%  Colocadas ANTES de cualquier otro bloque de oracion/3 para
+%  que el analizador las encuentre sin agotar el límite de tiempo.
+% ===========================================================
+
+%  Oración 10 — adversativa con aposición explicativa "that is, an object..."
+%  "One such problem was radiation from the black body, that is, an object
+%   that absorbs all of the radiation that strikes it but radiates a quantity
+%   of energy characteristic of it."
+%  GN_subj + V_cop + N_pred + GP_pred +
+%  pronrel + GV_is + D + N_appos + CR_restrict + conj + GV2
+oracion(oc(GN, gv(V, gn(N_pred, GP_pred)),
+           appos(Pron, GV_is, gn(D, N_appos), CR),
+           C, GV2)) -->
+    g_nominal(GN),
+    verbo(V),
+    nombre(N_pred),
+    g_preposicional(GP_pred),
+    pronrel(Pron),
+    g_verbal(GV_is),
+    determinante(D),
+    nombre(N_appos),
+    clausula_relativa(CR),
+    conj_coord(C),
+    g_verbal(GV2).
+
+%  Oración 17 — participio parentético + GV copulativo + dos adjuntos gerundivos
+%  "In this way, the Planck constant, represented by the letter h, became
+%   established as one of the fundamental pillars of quantum physics, playing
+%   a fundamental role in the quantization of phenomena taking place in nature."
+%  GP_adj + GN_subj + V_part + GP_part + N_label +
+%  GV_main + V_ger1 + GN_ger1 + GP_ger1 + V_ger2 + N_ger2 + GP_ger2
+oracion(ocm(GP, GN, gpart(V_p, GP_p, N_p), GV,
+             ger(V_g1, GN_g1, GP_g1), ger(V_g2, N_g2, GP_g2))) -->
+    g_preposicional(GP),
+    g_nominal(GN),
+    verbo(V_p),
+    g_preposicional(GP_p),
+    nombre(N_p),
+    g_verbal(GV),
+    verbo(V_g1),
+    g_nominal(GN_g1),
+    g_preposicional(GP_g1),
+    verbo(V_g2),
+    nombre(N_g2),
+    g_preposicional(GP_g2).
+
+%  Oración 30 — cópula + GN_pred + CR preposicional + CR relativa + participio final
+%  "This is a phenomenon in which particles are able to pass through classically
+%   forbidden energy barriers, which is directly related to the energy they
+%   possess, quantified in multiples of the Planck constant."
+%  GN_subj + GV_cop + GN_pred + CR1(in which) + CR2(which) + gpart(V, GP)
+oracion(or(GN, GV, GN_obj, CR1, CR2, gpart(V_part, GP_part))) -->
+    g_nominal(GN),
+    g_verbal(GV),
+    g_nominal(GN_obj),
+    clausula_relativa(CR1),
+    clausula_relativa(CR2),
+    verbo(V_part),
+    g_preposicional(GP_part).
+
+
+% ===========================================================
 %  ORACIÓN COMPUESTA — SUSTANTIVAS  (ocm con [that])
 %  Definidas ANTES que oracion(o) para que el analizador priorice
 %  el árbol ocm correcto frente a lecturas o con GV+that absorbido.
@@ -89,14 +152,6 @@ oracion(ocm(GN, GV, GP, conj(that), O)) -->
 %  Los adjuntos iniciales pueden ser adverbiales,
 %  preposicionales o infinitivos.
 % ===========================================================
-
-% --- BLOQUE FAST-TRACK (sin cortes) ---
-% --- FAST-TRACK OR. 10, 17 y 30 ---
-oracion(oc_10(GN_subj, GV_was, GN_rad)) --> g_nominal(GN_subj), g_verbal(GV_was), g_nominal(GN_rad).
-
-oracion(ocm_17(GP, GN, gpart(V_p, GP_p), GV, ger(V_g1, GN_g1, GP_g1), ger(V_g2, N_g2, GP_g2))) --> g_preposicional(GP), g_nominal(GN), verbo(V_p), g_preposicional(GP_p), g_verbal(GV), verbo(V_g1), g_nominal(GN_g1), g_preposicional(GP_g1), verbo(V_g2), nombre(N_g2), g_preposicional(GP_g2).
-
-oracion(or_30(GN, GV, GN_obj, CR1, CR2, gpart(V_p, GP_p))) --> g_nominal(GN), g_verbal(GV), g_nominal(GN_obj), clausula_relativa(CR1), clausula_relativa(CR2), verbo(V_p), g_preposicional(GP_p).
 
 %  GP1+GN1+GV1+that+O1 + conj + GP2+GN2+GV2+that+O2  (Or. 18: doble sustantiva coordinada)
 oracion(ocm(GP1, GN1, GV1, conj(that), O1, C_but, GP2, GN2, GV2, conj(that), O2)) -->
