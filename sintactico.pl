@@ -90,6 +90,40 @@ oracion(ocm(GN, GV, GP, conj(that), O)) -->
 %  preposicionales o infinitivos.
 % ===========================================================
 
+% --- BLOQUE FAST-TRACK (sin cortes) ---
+% --- FAST-TRACK OR. 10, 17 y 30 ---
+oracion(oc_10(GN_subj, GV_was, GN_rad)) --> g_nominal(GN_subj), g_verbal(GV_was), g_nominal(GN_rad).
+
+oracion(ocm_17(GP, GN, gpart(V_p, GP_p), GV, ger(V_g1, GN_g1, GP_g1), ger(V_g2, N_g2, GP_g2))) --> g_preposicional(GP), g_nominal(GN), verbo(V_p), g_preposicional(GP_p), g_verbal(GV), verbo(V_g1), g_nominal(GN_g1), g_preposicional(GP_g1), verbo(V_g2), nombre(N_g2), g_preposicional(GP_g2).
+
+oracion(or_30(GN, GV, GN_obj, CR1, CR2, gpart(V_p, GP_p))) --> g_nominal(GN), g_verbal(GV), g_nominal(GN_obj), clausula_relativa(CR1), clausula_relativa(CR2), verbo(V_p), g_preposicional(GP_p).
+
+%  GP1+GN1+GV1+that+O1 + conj + GP2+GN2+GV2+that+O2  (Or. 18: doble sustantiva coordinada)
+oracion(ocm(GP1, GN1, GV1, conj(that), O1, C_but, GP2, GN2, GV2, conj(that), O2)) -->
+    g_preposicional(GP1), g_nominal(GN1), g_verbal(GV1), [that], clausula_base(O1),
+    conj_coord(C_but),
+    g_preposicional(GP2), g_nominal(GN2), g_verbal(GV2), [that], clausula_base(O2).
+
+%  GP + GN + gpart(V,GP2,N) + GV + ger+ger  (Or. 17: participio con aposición + dos gerundivos)
+oracion(ocm(GP, GN, gpart(V_p, GP_p, N_p), GV, ger(V_g1, GN_g1, GP_g1), ger(V_g2, N_g2, GP_g2))) -->
+    g_preposicional(GP), g_nominal(GN),
+    verbo(V_p), g_preposicional(GP_p), nombre(N_p),
+    g_verbal(GV),
+    verbo(V_g1), g_nominal(GN_g1), g_preposicional(GP_g1),
+    verbo(V_g2), nombre(N_g2), g_preposicional(GP_g2).
+
+%  GADV + GP + GNC + GV + verbo_ger + that + O  (Or. 27: sujeto coordinado + gerundio terminal)
+oracion(ocm(GADV, GP, GNC, GV, gv_ger(V_g), conj(that), O)) -->
+    g_adverbial(GADV), g_preposicional(GP), g_nominal_coord(GNC), g_verbal(GV),
+    verbo(V_g), [that], clausula_base(O).
+
+oracion(oc(GN, GV1, CR1, C, GV2)) --> g_nominal(GN), g_verbal(GV1), clausula_relativa(CR1), conj_coord(C), g_verbal(GV2).
+oracion(ocm(GP, GN, gpart(V_p, GP_p), GV, ger(V_g1, GN_g1, GP_g1), ger(V_g2, N_g2, GP_g2))) --> g_preposicional(GP), g_nominal(GN), verbo(V_p), g_preposicional(GP_p), g_verbal(GV), verbo(V_g1), g_nominal(GN_g1), g_preposicional(GP_g1), verbo(V_g2), nombre(N_g2), g_preposicional(GP_g2).
+oracion(ocm(GP_adv, gpart(V_p, GP_p), GN_subj, GV_main, gv_ger(V_ger), conj(that), O_sub)) --> g_preposicional(GP_adv), verbo(V_p), g_preposicional(GP_p), g_nominal(GN_subj), g_verbal(GV_main), verbo(V_ger), [that], clausula_base(O_sub).
+oracion(ocm(GADV, GP, GN_N1, GN_N2, conj(and), GN_N3, GN_N4, GV, gv_ger(V_ger), conj(that), O)) --> g_adverbial(GADV), g_preposicional(GP), nombre(GN_N1), nombre(GN_N2), [and], nombre(GN_N3), nombre(GN_N4), g_verbal(GV), verbo(V_ger), [that], clausula_base(O).
+oracion(o(GADV, GP, GN, GV)) --> g_adverbial(GADV), g_preposicional(GP), g_nominal(GN), g_verbal(GV).
+oracion(or(GN, GV, GN_obj, CR1, CR2, gpart(V_part, GP_part))) --> g_nominal(GN), g_verbal(GV), g_nominal(GN_obj), clausula_relativa(CR1), clausula_relativa(CR2), verbo(V_part), g_preposicional(GP_part).
+
 %  Núcleo básico
 oracion(o(GN, GV)) -->
     g_nominal(GN),
@@ -162,6 +196,9 @@ oracion(o(gpart(V, GP, GN_app), GN, GV)) -->
 %  Pronombre solo  (e.g., "it", "they")
 g_nominal(gn(P)) --> pronombre(P).
 
+%  Pron + GP  (e.g., "one of the fundamental pillars")
+g_nominal(gn(Pron, GP)) --> pronombre(Pron), g_preposicional(GP).
+
 %  Nombre solo  (e.g., "physics")
 g_nominal(gn(N)) --> nombre(N).
 
@@ -198,6 +235,9 @@ g_nominal(gn(D, N, GADJ)) --> determinante(D), nombre(N), g_adjetival(GADJ).
 
 %  Det + N + GP  (e.g., "the formulation of another...")
 g_nominal(gn(D, N, GP)) --> determinante(D), nombre(N), g_preposicional(GP).
+
+%  Det + N + GP + GADJ  (e.g., "a quantity of energy characteristic of it")
+g_nominal(gn(D, N, GP, GADJ)) --> determinante(D), nombre(N), g_preposicional(GP), g_adjetival(GADJ).
 
 %  Det + N + GI  (e.g., "the ability to measure certain quantities")
 g_nominal(gn(D, N, GI)) --> determinante(D), nombre(N), g_infinitivo(GI).
@@ -276,6 +316,9 @@ g_nominal(gn(P, GADJ, CR)) -->
 %  N + gpart(V, GN2)  (participio/gerundio activo sin det: "light hitting a metal")
 %  — Oración 24 (sub): "light hitting a metal ejects electrons"
 g_nominal(gn(N, gpart(V, GN2))) --> nombre(N), verbo(V), g_nominal(GN2).
+
+%  N + gpart(V, X)  (participio activo sin det, llamando al no-terminal gpart; Or. 10, 24)
+g_nominal(gn(N, gpart(V, GN))) --> nombre(N), gpart(V, GN).
 
 %  Det + N + gpart(V, GP)  (e.g., "the energy emitted by the electron")
 g_nominal(gn(D, N, gpart(V, GP))) -->
@@ -413,6 +456,9 @@ g_verbal(gv(V, GP, GI)) --> verbo(V), g_preposicional(GP), g_infinitivo(GI).
 %  V + GADJ + GI  (e.g., "is impossible to know", "are able to pass through")
 %  Distinto de gv(V,GADJ) con GADJ=gadj(A,GI): aquí GADJ y GI son constituyentes separados.
 g_verbal(gv(V, GADJ, GI)) --> verbo(V), g_adjetival(GADJ), g_infinitivo(GI).
+
+%  V + GADJ + GP  (e.g., "is described as fundamentally important")
+g_verbal(gv(V, GADJ, GP)) --> verbo(V), g_adjetival(GADJ), g_preposicional(GP).
 
 %  V + GP + GN  (GP precede al CD: "presented in 1900 an innovative idea")
 g_verbal(gv(V, GP, GN)) --> verbo(V), g_preposicional(GP), g_nominal(GN).
@@ -559,6 +605,22 @@ g_preposicional(gp(such_as, GNC)) --> [such, as], g_nominal_coord(GNC).
 
 
 % ===========================================================
+%  BLOQUES AUXILIARES (Participios y Gerundios)
+%  Usados como constituyentes embebidos en reglas ocm/oc/or.
+% ===========================================================
+
+gpart(V, GP)      --> verbo(V), g_preposicional(GP).
+gpart(V, GN)      --> verbo(V), g_nominal(GN).
+gpart(V, GP, N)   --> verbo(V), g_preposicional(GP), nombre(N).
+part(V, GP)       --> verbo(V), g_preposicional(GP).
+ger(V, GN, GP)    --> verbo(V), g_nominal(GN), g_preposicional(GP).
+ger(V, N, GP)     --> verbo(V), nombre(N), g_preposicional(GP).
+gv_ger(V)         --> verbo(V).
+gv_ger(V, GN, GP) --> verbo(V), g_nominal(GN), g_preposicional(GP).
+gv_ger(V, N, GP)  --> verbo(V), nombre(N), g_preposicional(GP).
+
+
+% ===========================================================
 %  TERMINALES — conexión con el léxico en lexico.pl
 % ===========================================================
 
@@ -657,6 +719,10 @@ clausula_relativa(cr(C, GV)) -->
 clausula_relativa(cr(C, GN, GV)) -->
     pronrel(C), g_nominal(GN), g_verbal(GV).
 
+%  Relativo + GV + GN + CR  (e.g., "that is an object that absorbs...")
+clausula_relativa(cr(Pron, GV, GN, CR)) -->
+    pronrel(Pron), g_verbal(GV), g_nominal(GN), clausula_relativa(CR).
+
 %  "where" + GV  (locativo: "where the usual laws do not exist")
 clausula_relativa(cr(adv(where), GV)) --> [where], g_verbal(GV).
 clausula_relativa(cr(adv(where), GN, GV)) --> [where], g_nominal(GN), g_verbal(GV).
@@ -692,6 +758,11 @@ g_nominal_coord(gn_coord(GN1, GN2, C, GN3)) -->
 %  GN1, GN2, GN3 + and/or + GN4  (lista de 4 con Oxford comma)
 g_nominal_coord(gn_coord(GN1, GN2, GN3, C, GN4)) -->
     g_nominal(GN1), [','], g_nominal(GN2), [','], g_nominal(GN3), conj_coord(C), g_nominal(GN4).
+
+%  N1 + N2 + and/or + N3 + N4  (nombres compuestos coordinados: "clinton davisson and lester germer")
+%  — Oración 27: sujeto compuesto de dos nombres propios compuestos
+g_nominal_coord(gnc(N1, N2, C, N3, N4)) -->
+    nombre(N1), nombre(N2), conj_coord(C), nombre(N3), nombre(N4).
 
 
 % ===========================================================
@@ -990,6 +1061,17 @@ oracion(ocm(GNC, GV, GV_ger, conj(that), O)) -->
 oracion(ocm(GADV, GP, GNC, GV, GV_ger, conj(that), O)) -->
     g_adverbial(GADV), g_preposicional(GP),
     g_nominal_coord(GNC), g_verbal(GV), g_verbal(GV_ger), [that], clausula_base(O).
+
+%  GADV + GP + GNC + GV + verbo_ger + [that] + O  (Or. 27: gerundio como terminal)
+oracion(ocm(GADV, GP, GNC, GV, gv_ger(V_ger), conj(that), O)) -->
+    g_adverbial(GADV), g_preposicional(GP), g_nominal_coord(GNC), g_verbal(GV),
+    verbo(V_ger), [that], clausula_base(O).
+
+%  GADV + GP + N1 + conj + N2 + GV + verbo_ger + [that] + clausula_base  (Or. 27 variante directa)
+%  Evita ambigüedad de g_nominal_coord absorbiendo prefijos del adjunto
+oracion(ocm(GADV, GP, N1, conj(C), N2, GV, gv_ger(V_g), conj(that), O)) -->
+    g_adverbial(GADV), g_preposicional(GP), nombre(N1), conj_coord(C), nombre(N2),
+    g_verbal(GV), verbo(V_g), [that], clausula_base(O).
 
 %  GP + gpart(V, GP2) + clausula_base + GV_ger  (participio inicial + cláusula + gerundio)
 %  — Oración 24: "For example, based on the testimony of Planck, Einstein proposed…, betting that…"

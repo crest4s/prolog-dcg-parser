@@ -44,12 +44,12 @@ test(20, [likewise,the,planck,constant,also,played,an,essential,role,in,formulat
 test(21, [the,idea,of,this,approach,states,that,it,is,impossible,to,know,with,absolute,precision,the,position,and,momentum,of,a,particle]).
 test(22, [in,this,case,the,planck,constant,appears,as,an,impediment,as,if,it,were,a,limitation,on,the,ability,to,measure,certain,quantities,accurately]).
 test(23, [its,presence,deduced,in,a,theoretical,way,manages,to,give,explanation,and,manifest,itself,through,quantum,phenomena,observed,in,different,experiments,which,definitively,consolidated,its,importance]).
-test(24, [for,example,based,on,the,testimony,of,planck,albert,einstein,proposed,in,1905,a,quantum,explanation,for,the,photoelectric,effect,betting,that,light,hitting,a,metal,ejects,electrons]).
+test(24, [for,example,based,on,the,testimony,of,planck,albert,einstein,proposed,in,'1905',a,quantum,explanation,for,the,photoelectric,effect,betting,that,light,hitting,a,metal,ejects,electrons]).
 test(25, [to,establish,this,idea,einstein,used,the,hypothesis,that,light,is,composed,of,particles,called,photons,each,with,energy,proportional,to,'planck''s',constant]).
 test(26, [it,was,precisely,this,phenomenon,that,managed,to,explain,that,light,had,both,wave,and,particle,behaviors,laying,the,foundation,for,the,'wave-particle',duality]).
-test(27, [likewise,in,1927,clinton,davisson,and,lester,germer,conducted,different,experiments,of,electron,diffraction,showing,that,they,exhibited,wavelike,behaviors,very,similar,to,light,waves]).
+test(27, [likewise,in,'1927',clinton,davisson,and,lester,germer,conducted,different,experiments,of,electron,diffraction,showing,that,they,exhibited,wavelike,behaviors,very,similar,to,light,waves]).
 test(28, [this,phenomenon,which,came,to,be,known,as,electron,diffraction,confirmed,this,'wave-particle',duality,and,highlighted,the,need,to,consider,the,planck,constant,as,an,indispensable,element,in,the,study,of,the,microscopic,world]).
-test(29, [also,in,1981,it,played,a,very,important,role,during,the,invention,of,the,tunnel,effect,microscope]).
+test(29, [also,in,'1981',it,played,a,very,important,role,during,the,invention,of,the,tunnel,effect,microscope]).
 test(30, [this,is,a,phenomenon,in,which,particles,are,able,to,pass,through,classically,forbidden,energy,barriers,which,is,directly,related,to,the,energy,they,possess,quantified,in,multiples,of,the,planck,constant]).
 
 :- dynamic ok_count/1, ko_count/1.
